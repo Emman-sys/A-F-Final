@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+   <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Merriweather+Sans:wght@700&display=swap" rel="stylesheet" />
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+   <link rel="stylesheet" href="styles.css">
+    
+  <style>
+.signup-container {
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(
+    180deg,
+    #6b16ac 28.36%,
+    #371b70 65.29%,
+    #4e317a 80.43%,
+    #8d7d7d 100%
+  );
+  position: relative;
+  padding: 2rem;
+}
+
+.brand-logo {
+  color: #fff;
+  font-family: Merriweather;
+  font-size: 60px;
+  font-weight: 700;
+}
+
+.content-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 120px);
+}
+
+.form-wrapper {
+  width: 544px;
+  border-radius: 48px;
+  border: 1px solid #fff;
+  background-color: rgba(217, 217, 217, 0.1);
+  backdrop-filter: blur(17.5px);
+  padding: 2rem;
+  position: relative;
+  z-index: 10;
+}
+
+.form-title {
+  color: #fff;
+  font-family: Poppins;
+  font-size: 60px;
+  font-weight: 700;
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.input-group {
+  position: relative;
+}
+
+.input-label {
+  color: #fff;
+  font-family: Poppins;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.form-input {
+  width: 100%;
+  height: 73px;
+  border-radius: 34px;
+  border: 1px solid #c8b9b9;
+  background-color: rgba(216, 204, 204, 0.61);
+  padding: 0 1.5rem;
+}
+
+.icon-wrapper {
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.signup-button {
+  width: 100%;
+  height: 73px;
+  border-radius: 34px;
+  background-color: #fff;
+  color: #000;
+  font-family: Poppins;
+  font-size: 24px;
+  font-weight: 700;
+  margin-top: 2rem;
+  border: none;
+  cursor: pointer;
+}
+
+.signin-link {
+  color: #fff;
+  font-family: Poppins;
+  font-size: 18px;
+  text-align: center;
+  margin-top: 1.5rem;
+  cursor: pointer;
+}
+
+.decorative-image {
+  position: absolute;
+}
+
+.image-1 {
+  left: 0;
+  top: 128px;
+  width: 540px;
+  transform: rotate(-11.691deg);
+}
+
+.image-2 {
+  right: 0;
+  top: 94px;
+  width: 619px;
+  transform: rotate(-8.397deg);
+}
+
+.image-3 {
+  left: 63px;
+  bottom: 0;
+  width: 438px;
+}
+
+.image-4 {
+  right: 100px;
+  bottom: 0;
+  width: 357px;
+  transform: rotate(-18.198deg);
+}
+
+.image-5 {
+  right: 100px;
+  top: 66px;
+  width: 195px;
+  transform: rotate(33.9deg);
+}
+
+@media (max-width: 991px) {
+  .brand-logo {
+    font-size: 48px;
+  }
+
+  .form-wrapper {
+    width: 90%;
+  }
+
+  .form-title {
+    font-size: 48px;
+  }
+
+  .image-1,
+  .image-2 {
+    width: 400px;
+  }
+
+  .image-3 {
+    width: 300px;
+  }
+
+  .image-4 {
+    width: 250px;
+  }
+
+  .image-5 {
+    width: 150px;
+  }
+}
+
+@media (max-width: 640px) {
+  .brand-logo {
+    font-size: 36px;
+  }
+
+  .form-wrapper {
+    width: 100%;
+  }
+
+  .form-title {
+    font-size: 36px;
+  }
+
+  .image-1,
+  .image-2,
+  .image-3,
+  .image-4,
+  .image-5 {
+    display: none;
+  }
+}
+
+</style>
+
+<main class="signup-container">
+  <h1 class="brand-logo">A&F</h1>
+  <section class="content-wrapper">
+    <div class="form-wrapper">
+      <h2 class="form-title">Sign up</h2>
+      <form class="signup-form">
+        <div class="input-group">
+          <label class="input-label" for="username">Username</label>
+          <div class="input-wrapper">
+            <input type="text" id="username" class="form-input" />
+            <div class="icon-wrapper">
+              <svg width="32" height="27" viewbox="0 0 32 27" fill="none" xmlns="http://www.w3.org/2000/svg" class="input-icon">
+                <path d="M24.9909 23.625V21.375C24.9909 20.1815 24.4535 19.0369 23.4969 18.193C22.5403 17.3491 21.243 16.875 19.8902 16.875H12.2391C10.8863 16.875 9.58895 17.3491 8.63239 18.193C7.67582 19.0369 7.13843 20.1815 7.13843 21.375V23.625" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M16.0646 12.375C18.8816 12.375 21.1653 10.3603 21.1653 7.875C21.1653 5.38972 18.8816 3.375 16.0646 3.375C13.2475 3.375 10.9639 5.38972 10.9639 7.875C10.9639 10.3603 13.2475 12.375 16.0646 12.375Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="email">Email</label>
+          <div class="input-wrapper">
+            <input type="email" id="email" class="form-input" />
+            <div class="icon-wrapper">
+              <svg width="26" height="24" viewbox="0 0 26 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="input-icon">
+                <path d="M23.2661 7L14.094 12.727C13.7827 12.9042 13.4292 12.9976 13.0693 12.9976C12.7093 12.9976 12.3558 12.9042 12.0445 12.727L2.86328 7" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M21.2258 4H4.90356C3.77674 4 2.86328 4.89543 2.86328 6V18C2.86328 19.1046 3.77674 20 4.90356 20H21.2258C22.3526 20 23.2661 19.1046 23.2661 18V6C23.2661 4.89543 22.3526 4 21.2258 4Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="password">Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="password" class="form-input" />
+            <div class="icon-wrapper">
+              <svg width="31" height="30" viewbox="0 0 31 30" fill="none" xmlns="http://www.w3.org/2000/svg" class="input-icon">
+                <path d="M15.5544 21.25C16.2352 21.25 16.7871 20.6904 16.7871 20C16.7871 19.3096 16.2352 18.75 15.5544 18.75C14.8737 18.75 14.3218 19.3096 14.3218 20C14.3218 20.6904 14.8737 21.25 15.5544 21.25Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M24.1831 12.5H6.92578C5.56422 12.5 4.46045 13.6193 4.46045 15V25C4.46045 26.3807 5.56422 27.5 6.92578 27.5H24.1831C25.5447 27.5 26.6485 26.3807 26.6485 25V15C26.6485 13.6193 25.5447 12.5 24.1831 12.5Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M9.39111 12.5V8.75C9.39111 7.0924 10.0405 5.50269 11.1963 4.33058C12.3522 3.15848 13.9198 2.5 15.5545 2.5C17.1891 2.5 18.7567 3.15848 19.9126 4.33058C21.0684 5.50269 21.7178 7.0924 21.7178 8.75V12.5" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="signup-button">Sign up</button>
+        <p class="signin-link">
+          Already have an account? <a href="Login.html" style="color: #fff; text-decoration: underline;">Sign in</a>
+        </p>
+      </form>
+    </div>
+  </section>
+
+  <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/1192fe4c4e19ec325cebdf6ab93326d7b756d1b2" alt="" class="decorative-image image-1" />
+  <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/a7a048e7493fbf1c6595beb3de45ac8c2fa42df3" alt="" class="decorative-image image-2" />
+  <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/63fbad6ef4e9aeac26ad69824aef8f4a040fb95b" alt="" class="decorative-image image-3" />
+  <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/63eccd7e09789e7777e24681264391d14aeea6f2" alt="" class="decorative-image image-4" />
+  <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/a5d04448581cd8ed933e22b0732f56e6c980a7b2" alt="" class="decorative-image image-5" />
+</main>
+  </head>
+</html>
