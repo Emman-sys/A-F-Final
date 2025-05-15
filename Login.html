@@ -21,19 +21,22 @@
   flex-direction: column;
   min-height: screen;
   align-items: center;
-    justify-content: center;
-    min-height: 100vh;
+  justify-content: center;
+  min-height: 100vh;
   width: 100%;
-  background: linear-gradient(
-    180deg,
-    #6b16ac 28.36%,
-    #371b70 65.29%,
-    #4e317a 80.43%,
-    #8d7d7d 100%
-     
-  );
+  background: linear-gradient(180deg,#6b16ac 28.36%,#371b70 65.29%,#4e317a 80.43%,#8d7d7d 100%);
  box-sizing: border-box;
  overflow: hidden;
+}
+   .shopicons {
+   position: absolute;
+   top: 0;
+   left: 30;
+   width: 75%;
+   height: 100%;
+   object-fit: cover;
+   z-index: 0;
+   opacity: 1;
 }
 
 .login-wrapper {
@@ -208,16 +211,19 @@
   .login-form {
     gap: 16px;
   }
+  
+
 }
  </style>
     
 <main class="login-page">
+  <img src="https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/shopicons?v=1747053237664" alt="Image icons" class="shopicons">
   <div class="login-wrapper">
     <header>
       <h1 class="brand-logo">A&amp;F</h1>
     </header>
     <div class="form-container">
-      <div class="form-content">
+     <div class="form-content">
         <h2 class="form-title">Login</h2>
         <form class="login-form">
           <div class="form-group">
