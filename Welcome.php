@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>A&F</title>
+   <meta charset="utf-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+   <title>A&F</title>
    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Merriweather+Sans:wght@700&display=swap" rel="stylesheet" />
    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
    <link rel="stylesheet" href="styles.css">
 
+<<<<<<< HEAD:Welcome.php
     <style>
   .page-wrapper{
   position: relative;
@@ -17,15 +18,21 @@
   background-position: center;
   background-attachment: fixed;
         
+=======
+<style>
+  body{
+  background-image:url("https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/image%203.png?v=1747320934399");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;        
+>>>>>>> 5637e085f027e009f25ba4d3684a798ed8886f88:Welcome.html
 }
-
 .navigation {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 54px 72px;
 }
-
 .nav-links-left,
 .nav-links-right {
   display: flex;
@@ -34,18 +41,15 @@
   font-size: 20px;
   font-family: Merriweather;
 }
-
 .nav-link {
   color: #FFF;
   text-decoration: none;
   cursor: pointer;
 }
-
 .nav-logo {
   width: 108px;
   height: 108px;
 }
-
 .mobile-menu-toggle {
   display: none;
   color: #ffffff;
@@ -53,39 +57,35 @@
   border: none;
   cursor: pointer;
 }
-
 .mobile-menu-toggle i {
   font-size: 24px;
 }
-
-.hero-section {
+.brandname-section {
   display: flex;
   flex-direction: column;
   padding: 120px 110px 0;
 }
-
 .hero-content {
   max-width: 787px;
 }
-
-.hero-subtitle {
+h2 {
+  position:absolute;
+  top: 300px;
   font-size: 40px;
   color: #ffffff;
   font-family: Merriweather;
   font-weight: 700;
   margin-bottom: 20px;
 }
-
-.hero-title {
-  font-size: 115px;
+h1{
+  font-size: 134px;
   color: #ffffff;
   font-family: Merriweather;
   font-weight: 700;
   line-height: 1;
   margin-bottom: 32px;
 }
-
-.hero-description {
+.description {
   font-size: 20px;
   color: #ffffff;
   font-family: 'Merriweather Sans';
@@ -93,8 +93,10 @@
   margin-bottom: 40px;
   max-width: 787px;
 }
-
 .cta-button {
+  position:absolute;
+  left: 330px;
+  bottom: 150px;
   background-color: #3D0D0D;
   color: #ffffff;
   font-family: 'Merriweather Sans';
@@ -108,19 +110,12 @@
               border-color 200ms cubic-bezier(0.4, 0, 0.2, 1),
               color 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-.hero-image-container {
+.chocolatesplash {
   position: absolute;
-  right: 0;
-  bottom: 0;
-  max-width: 627px;
-  width: 100%;
-}
-
-.hero-image {
-  width: 100%;
-  height: auto;
-  border-radius: 57px;
+  left: 1200px;
+  bottom: 19;
+  max-width: 750px;
+  width: 120%;
 }
 
 @media (max-width: 991px) {
@@ -128,15 +123,15 @@
     padding: 54px 40px;
   }
 
-  .hero-section {
+  .brandname-section {
     padding: 120px 40px 0;
   }
 
-  .hero-title {
+  h1 {
     font-size: 80px;
   }
 
-  .hero-image-container {
+  .chocimage {
     position: relative;
     margin-top: 40px;
   }
@@ -156,53 +151,55 @@
     display: block;
   }
 
-  .hero-section {
+  .brandname-section {
     padding: 60px 20px 0;
   }
 
-  .hero-title {
+  h1 {
     font-size: 50px;
   }
 }
-    </style>
-    
-    
-  
+</style>
+     
+<body>
   <div class="page-wrapper">
   <nav class="navigation">
     <div class="nav-links-left">
       <a href="#" class="nav-link">Home</a>
       <a href="#" class="nav-link">Contact</a>
     </div>
-
+     </nav>
+    
     <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/cbc700ac3a9cc70c2561f787dc7a724761a462ad" alt="Logo" class="nav-logo" />
 
+    
     <div class="nav-links-right">
       <a href="About.html" class="nav-link">About</a>
+      <div class="line"></div>
       <a href="Login.html" class="nav-link">Login/Sign up</a>
     </div>
-
+    
+   
     <button class="mobile-menu-toggle" aria-label="Toggle mobile menu">
       <i class="ti ti-menu-2"></i>
     </button>
-  </nav>
+ 
 
-  <main class="hero-section">
-    <div class="hero-content">
-      <h2 class="hero-subtitle">More Than Just Sweets!</h2>
-      <h1 class="hero-title">A&F CHOCOLATE</h1>
-      <p class="hero-description">
+  <main class="brandname-section">
+    <div class="letters-content">
+      <h2>More Than Just Sweets!</h2>
+      <h1>A&FCHOCOLATE</h1>
+      <p class="description">
         Discover a world of flavor with A&F Chocolate! From affordable chocolates to your favorite Korean snacks and classic Filipino treats — all in one place.
       </p>
+      
       <button class="cta-button">Order</button>
     </div>
-    <div class="hero-image-container">
-      <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/596604e22c5f5200441d1ef30fb06dacc70178eb" alt="Chocolate splash" class="hero-image" />
-    </div>
-  </main>
+    
+     <img src="https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/chocolatesplash?v=1747319066989" alt="Chocolate splash" class="chocolatesplash" />
+   </main>
 </div>
-    
-    
-    
+  
+ </body>   
   </head>
 </html>

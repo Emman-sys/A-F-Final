@@ -246,42 +246,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
  </style>
     
-  </head>
-  <body>
-    <main class="login-page">
-      <img src="https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/shopicons?v=1747053237664" alt="Image icons" class="shopicons">
-      <div class="login-wrapper">
-        <header>
-          <h1 class="brand-logo">A&amp;F</h1>
-        </header>
-        <div class="form-container">
-         <div class="form-content">
-            <h2 class="form-title">Login</h2>
-            <form class="login-form" method="POST" action="">
-              <div class="form-group">
-                <label class="input-label">Email</label>
-                <div class="input-wrapper">
-                  <input type="email" name="email" class="form-input" required />
-                </div>
+<main class="login-page">
+  <div class="login-wrapper">
+    <header>
+      <h1 class="brand-logo">A&amp;F</h1>
+    </header>
+    <div class="form-container">
+      <div class="form-content">
+        <h2 class="form-title">Login</h2>
+        <form class="login-form">
+          <div class="form-group">
+            <label class="input-label">Username</label>
+            <div class="input-wrapper">
+              <input type="text" class="form-input" />
+              <div class="icon-wrapper">
               </div>
-              <div class="form-group">
-                <label class="input-label">Password</label>
-                <div class="input-wrapper">
-                  <input type="password" name="password" class="form-input" required />
-                </div>
-              </div>
-              <button type="submit" class="login-button">Login</button>
-              <p class="signup-text">
-                Don't have an account? <a href="Sign-Up.php" style="color: #fff; text-decoration: underline;">Sign up</a>
-              </p>
-              <p class="back-to-welcome">
-                <a href="Welcome.html" style="color: #fff; text-decoration: underline;">Back to Welcome Page</a>
-              </p>
-              <?php if ($message) echo "<p style='color:white;text-align:center;'>$message</p>"; ?>
-            </form>
+            </div>
           </div>
-        </div>
+          <div class="form-group">
+            <label class="input-label">Password</label>
+            <div class="input-wrapper">
+              <input type="password" class="form-input" />
+              <div class="icon-wrapper">
+              </div>
+            </div>
+          </div>
+          <div class="remember-me">
+            <input type="checkbox" class="remember-checkbox" />
+            <label class="remember-label">Remember me</label>
+          </div>
+          <button type="submit" class="login-button">Login</button>
+          <p class="signup-text">
+            Don't have an account? <a href="Sign-Up.html" style="color: #fff; text-decoration: underline;">Sign up</a>
+          </p>
+          <p class="back-to-welcome">
+            <a href="Welcome.html" style="color: #fff; text-decoration: underline;">Back to Welcome Page</a>
+          </p>
+        </form>
       </div>
-    </main>
-  </body>
+    </div>
+  </div>
+</main>
+  </head>
 </html>
