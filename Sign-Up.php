@@ -1,3 +1,25 @@
+<?php
+require 'db_connect.php';
+$message = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  $name = trim($_POST["username"]);
+  $email = trim($_POST["email"]);
+  $password = password_hash($_POST["password"], PASSWORD_DEFAULT);
+  $phone = trim($_POST["phone"]);
+  $address = trim($_POST["address"]);
+
+  $stmt = $conn->prepare("INSERT INTO users (name, email, password_hash, phone_number, address) VALUES (?, ?, ?, ?, ?)");
+  $stmt->bind_param("sssss", $name, $email, $password, $phone, $address);
+
+  if ($stmt->execute()) {
+    $message = "Registration successful! <a href='Login.php'>Login here</a>.";
+  } else {
+    $message = "Error: " . $stmt->error;
+  }
+  $stmt->close();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -209,48 +231,42 @@
       <div class="form-container">
         <div class="form-content">
           <h2 class="form-title">Sign up</h2>
-          <form class="signup-form">
+          <form class="signup-form" method="POST" action="">
             <div class="form-group">
               <label class="input-label" for="username">Username</label>
               <div class="input-wrapper">
-                <input type="text" id="username" class="form-input" />
-                <div class="icon-wrapper">
-                  <svg width="32" height="27" viewBox="0 0 32 27" fill="none" xmlns="http://www.w3.org/2000/svg" class="input-icon">
-                    <path d="M24.9909 23.625V21.375C24.9909 20.1815 24.4535 19.0369 23.4969 18.193C22.5403 17.3491 21.243 16.875 19.8902 16.875H12.2391C10.8863 16.875 9.58895 17.3491 8.63239 18.193C7.67582 19.0369 7.13843 20.1815 7.13843 21.375V23.625" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                    <path d="M16.0646 12.375C18.8816 12.375 21.1653 10.3603 21.1653 7.875C21.1653 5.38972 18.8816 3.375 16.0646 3.375C13.2475 3.375 10.9639 5.38972 10.9639 7.875C10.9639 10.3603 13.2475 12.375 16.0646 12.375Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                  </svg>
-                </div>
+                <input type="text" id="username" name="username" class="form-input" required />
               </div>
             </div>
             <div class="form-group">
               <label class="input-label" for="email">Email</label>
               <div class="input-wrapper">
-                <input type="email" id="email" class="form-input" />
-                <div class="icon-wrapper">
-                  <svg width="26" height="24" viewBox="0 0 26 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="input-icon">
-                    <path d="M23.2661 7L14.094 12.727C13.7827 12.9042 13.4292 12.9976 13.0693 12.9976C12.7093 12.9976 12.3558 12.9042 12.0445 12.727L2.86328 7" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                    <path d="M21.2258 4H4.90356C3.77674 4 2.86328 4.89543 2.86328 6V18C2.86328 19.1046 3.77674 20 4.90356 20H21.2258C22.3526 20 23.2661 19.1046 23.2661 18V6C23.2661 4.89543 22.3526 4 21.2258 4Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                  </svg>
-                </div>
+                <input type="email" id="email" name="email" class="form-input" required />
               </div>
             </div>
             <div class="form-group">
               <label class="input-label" for="password">Password</label>
               <div class="input-wrapper">
-                <input type="password" id="password" class="form-input" />
-                <div class="icon-wrapper">
-                  <svg width="31" height="30" viewBox="0 0 31 30" fill="none" xmlns="http://www.w3.org/2000/svg" class="input-icon">
-                    <path d="M15.5544 21.25C16.2352 21.25 16.7871 20.6904 16.7871 20C16.7871 19.3096 16.2352 18.75 15.5544 18.75C14.8737 18.75 14.3218 19.3096 14.3218 20C14.3218 20.6904 14.8737 21.25 15.5544 21.25Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                    <path d="M24.1831 12.5H6.92578C5.56422 12.5 4.46045 13.6193 4.46045 15V25C4.46045 26.3807 5.56422 27.5 6.92578 27.5H24.1831C25.5447 27.5 26.6485 26.3807 26.6485 25V15C26.6485 13.6193 25.5447 12.5 24.1831 12.5Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                    <path d="M9.39111 12.5V8.75C9.39111 7.0924 10.0405 5.50269 11.1963 4.33058C12.3522 3.15848 13.9198 2.5 15.5545 2.5C17.1891 2.5 18.7567 3.15848 19.9126 4.33058C21.0684 5.50269 21.7178 7.0924 21.7178 8.75V12.5" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                  </svg>
-                </div>
+                <input type="password" id="password" name="password" class="form-input" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="input-label" for="phone">Phone Number</label>
+              <div class="input-wrapper">
+                <input type="text" id="phone" name="phone" class="form-input" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="input-label" for="address">Address</label>
+              <div class="input-wrapper">
+                <input type="text" id="address" name="address" class="form-input" required />
               </div>
             </div>
             <button type="submit" class="signup-button">Sign up</button>
             <p class="signin-link">
-              Already have an account? <a href="Login.html">Sign in</a>
+              Already have an account? <a href="Login.php">Sign in</a>
             </p>
+            <?php if ($message) echo "<p style='color:white;text-align:center;'>$message</p>"; ?>
           </form>
         </div>
       </div>

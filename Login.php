@@ -1,3 +1,33 @@
+<?php
+require 'db_connect.php';
+session_start();
+$message = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  $email = trim($_POST["email"]);
+  $password = $_POST["password"];
+
+  $stmt = $conn->prepare("SELECT user_id, password_hash FROM users WHERE email = ?");
+  $stmt->bind_param("s", $email);
+  $stmt->execute();
+  $stmt->store_result();
+
+  if ($stmt->num_rows > 0) {
+    $stmt->bind_result($user_id, $hashed_password);
+    $stmt->fetch();
+    if (password_verify($password, $hashed_password)) {
+      $_SESSION["user_id"] = $user_id;
+      header("Location: Userdashboard.php");
+      exit();
+    } else {
+      $message = "Invalid password.";
+    }
+  } else {
+    $message = "User not found.";
+  }
+  $stmt->close();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -216,47 +246,42 @@
 }
  </style>
     
-<main class="login-page">
-  <img src="https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/shopicons?v=1747053237664" alt="Image icons" class="shopicons">
-  <div class="login-wrapper">
-    <header>
-      <h1 class="brand-logo">A&amp;F</h1>
-    </header>
-    <div class="form-container">
-     <div class="form-content">
-        <h2 class="form-title">Login</h2>
-        <form class="login-form">
-          <div class="form-group">
-            <label class="input-label">Username</label>
-            <div class="input-wrapper">
-              <input type="text" class="form-input" />
-              <div class="icon-wrapper">
-              </div>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="input-label">Password</label>
-            <div class="input-wrapper">
-              <input type="password" class="form-input" />
-              <div class="icon-wrapper">
-              </div>
-            </div>
-          </div>
-          <div class="remember-me">
-            <input type="checkbox" class="remember-checkbox" />
-            <label class="remember-label">Remember me</label>
-          </div>
-          <button type="submit" class="login-button">Login</button>
-          <p class="signup-text">
-            Don't have an account? <a href="Sign-Up.html" style="color: #fff; text-decoration: underline;">Sign up</a>
-          </p>
-          <p class="back-to-welcome">
-            <a href="Welcome.html" style="color: #fff; text-decoration: underline;">Back to Welcome Page</a>
-          </p>
-        </form>
-      </div>
-    </div>
-  </div>
-</main>
   </head>
+  <body>
+    <main class="login-page">
+      <img src="https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/shopicons?v=1747053237664" alt="Image icons" class="shopicons">
+      <div class="login-wrapper">
+        <header>
+          <h1 class="brand-logo">A&amp;F</h1>
+        </header>
+        <div class="form-container">
+         <div class="form-content">
+            <h2 class="form-title">Login</h2>
+            <form class="login-form" method="POST" action="">
+              <div class="form-group">
+                <label class="input-label">Email</label>
+                <div class="input-wrapper">
+                  <input type="email" name="email" class="form-input" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="input-label">Password</label>
+                <div class="input-wrapper">
+                  <input type="password" name="password" class="form-input" required />
+                </div>
+              </div>
+              <button type="submit" class="login-button">Login</button>
+              <p class="signup-text">
+                Don't have an account? <a href="Sign-Up.php" style="color: #fff; text-decoration: underline;">Sign up</a>
+              </p>
+              <p class="back-to-welcome">
+                <a href="Welcome.html" style="color: #fff; text-decoration: underline;">Back to Welcome Page</a>
+              </p>
+              <?php if ($message) echo "<p style='color:white;text-align:center;'>$message</p>"; ?>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
 </html>

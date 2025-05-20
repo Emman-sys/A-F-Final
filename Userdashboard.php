@@ -1,3 +1,10 @@
+<?php
+session_start();
+if (!isset($_SESSION["user_id"])) {
+  header("Location: Login.php");
+  exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -5,8 +12,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>User Dashboard | A&F</title>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Merriweather+Sans:wght@700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css">
     <style>
-      html, body {
+html, body {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
@@ -99,7 +107,7 @@
       .logout-btn:hover {
         background: #c0392b;
       }
-      /* Decorative images (optional, similar to sign up page) */
+
       .decorative-image {
         position: absolute;
         z-index: 1;
@@ -125,8 +133,7 @@
         .dashboard-title { font-size: 22px; }
         .dashboard-btn { font-size: 15px; padding: 14px 0;}
         .image-1, .image-2, .image-3, .image-4, .image-5 { display: none; }
-      }
-    </style>
+      }    </style>
   </head>
   <body>
     <main class="dashboard-page">
@@ -137,14 +144,14 @@
           <button class="dashboard-btn" onclick="location.href='mypurchases.html'">My Purchases</button>
           <button class="dashboard-btn" onclick="location.href='myaddress.html'">My Address</button>
           <button class="dashboard-btn" onclick="location.href='settings.html'">Settings</button>
-          <button class="dashboard-btn logout-btn" onclick="location.href='Sign-Up.html'">Log Out</button>
+          <button class="dashboard-btn logout-btn" onclick="location.href='logout.php'">Log Out</button>
         </div>
       </div>
+
       <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/1192fe4c4e19ec325cebdf6ab93326d7b756d1b2" alt="" class="decorative-image image-1" />
       <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/a7a048e7493fbf1c6595beb3de45ac8c2fa42df3" alt="" class="decorative-image image-2" />
       <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/63fbad6ef4e9aeac26ad69824aef8f4a040fb95b" alt="" class="decorative-image image-3" />
       <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/63eccd7e09789e7777e24681264391d14aeea6f2" alt="" class="decorative-image image-4" />
-      <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/a5d04448581cd8ed933e22b0732f56e6c980a7b2" alt="" class="decorative-image image-5" />
-    </main>
+      <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/a5d04448581cd8ed933e22b0732f56e6c980a7b2" alt="" class="decorative-image image-5" />    </main>
   </body>
 </html>
