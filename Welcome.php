@@ -8,7 +8,6 @@
    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
    <link rel="stylesheet" href="styles.css">
 
-<<<<<<< HEAD:Welcome.php
     <style>
   .page-wrapper{
   position: relative;
@@ -18,14 +17,6 @@
   background-position: center;
   background-attachment: fixed;
         
-=======
-<style>
-  body{
-  background-image:url("https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/image%203.png?v=1747320934399");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;        
->>>>>>> 5637e085f027e009f25ba4d3684a798ed8886f88:Welcome.html
 }
 .navigation {
   display: flex;
