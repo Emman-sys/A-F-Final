@@ -1,22 +1,34 @@
 <?php
 require 'db_connect.php';
 session_start();
+
+// Redirect if already logged in
+if (isset($_SESSION["user_id"])) {
+  header("Location: Userdashboard.php");
+  exit();
+}
+
 $message = "";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+// Handle login form submission
+if (isset($_SERVER["REQUEST_METHOD"]) && $_SERVER["REQUEST_METHOD"] == "POST") {
   $email = trim($_POST["email"]);
   $password = $_POST["password"];
 
+  // Prepare and execute query
   $stmt = $conn->prepare("SELECT user_id, password_hash FROM users WHERE email = ?");
   $stmt->bind_param("s", $email);
   $stmt->execute();
   $stmt->store_result();
 
   if ($stmt->num_rows > 0) {
-    $stmt->bind_result($user_id, $hashed_password);
+    $stmt->bind_result($user_id, $stored_password);
     $stmt->fetch();
-    if (password_verify($password, $hashed_password)) {
+    
+    // For plain text passwords use direct comparison
+    if ($password === $stored_password) {
       $_SESSION["user_id"] = $user_id;
+      $_SESSION["login_success"] = true;
       header("Location: Userdashboard.php");
       exit();
     } else {
@@ -30,262 +42,225 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-   <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Merriweather+Sans:wght@700&display=swap" rel="stylesheet" />
-   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-   <link rel="stylesheet" href="styles.css">
-
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Merriweather+Sans:wght@700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <link rel="stylesheet" href="styles.css">
     <style>
     html, body {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  width: 100%;
-  height: 100%;
-}
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      width: 100%;
+      height: 100%;
+    }
 
     .login-page {
-  display: flex;
-  flex-direction: column;
-  min-height: screen;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  width: 100%;
-  background: linear-gradient(180deg,#6b16ac 28.36%,#371b70 65.29%,#4e317a 80.43%,#8d7d7d 100%);
- box-sizing: border-box;
- overflow: hidden;
-}
-   .shopicons {
-   position: absolute;
-   top: 0;
-   left: 30;
-   width: 75%;
-   height: 100%;
-   object-fit: cover;
-   z-index: 0;
-   opacity: 1;
-}
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      background: linear-gradient(180deg,#6b16ac 28.36%,#371b70 65.29%,#4e317a 80.43%,#8d7d7d 100%);
+      box-sizing: border-box;
+      overflow: hidden;
+    }
 
-.login-wrapper {
-  padding: 1px;
-}
+    .login-wrapper {
+      padding: 20px;
+    }
 
-.brand-logo {
-  position: absolute;
-  top: -20px; /* Adjust this value to move the logo higher */
-  left: 20px;
-  color: #fff;
-  font-family: Merriweather;
-  font-size: 60px;
-  font-weight: 700;
-}
+    .brand-logo {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: #fff;
+      font-family: Merriweather;
+      font-size: 60px;
+      font-weight: 700;
+    }
 
-.form-container {
-  width: 100%; /* Adjust width for smaller screens */
-  max-width: 500px; /* Make the box smaller */
-  padding: 20px; /* Reduce padding inside the box */
-  border-radius: 15px; /* Adjust border radius */
-  background-color: rgba(217, 217, 217, 0.1);
-  backdrop-filter: blur(10px);
-  margin: 0 auto; /* Center the box */
-}
+    .form-container {
+      width: 100%;
+      max-width: 500px;
+      padding: 40px;
+      border-radius: 15px;
+      background-color: rgba(217, 217, 217, 0.1);
+      backdrop-filter: blur(10px);
+      margin: 0 auto;
+    }
 
-.form-title {
-  color: #fff;
-  font-family: Poppins, sans-serif;
-  font-size: 20px; /* Reduce font size */
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 15px; /* Reduce spacing */
-}
+    .form-title {
+      color: #fff;
+      font-family: Poppins, sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 30px;
+    }
 
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-}
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
 
-.form-group {
-  position: relative;
-}
+    .form-group {
+      position: relative;
+    }
 
-.input-label {
-  color: #fff;
-  font-family: Poppins;
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  display: block;
-}
+    .input-label {
+      color: #fff;
+      font-family: Poppins;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: block;
+    }
 
-.input-wrapper {
-  position: relative;
-}
+    .input-wrapper {
+      position: relative;
+    }
 
-.form-input {
-  width: 465px; 
-  height: 60px; 
-  border-radius: 10px; /* Adjust border radius */
-  border: 1px solid rgba(216, 204, 204, 0.61);
-  background-color: rgba(216, 204, 204, 0.61);
-  padding: 0 1rem; /* Adjust padding */
-  font-size: 14px; /* Adjust font size */
-  line-height: 40px; /* Match input height */
-  color: #000;
-  margin: 0 auto;
-}
+    .form-input {
+      width: 100%;
+      height: 50px;
+      border-radius: 10px;
+      border: 1px solid rgba(216, 204, 204, 0.61);
+      background-color: rgba(216, 204, 204, 0.61);
+      padding: 0 15px;
+      font-size: 14px;
+      color: #000;
+      box-sizing: border-box;
+    }
 
-.icon-wrapper {
-  position: absolute;
-  right: 24px;
-  top: 50%;
-  transform: translateY(-50%);
-}
+    .login-button {
+      width: 100%;
+      height: 50px;
+      border-radius: 10px;
+      background-color: #fff;
+      color: #000;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      margin-top: 20px;
+    }
 
-.remember-me {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-}
+    .login-button:hover {
+      background-color: #f0f0f0;
+    }
 
-.remember-checkbox {
-  width: 16px;
-  height: 15px;
-  border: 1px solid #8d7d7d;
-  background-color: #fff;
-}
+    .signup-text,
+    .back-to-welcome {
+      text-align: center;
+      font-family: Poppins, sans-serif;
+      font-size: 14px;
+      color: #fff;
+      margin-top: 15px;
+    }
 
-.remember-label {
-  color: #fff;
-  font-family: Poppins;
-  font-size: 18px;
-  font-weight: 700;
-}
+    .signup-text a,
+    .back-to-welcome a {
+      color: #fff;
+      text-decoration: underline;
+    }
 
-.login-button {
-  width: 100%;
-  height: 40px; /* Reduce height */
-  border-radius: 10px; /* Adjust border radius */
-  background-color: #fff;
-  color: #000;
-  font-size: 14px; /* Adjust font size */
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-}
+    .button-message {
+      margin-top: 10px;
+      text-align: center;
+      font-family: Poppins, sans-serif;
+      font-size: 14px;
+      padding: 10px;
+      border-radius: 5px;
+      display: none;
+    }
 
-.signup-text,
-.back-to-welcome {
-  text-align: center;
-  font-family: Poppins, sans-serif;
-  font-size: 12px; /* Adjust font size */
-  color: #fff;
-}
+    .success-message {
+      background-color: rgba(39, 174, 96, 0.7);
+      color: white;
+    }
 
-.signup-text a,
-.back-to-welcome a {
-  color: #fff;
-  text-decoration: underline;
-}
+    .error-message {
+      background-color: rgba(192, 57, 43, 0.7);
+      color: white;
+    }
+    </style>
+    <script>
+    function togglePassword() {
+      var pwd = document.getElementById("password");
+      var btn = event.target;
+      if (pwd.type === "password") {
+        pwd.type = "text";
+        btn.textContent = "Hide";
+      } else {
+        pwd.type = "password";
+        btn.textContent = "Show";
+      }
+    }
 
-@media (max-width: 991px) {
-  .login-wrapper {
-    padding: 20px;
-  }
-
-  .brand-logo {
-    font-size: 48px;
-  }
-
-  .form-container {
-    margin-top: 32px;
-  }
-
-  .form-content {
-    width: 90%;
-    padding: 32px;
-  }
-
-  .form-title {
-    font-size: 48px;
-  }
-}
-
-@media (max-width: 640px) {
-  .login-wrapper {
-    padding: 16px;
-  }
-
-  .brand-logo {
-    font-size: 36px;
-  }
-
-  .form-container {
-    margin-top: 24px;
-  }
-
-  .form-content {
-    width: 100%;
-    padding: 24px;
-  }
-
-  .form-title {
-    font-size: 36px;
-    margin-bottom: 32px;
-  }
-
-  .login-form {
-    gap: 16px;
-  }
-  
-
-}
- </style>
-    
-<main class="login-page">
-  <div class="login-wrapper">
-    <header>
-      <h1 class="brand-logo">A&amp;F</h1>
-    </header>
-    <div class="form-container">
-      <div class="form-content">
-        <h2 class="form-title">Login</h2>
-        <form class="login-form">
-          <div class="form-group">
-            <label class="input-label">Username</label>
-            <div class="input-wrapper">
-              <input type="text" class="form-input" />
-              <div class="icon-wrapper">
+    function validateForm() {
+      var email = document.getElementById("email").value;
+      var password = document.getElementById("password").value;
+      var buttonMessage = document.getElementById("button-message");
+      
+      if (!email || !password) {
+        buttonMessage.textContent = "Please fill in all fields";
+        buttonMessage.className = "button-message error-message";
+        buttonMessage.style.display = "block";
+        return false;
+      }
+      
+      buttonMessage.textContent = "Logging in...";
+      buttonMessage.className = "button-message";
+      buttonMessage.style.display = "block";
+      return true;
+    }
+    </script>
+</head>
+<body>
+    <main class="login-page">
+      <div class="login-wrapper">
+        <header>
+          <h1 class="brand-logo">A&amp;F</h1>
+        </header>
+        <div class="form-container">
+          <div class="form-content">
+            <h2 class="form-title">Login</h2>
+            <?php if (!empty($message)): ?>
+              <div style="color: #fff; background: #c0392b; padding: 10px; border-radius: 8px; margin-bottom: 16px; text-align: center;">
+                <?php echo htmlspecialchars($message); ?>
               </div>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="input-label">Password</label>
-            <div class="input-wrapper">
-              <input type="password" class="form-input" />
-              <div class="icon-wrapper">
+            <?php endif; ?>
+            <form class="login-form" method="post" action="" onsubmit="return validateForm()">
+              <div class="form-group">
+                <label class="input-label">Email</label>
+                <div class="input-wrapper">
+                  <input type="email" class="form-input" id="email" name="email" required />
+                </div>
               </div>
-            </div>
+              <div class="form-group">
+                <label class="input-label">Password</label>
+                <div class="input-wrapper">
+                  <input type="password" class="form-input" name="password" id="password" required />
+                  <button type="button" onclick="togglePassword()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#333;cursor:pointer;">Show</button>
+                </div>
+              </div>
+              <button type="submit" class="login-button">Login</button>
+              <div id="button-message" class="button-message"></div>
+              <p class="signup-text">
+                Don't have an account? <a href="Sign-Up.php">Sign up</a>
+              </p>
+              <p class="back-to-welcome">
+                <a href="Welcome.php">Back to Welcome Page</a>
+              </p>
+            </form>
           </div>
-          <div class="remember-me">
-            <input type="checkbox" class="remember-checkbox" />
-            <label class="remember-label">Remember me</label>
-          </div>
-          <button type="submit" class="login-button">Login</button>
-          <p class="signup-text">
-            Don't have an account? <a href="Sign-Up.html" style="color: #fff; text-decoration: underline;">Sign up</a>
-          </p>
-          <p class="back-to-welcome">
-            <a href="Welcome.html" style="color: #fff; text-decoration: underline;">Back to Welcome Page</a>
-          </p>
-        </form>
+        </div>
       </div>
-    </div>
-  </div>
-</main>
-  </head>
+    </main>
+</body>
 </html>
