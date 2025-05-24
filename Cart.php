@@ -10,7 +10,7 @@
     
     <style>
       body{
-        background-color:#C59DD4;
+        background-image:url("");
         background-position:center;
         background-size:cover;
         background-attachment:fixed;
@@ -138,10 +138,10 @@
       }
       .vertical-line{
        position:absolute;
-       left: 80px;
-       bottom:769px;
-       width: 79px;               
-       height: 10px;             
+       left: 200px;
+       bottom: 795px;
+       width: 5.10px;               
+       height: 100px;             
        background-color: black;   
        margin: 0 20px;  
        z-index:1;          
