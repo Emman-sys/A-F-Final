@@ -143,7 +143,8 @@
        width: 79px;               
        height: 0px;             
        background-color: black;   
-       margin: 0 20px;            
+       margin: 0 20px;  
+       z-index:1;          
       }
       .pyment{
         position:absolute;
