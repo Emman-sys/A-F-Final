@@ -141,7 +141,7 @@
        left: 80px;
        bottom:769px;
        width: 79px;               
-       height: 0px;             
+       height: 10px;             
        background-color: black;   
        margin: 0 20px;  
        z-index:1;          
