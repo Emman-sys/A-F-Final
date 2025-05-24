@@ -559,7 +559,7 @@
      }
      .add{
       position:absolute;
-      left:710px;
+      left:705px;
       font-size: 15px;
       font-weight:bold;
       bottom: 434px;
@@ -570,7 +570,7 @@
      }
     .minus{
       position:absolute;
-      left:745px;
+      left:773px;
       font-size:15px;
       font-weight:bold;
       bottom: 430px;
