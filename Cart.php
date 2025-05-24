@@ -560,9 +560,9 @@
      .add1{
       position:absolute;
       left:705px;
+      bottom: 434px;
       font-size: 15px;
       font-weight:bold;
-      bottom: 434px;
       width: 11px;px;
       height:23px;
       z-index:1;
@@ -571,6 +571,7 @@
     .minus1{
       position:absolute;
       left:773px;
+      bottom: 430px;
       font-size:15px;
       font-weight:bold;
       bottom: 430px;
@@ -581,7 +582,7 @@
     }
     .add2{
       position:absolute;
-      left: 695px;
+      left: 710px;
       bottom: 260px;
       font-size: 15px;
       font-weight: bold;
@@ -592,7 +593,7 @@
     }
     .minus2{
       position:absolute;
-      left:760px;
+      left:775px;
       bottom: 260px;
       font-size: 15px;
       font-weight: bold;
