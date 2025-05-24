@@ -100,7 +100,7 @@ h1{
 }
 .chocolatesplash {
   position: absolute;
-  left: 1200px;
+  left: 1250px;
   bottom: 19;
   max-width: 750px;
   width: 120%;
