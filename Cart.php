@@ -581,7 +581,7 @@
     }
     .add2{
       position:absolute;
-      left: 700px;
+      left: 695px;
       bottom: 27px;
       font-size: 15px;
       font-weight: bold;
