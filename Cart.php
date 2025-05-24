@@ -556,10 +556,27 @@
        font-weight:extra bold;
        color:#FFFFFF;
        z-index:1;
-          
-        
-      }
-      
+     }
+     .add{
+      position:absolute;
+      left:695px;
+      font-size: 15px;
+      bottom: 430px;
+      width: 11px;px;
+      height:23px;
+      z-index:1;
+      color:black;
+     }
+    .minus{
+      position:absolute;
+      left:760px;
+      font-size;15px;
+      bottom: 430px;
+      width:11px;
+      height:23px;
+      z-index:1;
+      color:black;
+    }
       
       
     
@@ -642,6 +659,9 @@
     <div class="shapeq3"></div>
     <div class="boxq5"></div>
     <div class="boxq6"></div>
+
+    <div class="add">+</div>
+    <div class="minus">-</div>
   
   
   </body>
