@@ -582,22 +582,22 @@
     .addd{
       position:absolute;
       left:500px;
-      bottom: 260px;
-      font-weight:bold;
-      bottom: 434px;
-      width: 11px;px;
+      width: 11px;
       height:23px;
+      bottom: 260px;
+      font-size:15px;
+      font-weight:bold;
       z-index:1;
       color:black;
      }
     .minuss{
       position:absolute;
       left:450px;
+      height:23px;
+      width:11px;
+      bottom: 430px;
       font-size:15px;
       font-weight:bold;
-      bottom: 430px;
-      width:11px;
-      height:23px;
       z-index:1;
       color:black;
     }
