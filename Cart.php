@@ -557,7 +557,7 @@
        color:#FFFFFF;
        z-index:1;
      }
-     .add{
+     .add1{
       position:absolute;
       left:705px;
       font-size: 15px;
@@ -568,7 +568,7 @@
       z-index:1;
       color:black;
      }
-    .minus{
+    .minus1{
       position:absolute;
       left:773px;
       font-size:15px;
@@ -579,28 +579,29 @@
       z-index:1;
       color:black;
     }
-    .addd{
+    .add2{
       position:absolute;
-      left:500px;
-      width: 11px;
-      height:23px;
-      bottom: 260px;
-      font-size:15px;
-      font-weight:bold;
-      z-index:1;
-      color:black;
-     }
-    .minuss{
-      position:absolute;
-      left:450px;
-      height:23px;
+      left: 700px;
+      bottom: 27px;
+      font-size: 15px;
+      font-weight: bold;
       width:11px;
-      bottom: 430px;
-      font-size:15px;
-      font-weight:bold;
-      z-index:1;
+      height:23px;
+      z-index: 1;
       color:black;
     }
+    .minus2{
+      position:absolute;
+      left:760px;
+      bottom: 260px;
+      font-size: 15px;
+      font-weight: bold;
+      width:11px;
+      height:23px;
+      z-index: 1;
+      color:black;
+    }
+    
       
       
     
@@ -684,11 +685,10 @@
     <div class="boxq5"></div>
     <div class="boxq6"></div>
 
-    <div class="add">+</div>
-    <div class="minus">-</div>
-    <div class="addd">+</div>
-    <div class="minuss">-</div>
-    
+    <div class="add1">+</div>
+    <div class="minus1">-</div>
+    <div class="add1">+</div>
+    <div class="minus2">-</div>
   
   
   </body>
