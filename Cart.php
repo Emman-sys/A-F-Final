@@ -136,6 +136,15 @@
         color:black;
         z-index:1;
       }
+      .vertical-line{
+       position:absolute;
+       left: 80px;
+       bottom:769px;
+       width: 79px;               
+       height: 0px;             
+       background-color: black;   
+       margin: 0 20px;            
+      }
       .pyment{
         position:absolute;
         font-size:40px;
@@ -570,7 +579,7 @@
      }
     .minus1{
       position:absolute;
-      left:773px;
+      left:770px;
       bottom: 430px;
       font-size:15px;
       font-weight:bold;
@@ -582,8 +591,8 @@
     }
     .add2{
       position:absolute;
-      left: 697px;
-      bottom: 260px;
+      left: 705px;
+      bottom: 264px;
       font-size: 15px;
       font-weight: bold;
       width:11px;
@@ -600,6 +609,28 @@
       width:11px;
       height:23px;
       z-index: 1;
+      color:black;
+    }
+    .add3{
+      position:absolute;
+      left:705px;
+      bottom:90px;
+      font-size:15px;
+      font-weight:bold;
+      width:11px;
+      height:23px;
+      z-index:1;
+      color:black;
+    }
+    .minus3{
+      position:absolute;
+      left:770px;
+      bottom:90px;
+      font-size:15px;
+      font-weight:bold;
+      width:11px;
+      height:23px;
+      z-index:1;
       color:black;
     }
     
@@ -624,6 +655,7 @@
     <div class="Payment"></div>
     
     <h1 class="brand">A&F</h1>
+    <div class="vertical-line"></div>
     <h1 class="pyment">Payment Info.</h1>
     <h1 class="method">Payment Method:</h1>
     <h1 class="nme">Name:</h1>
@@ -690,6 +722,8 @@
     <div class="minus1">-</div>
     <div class="add2">+</div>
     <div class="minus2">-</div>
+     <div class="add3">+</div>
+    <div class="minus3">-</div>
   
   
   </body>
