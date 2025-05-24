@@ -587,7 +587,7 @@
       font-weight: bold;
       width:11px;
       height:23px;
-      z-index: 1;
+      z-index: 2;
       color:black;
     }
     .minus2{
