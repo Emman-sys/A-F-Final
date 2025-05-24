@@ -1,378 +1,413 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
    <meta charset="utf-8" />
    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-   <title>A&F</title>
+   <title>A&F Shipping</title>
    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Merriweather+Sans:wght@700&display=swap" rel="stylesheet" />
-   <link rel="stylesheet" href="https://lucide.dev/">
    <link rel="stylesheet" href="styles.css">
     
-    <style>
+   <style>
+
       body {
-      background-image: url('images/bg.png'); 
-      background-position: center;
-      background-size: cover;
-      background-attachment: fixed;
-      font-family: 'Merriweather', serif;
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden;  
-      min-height: calc(100vh + 180px);  /* Ensure full height */
-      width: 100%;
+         background-image: url('images/bg.png'); 
+         background-position: center;
+         background-size: cover;
+         background-attachment: fixed;
+         font-family: 'Merriweather', serif;
+         margin: 0;
+         padding: 0;
+         overflow-x: hidden;  
+         min-height: 30vh;
+         width:100%;
       }
-      .shape1{
+
+      .orderedsum {
+         display: flex;
+         max-width: 1400px;
+         margin: 0 auto;
+         padding: 2rem;
+         gap: 2rem;
+         min-height: 100vh;
+         align-items: flex-start;
+      }
+
+     
+      .header {
         position:absolute;
-        left:25px;
-        width:2000px;
+        left:10px;
+        width:100vw;
         top:2.20px;
-        height:265px;
+        height:200px;
         background:linear-gradient(to top, #5127A3,#986C93, #E0B083);
-        border-radius:9px;
         border:1px solid gray;
         z-index:1;
       }
-      .shape2{
-        position:absolute;
-        right:150px;
-        bottom:570px;
-        width:990px;
-        height:61px;
-        background-color:#FFFFFF;
-        border: 1px solid black;
-        z-index:1;
+
+      .brand {
+         position: absolute;
+         font-size: 60px;
+         left: 50px;
+         top: 50px;
+         font-weight: bold;
+         color: white;
+         z-index: 2;
       }
-      .shape3{
-        position:absolute;
-        right:150px;
-        bottom:350px;
-        width:990px;
-        height:215px;
-        background-color:#FFFFFF;
-        border: 1px solid black;
-        z-index:1;
+
+     
+      .shipping {
+         width: 400px;
+         min-height: 650px;
+         background: linear-gradient(to top, #371B70, #5127A3, #6A34D6);
+         border-radius: 16px;
+         padding: 2rem;
+         margin-top: 300px;
+         position: relative;
+         z-index: 2;
       }
-      .shape4{
-        position:absolute;
-        right:150px;
-        bottom:170px;
-        width:990px;
-        height:182px;
-        background-color:#FFFFFF;
-        border: 1px solid black;
-        z-index:1;
+
+      .shipping-title {
+         font-size: 1.5rem;
+         font-weight: bold;
+         color: white;
+         text-align: center;
+         margin-bottom: 2rem;
+         border-bottom: 5px solid white;
+         padding-bottom: 1rem;
       }
-      .shape5{
+     .nme{
         position:absolute;
-        right:150px;
-        bottom:80px;
-        width:990px;
-        height:100px;
-        background-color:#FFFFFF;
-        border: 1px solid black;
-        z-index:1;
+        font-size:18px;
+        left:330px;
+        bottom:450px;
+        font-weight:medium;
+        color:white;
+        z-index:2;
       }
-       .shape6{
+      .line2{
+       position:absolute;
+       left: 330px;
+       bottom: 410px;
+       height: 2px;
+       background-color: #C1ACAC;
+       width: 20%; 
+       margin: 10px 0;
+       z-index:2;
+      }
+      .address{
+       position:absolute;
+       font-size:18px;
+        left:330px;
+        bottom:360px;
+        font-weight:medium;
+        color:white;
+        z-index:2;
+      }
+      .line3{
+       position:absolute;
+       left:330px;
+       bottom:320px;
+       height: 2px;
+       background-color: #C1ACAC;
+       width: 20%; 
+       margin: 10px 0;
+       z-index:2;
+      }
+      .number{
+       position:absolute;
+        font-size:18px;
+        left:330px;
+        bottom:260px;
+        font-weight:medium;
+        color:white;
+        z-index:2;
+      }
+      .line4{
+       position:absolute;
+       left:330px;
+       bottom:220px;
+       height: 2px;
+       background-color: #C1ACAC;
+       width: 20%; 
+       margin: 10px 0;
+       z-index:2;
+      }
+      .email{
+        position:absolute;
+        font-size:18px;
+        left:330px;
+        bottom:180px;
+        font-weight:medium;
+        color:white;
+        z-index:2;
+      }
+       .line5{
+       position:absolute;
+       left: 330px;
+       bottom: 140px;
+       height: 2px;
+       background-color: #C1ACAC;
+       width: 20%; 
+       margin: 10px 0;
+       z-index:2;
+      }
+      .method{
+        position:absolute;
+        font-size:18px;
+        left:330px;
+        bottom:100px;
+        font-weight:medium;
+        color:white;
+        z-index:2;
+      }
+      .paymentchosen{
         position: absolute;
-        left: 320px;
-        bottom: 70px;
+        left: 440px;
+        bottom: 60px;
         width:97px;
         height:29px;
         background: #5127A3;
         border-radius:13px;
         border: 1px solid white;
-        z-index:1;
-      }
-      
-     
-      
-      .Spam{
-        position:absolute;
-        width:169px;
-        height:169px;
-        z-index:1;
-        right:945px;
-        bottom:355px;
-      }
-      .Melona{
-        position:absolute;
-        width:141px;
-        height:160px;
-        z-index:1;
-        right:945px;
-        bottom:190px;
-      }
-      
-      .shipinfo{
-        position:absolute;
-        width:400px;
-        height:650px;
-        left:200px;
-        bottom:2.20px;
-        background:linear-gradient(to top,#371B70,#5127A3,#6A34D6);
-        border-radius:16px;
-      }
-      .brand{
-        position:absolute;
-        font-size:65px;
-        left:50px;
-        bottom:769px;
-        font-weight:bold;
-        color:black;
-        z-index:1;
-      }
-      .shipping{
-        position:absolute;
-        font-size:25px;
-        left:230px;
-        bottom:580px;
-        font-weight:bold;
-        color:white;
-        z-index:1;
-      }
-      .line {
-       position:absolute;
-       left: 215px;
-       bottom: 548px;
-       height: 2px;
-       background-color: white;
-       width: 18%; 
-       margin: 20px 0;
-      }
-      
-      .nme{
-        position:absolute;
-        font-size:18px;
-        left:230px;
-        bottom:500px;
-        font-weight:medium;
-        color:white;
-        z-index:1;
-      }
-      .line2{
-       position:absolute;
-       left: 210px;
-       bottom: 460px;
-       height: 2px;
-       background-color: #C1ACAC;
-       width: 18%; 
-       margin: 10px 0;
-      }
-      .address{
-       position:absolute;
-       font-size:18px;
-        left:230px;
-        bottom:400px;
-        font-weight:medium;
-        color:white;
-        z-index:1;
-      }
-      .line3{
-       position:absolute;
-       left: 210px;
-       bottom: 350px;
-       height: 2px;
-       background-color: #C1ACAC;
-       width: 18%; 
-       margin: 10px 0;
-      }
-      .number{
-       position:absolute;
-        font-size:18px;
-        left:230px;
-        bottom:300px;
-        font-weight:medium;
-        color:white;
-        z-index:1;
-      }
-      .line4{
-       position:absolute;
-       left: 210px;
-       bottom: 254px;
-       height: 2px;
-       background-color: #C1ACAC;
-       width: 18%; 
-       margin: 10px 0;
-      }
-      .email{
-        position:absolute;
-        font-size:18px;
-        left:230px;
-        bottom:200px;
-        font-weight:medium;
-        color:white;
-        z-index:1;
-      }
-       .line5{
-       position:absolute;
-       left: 210px;
-       bottom: 155px;
-       height: 2px;
-       background-color: #C1ACAC;
-       width: 18%; 
-       margin: 10px 0;
-      }
-      .method{
-        position:absolute;
-        font-size:18px;
-        left:230px;
-        bottom:100px;
-        font-weight:medium;
-        color:white;
-        z-index:1;
-      }
-     
-      
-      
-      
-      .price{
-        position:absolute;
-        left:1290px;
-        bottom:520px;
-        font-size:18px;
-        font-weight:medium;
-        color:#8D7D7D;
-        z-index:1;
-      }
-      .quantity{
-        position:absolute;
-        right:500px;
-        bottom:520px;
-        font-size:18px;
-        font-weight:medium;
-        color:#8D7D7D;
-        z-index:1;
-      }
-      .totalsub1{
-        position:absolute;
-        right:300px;
-        bottom:520px;
-        font-size:18px;
-        font-weight:medium;
-        color:#8D7D7D;
-        z-index:1;
-      }
-       .price1{
-        position:absolute;
-        left:1290px;
-        bottom:415px;
-        font-size:25px;
-        font-weight:medium;
-        color:black;
-        z-index:1;
-      }
-      .price2{
-        position:absolute;
-        left:1290px;
-        bottom:245px;
-        font-size:25px;
-        font-weight:medium;
-        color:black;
-        z-index:1;
-      }
-      
-    
-      
-      .spm{
-        position:absolute;
-        right:830px;
-        bottom:420px;
-        font-size:15px;
-        font-weight:medium;
-        color:black;
-        z-index:1;
-      }
-      .mln{
-        position:absolute;
-        right:830px;
-        bottom:250px;
-        font-size:15px;
-        font-weight:medium;
-        color:black;
         z-index:2;
       }
-      .quantity1{
+      .check{
         position:absolute;
-        right:520px;
-        bottom:415px;
-        font-size:25px;
-        font-weight:medium;
-        color:black;
-        z-index:10;
+        left:330px;
+        bottom:5px;
+        width:32px;
+        height:31px;
+        border:1px solid white;
+        z-index: 2;
+        border-radius:6px;
       }
-      .quantity2{
-        position:absolute;
-        right:520px;
-        bottom:250px;
-        font-size:25px;
-        font-weight:medium;
-        color:black;
-        z-index:10;
+      .termsc{
+         position:absolute;
+         left:380px;
+         bottom:13px;
+         font-size:12px;
+         font-weight:medium;
+         color:white;
+         z-index:2;
       }
-      .itemsub1{
-        position:absolute;
-        right:320px;
-        bottom:415px;
-        font-size:25px;
-        font-weight:medium;
-        color:black;
-        z-index:10;
-      }
-      .itemsub2{
-        position:absolute;
-        right:320px;
-        bottom:250px;
-        font-size:25px;
-        font-weight:medium;
-        color:black;
-        z-index:10;
-      }
-      
+
      
- </style>
-    </head>
-  <body>
-    <div class="shape1"></div>
-    <div class="shape2"></div>
-    <div class="shape3"></div>
-    <div class="shape4"></div>
-    <div class="shape5"></div>
-    <div class="shape6"></div>
-   
-    <div class="shipinfo"></div>
+
     
-    <h1 class="brand">A&F</h1>
-    <h1 class="shipping">Shipping Information</h1>
-    <h1 class="nme">Name:</h1>
+
+      .orderitems{
+         flex: 1;
+         margin-top: 300px;
+         background: white;
+         border-radius: 10px;
+         padding: 2rem;
+         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .order-header {
+         background: #f8f9fa;
+         padding: 1rem;
+         border-radius: 8px;
+         margin-bottom: 1rem;
+         display: grid;
+         grid-template-columns: 2fr 1fr 1fr 1fr;
+         gap: 1rem;
+         font-weight: bold;
+         color: #8D7D7D;
+      }
+
+      .order-item {
+         display: grid;
+         grid-template-columns: 2fr 1fr 1fr 1fr;
+         gap: 1rem;
+         align-items: center;
+         padding: 1.5rem 1rem;
+         border-bottom: 1px solid #eee;
+      }
+
+      .product-info {
+         display: flex;
+         align-items: center;
+         gap: 1rem;
+      }
+
+      .product-image {
+         width: 80px;
+         height: 80px;
+         object-fit: cover;
+         border-radius: 8px;
+      }
+
+      .product-name {
+         font-size: 1rem;
+         font-weight: 500;
+         color: black;
+      }
+
+      .price, .quantity-val, .subtotal {
+         font-size: 1.2rem;
+         font-weight: 500;
+         color: black;
+         text-align: center;
+      }
+
+      .total-section {
+         margin-top: 2rem;
+         padding-top: 1rem;
+         border-top: 2px solid #5127A3;
+      }
+
+      .total-row {
+         display: flex;
+         justify-content: space-between;
+         padding: 0.5rem 0;
+         font-size: 1.1rem;
+      }
+
+      .total-final {
+         font-weight: bold;
+         font-size: 1.3rem;
+         color: #5127A3;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 1200px) {
+         .orderedsum{
+            flex-direction: column;
+            padding: 1rem;
+         }
+         
+         .shipping {
+            width: 100%;
+            margin-top: 280px;
+         }
+         
+         .orderitems {
+            margin-top: 1rem;
+         }
+      }
+
+      @media (max-width: 768px) {
+         .header {
+            margin: 10px;
+            height: 200px;
+         }
+         
+         .brand {
+            font-size: 2rem;
+            left: 20px;
+            top: 30px;
+         }
+         
+         .shipping {
+            margin-top: 220px;
+            padding: 1.5rem;
+         }
+         
+         .order-header,
+         .order-item {
+            grid-template-columns: 1fr;
+            text-align: center;
+         }
+         
+         .product-info {
+            justify-content: center;
+         }
+         
+         .product-image {
+            width: 60px;
+            height: 60px;
+         }
+      }
+
+      @media (max-width: 480px) {
+         .orderedsum {
+            padding: 0.5rem;
+         }
+         
+         .shipping{
+            padding: 1rem;
+         }
+         
+         .orderitems {
+            padding: 1rem;
+         }
+      }
+   </style>
+</head>
+<body>
+   <div class="header">
+      <h1 class="brand">A&F</h1>
+   </div>
+
+   <div class="orderedsum">
+   
+      <div class="shipping">
+         <h2 class="shipping-title">Shipping Information</h2>
+      </div>
+     
+     <h1 class="nme">Name:</h1>
     <h1 class="address">Address:</h1>
     <h1 class="number">Phone Number:</h1>
     <h1 class="email">Email:</h1>
     <h1 class="method">Payment Method:</h1>
-    <h1 class="price">Unit Price</h1>
-    <h1 class="quantity">Quantity</h1>
-    <h1 class="spm">SPAM PORK</h1>
-    <h1 class="mln">MELONA</h1>
-    <h1 class="totalsub1">Item Subtotal</h1>
-   
-    <h1 class="price1">₱115</h1>
-    <h1 class="price2">₱35</h1>
-    <h1 class="quantity1">1</h1>
-     <h1 class="quantity2">2</h1>
-    <h1 class="itemsub1">₱115</h1>
-    <h1 class="itemsub2">₱35</h1>
-    
-  
-    
-    <div class="prods">
-      <img src="https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/spam?v=1747830810539" class="Spam">
-      <img src="https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/icecream?v=1747830812291" class="Melona">
-    </div>
-    
-    <div class="line"></div>
-    <div class="line2"></div>
+     
+     <div class="line2"></div>
     <div class="line3"></div>
     <div class="line4"></div>
     <div class="line5"></div>
-    
- </body>
+
+    <div class="paymentchosen"></div>
+    <div class="check"></div>
+    <div class="termsc">I have read the terms and conditions</div>
+
+     
+     
+      <div class="orderitems">
+         <h2 style="color: #5127A3; margin-bottom: 2rem;">Order Summary</h2>
+         
+         <div class="order-header">
+            <div>Product</div>
+            <div>Unit Price</div>
+            <div>Quantity</div>
+            <div>Subtotal</div>
+         </div>
+         
+         <div class="order-item">
+            <div class="product-info">
+               <img src="https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/spam?v=1747830810539" class="product-image" alt="SPAM">
+               <span class="product-name">SPAM PORK</span>
+            </div>
+            <div class="price">₱115</div>
+            <div class="quantity-val">1</div>
+            <div class="subtotal">₱115</div>
+         </div>
+         
+         <div class="order-item">
+            <div class="product-info">
+               <img src="https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/icecream?v=1747830812291" class="product-image" alt="MELONA">
+               <span class="product-name">MELONA</span>
+            </div>
+            <div class="price">₱35</div>
+            <div class="quantity-val">2</div>
+            <div class="subtotal">₱70</div>
+         </div>
+         
+         <div class="total-section">
+            <div class="total-row">
+               <span>Subtotal:</span>
+               <span>₱185</span>
+            </div>
+            <div class="total-row">
+               <span>Shipping:</span>
+               <span>₱50</span>
+            </div>
+            <div class="total-row total-final">
+               <span>Total:</span>
+               <span>₱235</span>
+            </div>
+         </div>
+      </div>
+   </div>
+</body>
 </html>
