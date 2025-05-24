@@ -590,7 +590,7 @@
       z-index:1;
       color:black;
      }
-    .minus2{
+    .minus1{
       position:absolute;
       left:450px;
       font-size:15px;
@@ -688,8 +688,7 @@
     <div class="minus">-</div>
     <div class="add1">+</div>
     <div class="minus1">-</div>
-    <div class="add2">+</div>
-    <div class="minus2">-</div>
+    
   
   
   </body>
