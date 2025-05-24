@@ -687,7 +687,7 @@
 
     <div class="add1">+</div>
     <div class="minus1">-</div>
-    <div class="add1">+</div>
+    <div class="add2">+</div>
     <div class="minus2">-</div>
   
   
