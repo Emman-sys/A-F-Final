@@ -579,7 +579,7 @@
       z-index:1;
       color:black;
     }
-    .add1{
+    .addd{
       position:absolute;
       left:500px;
       bottom: 260px;
@@ -590,7 +590,7 @@
       z-index:2;
       color:black;
      }
-    .minus1{
+    .minuss{
       position:absolute;
       left:450px;
       font-size:15px;
