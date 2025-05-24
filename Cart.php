@@ -579,6 +579,28 @@
       z-index:1;
       color:black;
     }
+    .add1{
+      position:absolute;
+      left:695px;
+      bottom: 260px;
+      font-weight:bold;
+      bottom: 434px;
+      width: 11px;px;
+      height:23px;
+      z-index:1;
+      color:black;
+     }
+    .minus2{
+      position:absolute;
+      left:760px;
+      bottom: 260px;
+      font-weight:bold;
+      bottom: 430px;
+      width:11px;
+      height:23px;
+      z-index:1;
+      color:black;
+    }
       
       
     
@@ -664,6 +686,10 @@
 
     <div class="add">+</div>
     <div class="minus">-</div>
+    <div class="add1">+</div>
+    <div class="minus1">-</div>
+    <div class="add2">+</div>
+    <div class="minus2">-</div>
   
   
   </body>
