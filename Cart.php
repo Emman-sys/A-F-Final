@@ -10,11 +10,11 @@
     
     <style>
       body{
-        background-image:url("");
+        background-image:url('A-F-Final/bg.png');
         background-position:center;
         background-size:cover;
         background-attachment:fixed;
-        font-family:'Merriweather';
+        font-family:'Merriweather', serif;
       }
       .shape1{
         position:absolute;
