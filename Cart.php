@@ -559,8 +559,9 @@
      }
      .add{
       position:absolute;
-      left:695px;
+      left:700px;
       font-size: 15px;
+      font-weight:bold;
       bottom: 430px;
       width: 11px;px;
       height:23px;
@@ -569,8 +570,9 @@
      }
     .minus{
       position:absolute;
-      left:760px;
-      font-size;15px;
+      left:790px;
+      font-size:15px;
+      font-weight:bold;
       bottom: 430px;
       width:11px;
       height:23px;
