@@ -592,8 +592,8 @@
      }
     .minus2{
       position:absolute;
-      left:760px;
-      bottom: 260px;
+      left:773px;
+      font-size:15px;
       font-weight:bold;
       bottom: 430px;
       width:11px;
