@@ -587,7 +587,7 @@
       bottom: 434px;
       width: 11px;px;
       height:23px;
-      z-index:2;
+      z-index:1;
       color:black;
      }
     .minuss{
@@ -598,7 +598,7 @@
       bottom: 430px;
       width:11px;
       height:23px;
-      z-index:2;
+      z-index:1;
       color:black;
     }
       
