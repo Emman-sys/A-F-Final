@@ -10,20 +10,24 @@
     
     <style>
       body {
-       background-image: url('/A-F-Final/bg.png'); /* Absolute path from web root */
-       background-position: center;
-       background-size: cover;
-       background-attachment: fixed;
-       font-family: 'Merriweather', serif;
+      background-image: url('images/bg.png'); 
+      background-position: center;
+      background-size: cover;
+      background-attachment: fixed;
+      font-family: 'Merriweather', serif;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;  
+      min-height: calc(100vh + 180px);  /* Ensure full height */
+      width: 100%;
       }
       .shape1{
         position:absolute;
-        left:25px;
-        width:2000px;
+        left:10px;
+        width:100vw;
         top:2.20px;
         height:265px;
-        background-color:#CDACB1;
-        border-radius:9px;
+        background:linear-gradient(to top, #5127A3,#986C93, #E0B083);
         border:1px solid gray;
         z-index:1;
       }
@@ -63,6 +67,16 @@
         bottom:5.10px;
         width:990px;
         height:182px;
+        background-color:#FFFFFF;
+        border: 1px solid black;
+        z-index:1;
+      }
+      .shape10{
+        position:absolute;
+        left:150px;
+        bottom:-100px;
+        width:990px;
+        height:61px;
         background-color:#FFFFFF;
         border: 1px solid black;
         z-index:1;
@@ -133,7 +147,7 @@
         left:50px;
         bottom:769px;
         font-weight:bold;
-        color:black;
+        color:white;
         z-index:1;
       }
       .vertical-line{
@@ -142,7 +156,7 @@
        bottom: 795px;
        width: 5.10px;               
        height: 100px;             
-       background-color: black;   
+       background-color: white;   
        margin: 0 20px;  
        z-index:1;          
       }
@@ -709,6 +723,7 @@
     <div class="shape7"></div>
     <div class="shape8"></div>
     <div class="shape9"></div>
+    <div class="shape10"></div>
     <div class="shapeq1"></div>
     <div class="boxq1"></div>
     <div class="boxq2"></div>

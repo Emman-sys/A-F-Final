@@ -13,7 +13,12 @@
   background-image:url("https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/image%203.png?v=1747320934399");
   background-size: cover;
   background-position: center;
-  background-attachment: fixed;        
+  background-attachment: fixed;  
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;  
+  min-height: calc(100vh + 180px);  /* Ensure full height */
+  width: 100%;      
 }
 .navigation {
   display: flex;
