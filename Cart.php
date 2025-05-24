@@ -9,12 +9,12 @@
    <link rel="stylesheet" href="styles.css">
     
     <style>
-      body{
-        background-image:url('A-F-Final/bg.png');
-        background-position:center;
-        background-size:cover;
-        background-attachment:fixed;
-        font-family:'Merriweather', serif;
+      body {
+       background-image: url('/A-F-Final/bg.png'); /* Absolute path from web root */
+       background-position: center;
+       background-size: cover;
+       background-attachment: fixed;
+       font-family: 'Merriweather', serif;
       }
       .shape1{
         position:absolute;
