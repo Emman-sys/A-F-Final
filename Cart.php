@@ -19,7 +19,7 @@
       padding: 0;
       overflow-x: hidden;  
       min-height: calc(100vh + 180px);  /* Ensure full height */
-      width: 100%;
+      width: 110%;
       }
       .shape1{
         position:absolute;
