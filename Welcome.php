@@ -17,8 +17,7 @@
     margin: 0;
     padding: 0;
     overflow-x: hidden;  
-    min-height: 100vh;
-    width: 100%;      
+    width: 90%;     
   }
   
   .navigation {
@@ -51,6 +50,8 @@
   }
   
   .nav-logo {
+    position:absolute;
+    left: 760px;
     width: 6rem;
     height: 6rem;
   }
@@ -109,6 +110,8 @@
   }
   
   .cta-button {
+    position: absolute;
+    left: 345px;
     background-color: #3D0D0D;
     color: #ffffff;
     font-family: 'Merriweather Sans';
@@ -224,7 +227,7 @@
     <main class="brandname-section">
       <div class="letters-content">
         <h2>More Than Just Sweets!</h2>
-        <h1>A&FCHOCOLATE</h1>
+        <h1>A&F CHOCOLATE</h1>
         <p class="description">
           Discover a world of flavor with A&F Chocolate! From affordable chocolates to your favorite Korean snacks and classic Filipino treats — all in one place.
         </p>

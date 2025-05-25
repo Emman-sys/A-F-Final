@@ -8,6 +8,9 @@
    <link rel="stylesheet" href="styles.css">
     
    <style>
+      * {
+         box-sizing: border-box;
+      }
 
       body {
          background-image: url('images/bg.png'); 
@@ -18,30 +21,31 @@
          margin: 0;
          padding: 0;
          overflow-x: hidden;  
-         min-height: 30vh;
-         width:100%;
+         min-height: 100vh;
+         width: 100%;
       }
 
       .orderedsum {
          display: flex;
          max-width: 1400px;
+         height:200px;
          margin: 0 auto;
          padding: 2rem;
          gap: 2rem;
-         min-height: 100vh;
          align-items: flex-start;
+         position: relative;
       }
 
-     
       .header {
-        position:absolute;
-        left:10px;
-        width:100vw;
-        top:2.20px;
-        height:200px;
-        background:linear-gradient(to top, #5127A3,#986C93, #E0B083);
-        border:1px solid gray;
-        z-index:1;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 200px;
+        background: linear-gradient(to top, #5127A3,#986C93, #E0B083);
+        border: 1px solid gray;
+        z-index: 1;
+        margin: 10px;
       }
 
       .brand {
@@ -52,9 +56,9 @@
          font-weight: bold;
          color: white;
          z-index: 2;
+         margin: 0;
       }
 
-     
       .shipping {
          width: 400px;
          min-height: 650px;
@@ -75,127 +79,137 @@
          border-bottom: 5px solid white;
          padding-bottom: 1rem;
       }
-     .nme{
-        position:absolute;
-        font-size:18px;
-        left:330px;
-        bottom:450px;
-        font-weight:medium;
-        color:white;
-        z-index:2;
-      }
-      .line2{
-       position:absolute;
-       left: 330px;
-       bottom: 410px;
-       height: 2px;
-       background-color: #C1ACAC;
-       width: 20%; 
-       margin: 10px 0;
-       z-index:2;
-      }
-      .address{
-       position:absolute;
-       font-size:18px;
-        left:330px;
-        bottom:360px;
-        font-weight:medium;
-        color:white;
-        z-index:2;
-      }
-      .line3{
-       position:absolute;
-       left:330px;
-       bottom:320px;
-       height: 2px;
-       background-color: #C1ACAC;
-       width: 20%; 
-       margin: 10px 0;
-       z-index:2;
-      }
-      .number{
-       position:absolute;
-        font-size:18px;
-        left:330px;
-        bottom:260px;
-        font-weight:medium;
-        color:white;
-        z-index:2;
-      }
-      .line4{
-       position:absolute;
-       left:330px;
-       bottom:220px;
-       height: 2px;
-       background-color: #C1ACAC;
-       width: 20%; 
-       margin: 10px 0;
-       z-index:2;
-      }
-      .email{
-        position:absolute;
-        font-size:18px;
-        left:330px;
-        bottom:180px;
-        font-weight:medium;
-        color:white;
-        z-index:2;
-      }
-       .line5{
-       position:absolute;
-       left: 330px;
-       bottom: 140px;
-       height: 2px;
-       background-color: #C1ACAC;
-       width: 20%; 
-       margin: 10px 0;
-       z-index:2;
-      }
-      .method{
-        position:absolute;
-        font-size:18px;
-        left:330px;
-        bottom:100px;
-        font-weight:medium;
-        color:white;
-        z-index:2;
-      }
-      .paymentchosen{
+
+      .nme {
         position: absolute;
-        left: 440px;
-        bottom: 60px;
-        width:97px;
-        height:29px;
+        font-size: 18px;
+        left: 30px;
+        top: 120px;
+        font-weight: medium;
+        color: white;
+        z-index: 3;
+        margin: 0;
+      }
+
+      .line2 {
+       position: absolute;
+       left: 30px;
+       top: 150px;
+       height: 2px;
+       background-color: #C1ACAC;
+       width: 80%; 
+       z-index: 3;
+      }
+
+      .address {
+       position: absolute;
+       font-size: 18px;
+        left: 30px;
+        top: 180px;
+        font-weight: medium;
+        color: white;
+        z-index: 3;
+        margin: 0;
+      }
+
+      .line3 {
+       position: absolute;
+       left: 30px;
+       top: 210px;
+       height: 2px;
+       background-color: #C1ACAC;
+       width: 80%; 
+       z-index: 3;
+      }
+
+      .number {
+       position: absolute;
+        font-size: 18px;
+        left: 30px;
+        top: 240px;
+        font-weight: medium;
+        color: white;
+        z-index: 3;
+        margin: 0;
+      }
+
+      .line4 {
+       position: absolute;
+       left: 30px;
+       top: 270px;
+       height: 2px;
+       background-color: #C1ACAC;
+       width: 80%; 
+       z-index: 3;
+      }
+
+      .email {
+        position: absolute;
+        font-size: 18px;
+        left: 30px;
+        top: 300px;
+        font-weight: medium;
+        color: white;
+        z-index: 3;
+        margin: 0;
+      }
+
+      .line5 {
+       position: absolute;
+       left: 30px;
+       top: 330px;
+       height: 2px;
+       background-color: #C1ACAC;
+       width: 80%; 
+       z-index: 3;
+      }
+
+      .method {
+        position: absolute;
+        font-size: 18px;
+        left: 30px;
+        top: 360px;
+        font-weight: medium;
+        color: white;
+        z-index: 3;
+        margin: 0;
+      }
+
+      .paymentchosen {
+        position: absolute;
+        left: 30px;
+        top: 420px;
+        width: 97px;
+        height: 29px;
         background: #5127A3;
-        border-radius:13px;
+        border-radius: 13px;
         border: 1px solid white;
-        z-index:2;
-      }
-      .check{
-        position:absolute;
-        left:330px;
-        bottom:5px;
-        width:32px;
-        height:31px;
-        border:1px solid white;
-        z-index: 2;
-        border-radius:6px;
-      }
-      .termsc{
-         position:absolute;
-         left:380px;
-         bottom:13px;
-         font-size:12px;
-         font-weight:medium;
-         color:white;
-         z-index:2;
+        z-index: 3;
       }
 
-     
+      .check {
+        position: absolute;
+        left: 30px;
+        top: 480px;
+        width: 32px;
+        height: 31px;
+        border: 1px solid white;
+        z-index: 3;
+        border-radius: 6px;
+      }
 
-    
+      .termsc {
+         position: absolute;
+         left: 80px;
+         top: 488px;
+         font-size: 12px;
+         font-weight: medium;
+         color: white;
+         z-index: 3;
+         margin: 0;
+      }
 
-      .orderitems{
+      .orderitems {
          flex: 1;
          margin-top: 300px;
          background: white;
@@ -272,7 +286,7 @@
 
       /* Responsive Design */
       @media (max-width: 1200px) {
-         .orderedsum{
+         .orderedsum {
             flex-direction: column;
             padding: 1rem;
          }
@@ -284,6 +298,12 @@
          
          .orderitems {
             margin-top: 1rem;
+         }
+         
+         .nme, .address, .number, .email, .method, .paymentchosen, .check, .termsc {
+            position: relative;
+            left: auto;
+            top: auto;
          }
       }
 
@@ -325,7 +345,7 @@
             padding: 0.5rem;
          }
          
-         .shipping{
+         .shipping {
             padding: 1rem;
          }
          
@@ -341,28 +361,28 @@
    </div>
 
    <div class="orderedsum">
-   
       <div class="shipping">
          <h2 class="shipping-title">Shipping Information</h2>
+         
+         <h1 class="nme">Name:</h1>
+         <div class="line2"></div>
+         
+         <h1 class="address">Address:</h1>
+         <div class="line3"></div>
+         
+         <h1 class="number">Phone Number:</h1>
+         <div class="line4"></div>
+         
+         <h1 class="email">Email:</h1>
+         <div class="line5"></div>
+         
+         <h1 class="method">Payment Method:</h1>
+         
+         <div class="paymentchosen"></div>
+         <div class="check"></div>
+         <div class="termsc">I have read the terms and conditions</div>
       </div>
-     
-     <h1 class="nme">Name:</h1>
-    <h1 class="address">Address:</h1>
-    <h1 class="number">Phone Number:</h1>
-    <h1 class="email">Email:</h1>
-    <h1 class="method">Payment Method:</h1>
-     
-     <div class="line2"></div>
-    <div class="line3"></div>
-    <div class="line4"></div>
-    <div class="line5"></div>
-
-    <div class="paymentchosen"></div>
-    <div class="check"></div>
-    <div class="termsc">I have read the terms and conditions</div>
-
-     
-     
+      
       <div class="orderitems">
          <h2 style="color: #5127A3; margin-bottom: 2rem;">Order Summary</h2>
          
