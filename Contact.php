@@ -208,19 +208,19 @@
   <main class="contact-section">
     <div class="contact-info">
       <div class="social-item">
-        <img src="icons/facebook.image" alt="Facebook Icon" />
+        <img src="images/image 16.png" alt="Facebook Icon" />
         <span>@A&FCHOCS_</span>
       </div>
       <div class="social-item">
-        <img src="icons/instagram.image" alt="Instagram Icon" />
+        <img src="images/image 17.png" alt="Instagram Icon" />
         <span>@A&FCHOCS_</span>
       </div>
       <div class="social-item">
-        <img src="icons/gmail.image" alt="Gmail Icon" />
+        <img src="images/image 18.png" alt="Gmail Icon" />
         <span>A&FCHOCS@gmail.com</span>
       </div>
       <div class="social-item">
-        <img src="icons/whatsapp.image" alt="WhatsApp Icon" />
+        <img src="images/image 19.png" alt="WhatsApp Icon" />
         <span>+639123456789</span>
       </div>
       <div class="social-item">
