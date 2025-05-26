@@ -162,16 +162,16 @@
     }
     .pistachio-image{
       position:relative;
-      top:-334px;
+      top:-394px;
       left:755px;
-      width:190px;
-      height:149px;
+      width:179px;
+      height:135px;
       z-index:2;
     }
 
     .categories-section {
       position: relative;
-      top:-78px;
+      top:-123px;
       background: linear-gradient(to top, #592249, #BF489C);
       padding: clamp(40px, 8vw, 60px) clamp(10px, 2vw, 20px); /* Responsive padding */
       margin-top: clamp(20px, 4vw, 40px);
@@ -266,12 +266,18 @@
     }
 
     .brand-name-small {
+      position:absolute;
+      left:19px;
+      bottom: -150px;
       font-size: clamp(2rem, 5vw, 2.5rem); /* Responsive font size */
       font-weight: bold;
       color: white;
     }
 
     .section-title {
+      position:absolute;
+      left:155px;
+      bottom: -150px;
       font-size: clamp(1.5rem, 4vw, 2rem); /* Responsive font size */
       font-weight: bold;
       color: white;
@@ -300,14 +306,14 @@
     .sort-label {
       position:absolute;
       left:300px;
-      bottom:-515px;
+      bottom:-650px;
       font-size: clamp(1.2rem, 3vw, 1.5rem); /* Responsive font size */
       color: white;
     }
 
     .sort-buttons {
        position: absolute;
-       bottom: -521px;
+       bottom: -660px;
        left: 450px;
        display: flex;
        gap: 10px;
@@ -445,7 +451,7 @@
       </div>
 
       <div class="image-header">
-        <img src="images/pictachio.png" class="pistachio-image" alt="Chocolate">
+        <img src="images/pistachio.png" class="pistachio-image">
   </div>
 
       <div class="categories-section">
