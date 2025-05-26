@@ -1,3 +1,7 @@
+<?php
+session_start();
+$isLoggedIn = isset($_SESSION["user_id"]);
+?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -202,6 +206,126 @@
       height: 4rem;
     }
   }
+
+  .popup-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.popup-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 500px;
+  padding: 40px;
+  border-radius: 15px;
+  background-color: rgba(217, 217, 217, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.popup-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.form-title {
+  color: #fff;
+  font-family: Poppins, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  position: relative;
+}
+
+.input-label {
+  color: #fff;
+  font-family: Poppins;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.form-input {
+  width: 100%;
+  height: 50px;
+  border-radius: 10px;
+  border: 1px solid rgba(216, 204, 204, 0.61);
+  background-color: rgba(216, 204, 204, 0.61);
+  padding: 0 15px;
+  font-size: 14px;
+  color: #000;
+  box-sizing: border-box;
+}
+
+.login-button {
+  width: 100%;
+  height: 50px;
+  border-radius: 10px;
+  background-color: #fff;
+  color: #000;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.signup-text {
+  text-align: center;
+  font-family: Poppins, sans-serif;
+  font-size: 14px;
+  color: #fff;
+  margin-top: 15px;
+}
+
+.signup-text a {
+  color: #fff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.error-message {
+  background-color: rgba(192, 57, 43, 0.7);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.success-message {
+  background-color: rgba(39, 174, 96, 0.7);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  text-align: center;
+}
 </style>
      
 <body>
@@ -216,7 +340,11 @@
 
       <div class="nav-links-right">
         <a href="About.html" class="nav-link">About</a>
-        <a href="Login.php" class="nav-link">Login/Sign up</a>
+        <?php if ($isLoggedIn): ?>
+          <a href="Userdashboard.php" class="nav-link">Dashboard</a>
+        <?php else: ?>
+          <a onclick="openPopup('loginPopup')" class="nav-link">Login/Sign up</a>
+        <?php endif; ?>
       </div>
       
       <button class="mobile-menu-toggle" aria-label="Toggle mobile menu">
@@ -238,5 +366,168 @@
       <img src="https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/chocolatesplash?v=1747319066989" alt="Chocolate splash" class="chocolatesplash" />
     </main>
   </div>
+
+  <div id="loginPopup" class="popup-overlay">
+  <div class="popup-container">
+    <button class="popup-close" onclick="closePopup('loginPopup')">&times;</button>
+    <h2 class="form-title">Login</h2>
+    <div id="loginMessage"></div>
+    <form class="login-form" id="loginForm">
+      <div class="form-group">
+        <label class="input-label">Email</label>
+        <input type="email" class="form-input" id="loginEmail" name="email" required />
+      </div>
+      <div class="form-group">
+        <label class="input-label">Password</label>
+        <div style="position: relative;">
+          <input type="password" class="form-input" name="password" id="loginPassword" required />
+          <button type="button" onclick="togglePassword('loginPassword')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#333;cursor:pointer;">Show</button>
+        </div>
+      </div>
+      <button type="submit" class="login-button">Login</button>
+      <p class="signup-text">
+        Don't have an account? <a onclick="switchToSignup()">Sign up</a>
+      </p>
+    </form>
+  </div>
+</div>
+
+<div id="signupPopup" class="popup-overlay">
+  <div class="popup-container">
+    <button class="popup-close" onclick="closePopup('signupPopup')">&times;</button>
+    <h2 class="form-title">Sign Up</h2>
+    <div id="signupMessage"></div>
+    <form class="login-form" id="signupForm" style="gap: 15px;">
+      <div class="form-group">
+        <label class="input-label">Username</label>
+        <input type="text" class="form-input" name="username" required />
+      </div>
+      <div class="form-group">
+        <label class="input-label">Email</label>
+        <input type="email" class="form-input" name="email" required />
+      </div>
+      <div class="form-group">
+        <label class="input-label">Password</label>
+        <div style="position: relative;">
+          <input type="password" class="form-input" name="password" id="signupPassword" required />
+          <button type="button" onclick="togglePassword('signupPassword')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#333;cursor:pointer;">Show</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="input-label">Phone Number</label>
+        <input type="text" class="form-input" name="phone" required />
+      </div>
+      <div class="form-group">
+        <label class="input-label">Address</label>
+        <input type="text" class="form-input" name="address" required />
+      </div>
+      <button type="submit" class="login-button">Sign Up</button>
+      <p class="signup-text">
+        Already have an account? <a onclick="switchToLogin()">Sign in</a>
+      </p>
+    </form>
+  </div>
+</div>
+
+<script>
+function openPopup(popupId) {
+  document.getElementById(popupId).style.display = 'block';
+}
+
+function closePopup(popupId) {
+  document.getElementById(popupId).style.display = 'none';
+  document.getElementById('loginMessage').innerHTML = '';
+  document.getElementById('signupMessage').innerHTML = '';
+}
+
+function togglePassword(inputId) {
+  var pwd = document.getElementById(inputId);
+  var btn = event.target;
+  if (pwd.type === "password") {
+    pwd.type = "text";
+    btn.textContent = "Hide";
+  } else {
+    pwd.type = "password";
+    btn.textContent = "Show";
+  }
+}
+
+function switchToLogin() {
+  closePopup('signupPopup');
+  openPopup('loginPopup');
+}
+
+function switchToSignup() {
+  closePopup('loginPopup');
+  openPopup('signupPopup');
+}
+
+// Handle login form submission
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  var formData = new FormData(this);
+  formData.append('login_submit', 'true');
+  
+  fetch('login_popup.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      window.location.href = data.redirect;
+    } else {
+      document.getElementById('loginMessage').innerHTML = '<div class="error-message">' + data.message + '</div>';
+    }
+  })
+  .catch(error => {
+    document.getElementById('loginMessage').innerHTML = '<div class="error-message">An error occurred. Please try again.</div>';
+  });
+});
+
+// Handle signup form submission
+document.getElementById('signupForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  var formData = new FormData(this);
+  formData.append('signup_submit', 'true');
+  
+  fetch('signup_popup.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById('signupMessage').innerHTML = '<div style="background-color:rgba(39,174,96,0.7);color:white;padding:10px;border-radius:5px;margin-bottom:15px;text-align:center;">' + data.message + '</div>';
+      // Clear form
+      document.getElementById('signupForm').reset();
+      // Auto switch to login after 2 seconds
+      setTimeout(() => {
+        switchToLogin();
+      }, 2000);
+    } else {
+      document.getElementById('signupMessage').innerHTML = '<div class="error-message">' + data.message + '</div>';
+    }
+  })
+  .catch(error => {
+    document.getElementById('signupMessage').innerHTML = '<div class="error-message">An error occurred. Please try again.</div>';
+  });
+});
+
+// Close popup when clicking outside
+window.onclick = function(event) {
+  var loginPopup = document.getElementById('loginPopup');
+  var signupPopup = document.getElementById('signupPopup');
+  
+  if (event.target == loginPopup) {
+    closePopup('loginPopup');
+  }
+  if (event.target == signupPopup) {
+    closePopup('signupPopup');
+  }
+}
+</script>
 </body>   
 </html>

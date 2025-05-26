@@ -1,6 +1,6 @@
 <?php
 session_start();
 session_destroy();
-header("Location: Login.php");
+header("Location: Welcome.php");
 exit();
 ?>

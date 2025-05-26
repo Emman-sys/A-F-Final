@@ -4,6 +4,24 @@ if (!isset($_SESSION["user_id"])) {
   header("Location: Login.php");
   exit();
 }
+
+// Fetch user's name from database
+require 'db_connect.php';
+$username = "User"; // Default fallback
+
+if ($conn) {
+  $stmt = $conn->prepare("SELECT name FROM users WHERE user_id = ?");
+  if ($stmt) {
+    $stmt->bind_param("i", $_SESSION["user_id"]);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+      $user = $result->fetch_assoc();
+      $username = $user['name'];
+    }
+    $stmt->close();
+  }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -102,7 +120,7 @@ html, body {
       .logout-btn {
         background: #e74c3c;
         color: #fff;
-        margin-left: 16px;
+        margin-left: 0; 
       }
       .logout-btn:hover {
         background: #c0392b;
@@ -139,8 +157,9 @@ html, body {
     <main class="dashboard-page">
       <h1 class="brand-logo">A&F</h1>
       <div class="dashboard-container">
-        <div class="dashboard-title">Welcome to your Dashboard</div>
+        <div class="dashboard-title">Welcome, <?php echo htmlspecialchars($username); ?>!</div>
         <div class="dashboard-buttons">
+          <button class="dashboard-btn" onclick="location.href='shopping.php'">Proceed to Shopping Center</button>
           <button class="dashboard-btn" onclick="location.href='mypurchases.html'">My Purchases</button>
           <button class="dashboard-btn" onclick="location.href='myaddress.html'">My Address</button>
           <button class="dashboard-btn" onclick="location.href='settings.html'">Settings</button>
