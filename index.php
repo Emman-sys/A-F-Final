@@ -107,17 +107,17 @@
 
     .rectangle1 {
      top: -254px;
-     left: 120px;
+     left: 78px;
      width: 100%;
-     max-width: min(500px, 90vw); 
+     max-width: min(620px, 90vw); 
      height: clamp(200px, 25vw, 250px);
      background: linear-gradient(to bottom, #ECC7ED, #C647CC);
      border-radius: 20px;
      position: absolute; 
     }
     .shop-now {
-      left: 135px;
-      top:-88px;
+      left: 175px;
+      top:-100px;
       font-size: clamp(2rem, 6vw, 3rem); /* Responsive font size */
       font-weight: bold;
       color: white;
@@ -128,7 +128,7 @@
     .phone-image {
       position: absolute;
       top: 50%;
-      left: 70%;
+      left: 85%;
       transform: translate(-50%, -50%);
       width: 80%;
       max-width: min(400px, 80vw); /* Responsive max-width */
@@ -148,9 +148,7 @@
       border-radius: 20px;
       position: relative;
       top: -87px;
-      left: -20px;
-      
-
+      left: -50px;
     }
 
     .rectangle3 {
@@ -160,14 +158,24 @@
       border-radius: 20px;
       position: relative;
       top: -87px;
-      left: -20px;
+      left: -50px;
+    }
+    .pistachio-image{
+      position:relative;
+      top:-334px;
+      left:755px;
+      width:190px;
+      height:149px;
+      z-index:2;
     }
 
     .categories-section {
+      position: relative;
+      top:-78px;
       background: linear-gradient(to top, #592249, #BF489C);
       padding: clamp(40px, 8vw, 60px) clamp(10px, 2vw, 20px); /* Responsive padding */
-      border-radius: 27px 27px 0 0;
       margin-top: clamp(20px, 4vw, 40px);
+      border-radius:10px;
     }
 
     .categories-title {
@@ -241,7 +249,6 @@
     }
 
     .products-header {
-      
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -251,6 +258,8 @@
     }
 
     .products-title {
+      position:absolute;
+      bottom:-380px;
       display: flex;
       align-items: center;
       gap: clamp(15px, 3vw, 20px); /* Responsive gap */
@@ -270,12 +279,12 @@
 
     .search-products {
       position:relative;
-      left:150px;
-      width: 100%;
-      max-width: min(800px, 95vw); /* Responsive max-width */
+      left:250px;
+      width: 300%;
+      max-width: min(900px, 95vw); /* Responsive max-width */
       height: clamp(50px, 8vw, 60px); /* Responsive height */
+      backdrop-filter: blur(10px);
       background: #D8D0D9;
-      border-radius: 10px;
       margin: 20px 0;
     }
 
@@ -285,27 +294,34 @@
       gap: clamp(15px, 3vw, 20px); /* Responsive gap */
       flex-wrap: wrap;
       justify-content: center;
+      margin-bottom:30px;
     }
 
     .sort-label {
+      position:absolute;
+      left:300px;
+      bottom:-515px;
       font-size: clamp(1.2rem, 3vw, 1.5rem); /* Responsive font size */
       color: white;
     }
 
     .sort-buttons {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+       position: absolute;
+       bottom: -521px;
+       left: 450px;
+       display: flex;
+       gap: 10px;
+       flex-wrap: wrap;
     }
 
     .sort-btn {
-      width: clamp(100px, 15vw, 120px); /* Responsive width */
-      height: clamp(40px, 6vw, 50px); /* Responsive height */
+      width: clamp(97px, 15vw, 120px);
+      height: clamp(40px, 6vw, 50px);
       background: #FFFFFF;
       border: none;
-      border-radius: 5px;
       cursor: pointer;
-      font-size: clamp(0.8rem, 2vw, 1rem); /* Responsive font size */
+      font-size: clamp(0.8rem, 2vw, 1rem);
+     
     }
 
     .products-grid {
@@ -428,6 +444,10 @@
         </div>
       </div>
 
+      <div class="image-header">
+        <img src="images/pictachio.png" class="pistachio-image" alt="Chocolate">
+  </div>
+
       <div class="categories-section">
         <h2 class="categories-title">Categories</h2>
         <div class="categories-grid">
@@ -463,9 +483,9 @@
       <div class="sort-controls">
         <span class="sort-label">Sort by:</span>
         <div class="sort-buttons">
-          <button class="sort-btn">Price</button>
-          <button class="sort-btn">Name</button>
-          <button class="sort-btn">Rating</button>
+          <button class="sort-btn">Popular</button>
+          <button class="sort-btn">Latest</button>
+          <button class="sort-btn">Top Price</button>
         </div>
       </div>
 
