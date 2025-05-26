@@ -56,6 +56,7 @@
       gap: clamp(15px, 3vw, 30px); /* Responsive gap */
       color: white;
       font-size: clamp(0.8rem, 2vw, 1rem); /* Responsive font size */
+
     }
 
     .search-bar {
@@ -98,35 +99,36 @@
       position: relative;
     }
 
-    .shop-now {
-      font-size: clamp(2rem, 6vw, 3rem); /* Responsive font size */
-      font-weight: bold;
-      color: white;
-      margin-bottom: 20px;
-      
-    }
-
+  
     .hero-rectangles {
       position: relative;
       margin-top: clamp(20px, 4vw, 40px);
     }
 
     .rectangle1 {
-      position: absolute;
-      left: 85px;
-      top: -87px;
-      width: 100%;
-      max-width: min(500px, 90vw); /* Responsive max-width */
-      height: clamp(200px, 25vw, 250px); /* Responsive height */
-      background: linear-gradient(to bottom, #ECC7ED, #C647CC);
-      border-radius: 20px;
-      position: relative;
+     top: -254px;
+     left: 120px;
+     width: 100%;
+     max-width: min(500px, 90vw); 
+     height: clamp(200px, 25vw, 250px);
+     background: linear-gradient(to bottom, #ECC7ED, #C647CC);
+     border-radius: 20px;
+     position: absolute; 
     }
-
+    .shop-now {
+      left: 135px;
+      top:-88px;
+      font-size: clamp(2rem, 6vw, 3rem); /* Responsive font size */
+      font-weight: bold;
+      color: white;
+      margin-bottom: 20px;
+      position:relative;
+      z-index: 10;
+    }
     .phone-image {
       position: absolute;
       top: 50%;
-      left: 50%;
+      left: 70%;
       transform: translate(-50%, -50%);
       width: 80%;
       max-width: min(400px, 80vw); /* Responsive max-width */
@@ -144,6 +146,11 @@
       height: clamp(100px, 12vw, 120px); /* Responsive height */
       background: linear-gradient(to right, #FFFFFF, #CDACB1, #59D759);
       border-radius: 20px;
+      position: relative;
+      top: -87px;
+      left: -20px;
+      
+
     }
 
     .rectangle3 {
@@ -151,6 +158,9 @@
       height: clamp(100px, 12vw, 120px); /* Responsive height */
       background-color: #EEA7BD;
       border-radius: 20px;
+      position: relative;
+      top: -87px;
+      left: -20px;
     }
 
     .categories-section {
@@ -220,12 +230,18 @@
     }
 
     .products-section {
-      background: linear-gradient(to bottom, #5127A3, #986C93, #E0B083);
+      background:url('images/bg.png');
+      background-position: center;
+      background-attachment: fixed;
+      background-size: cover;
+      min-height: 100vh;
+      overflow-x: hidden; 
       min-height: 100vh;
       padding: clamp(40px, 8vw, 60px) clamp(10px, 2vw, 20px); /* Responsive padding */
     }
 
     .products-header {
+      
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -253,6 +269,8 @@
     }
 
     .search-products {
+      position:relative;
+      left:150px;
       width: 100%;
       max-width: min(800px, 95vw); /* Responsive max-width */
       height: clamp(50px, 8vw, 60px); /* Responsive height */
