@@ -92,15 +92,15 @@ html, body {
         flex-direction: column;
         gap: 24px;
         width: 100%;
-        max-width: 800px; /* Make the button column skinnier */
+        max-width: 800px; 
         margin: 0 auto;
-        align-items: center; /* Center buttons in the container */
+        align-items: center; 
       }
       .dashboard-btn {
-        width: 100%;         /* Button fills the column width */
-        max-width: 800px;    /* But never gets too wide */
+        width: 100%;        
+        max-width: 800px;   
         min-width: 140px;
-        padding: 16px 0;     /* Less padding for a skinnier look */
+        padding: 16px 0;     
         border-radius: 10px;
         background: #fff;
         color: #371b70;
