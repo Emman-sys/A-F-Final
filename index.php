@@ -82,6 +82,25 @@
     }
 
     .notifications {
+      position:absolute;
+      right:289px;
+      top:57px;
+      width: clamp(35px, 6vw, 49px); /* Responsive size */
+      height: clamp(35px, 6vw, 49px);
+    }
+
+    .cart{
+      position:absolute;
+      right:220px;
+      top:57px;
+      width: clamp(35px, 6vw, 49px); /* Responsive size */
+      height: clamp(35px, 6vw, 49px);
+    }
+
+    .user{
+      position:absolute;
+      right:150px;
+      top:57px;
       width: clamp(35px, 6vw, 49px); /* Responsive size */
       height: clamp(35px, 6vw, 49px);
     }
@@ -432,6 +451,12 @@
 
       <div class="search-bar">
         <img src="https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/search.png?v=1747633330905" class="search-icon" alt="Search">
+      </div>
+
+       <div class="icons">
+        <img src="images/bell.png" class="notifications" alt="notify">
+        <img src="images/shopping-cart.png" class="cart" alt="carty">
+        <img src="images/circle-user (1).png" class="user" alt="person">
       </div>
 
       <div class="hero-content">
