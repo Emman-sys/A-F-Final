@@ -427,7 +427,7 @@
           <span>New Product</span>
           <span>Announcements</span>
         </div>
-        <img src="https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/bell%20(1).png?v=1747633687046" class="notifications" alt="Notifications">
+        
       </header>
 
       <div class="search-bar">
