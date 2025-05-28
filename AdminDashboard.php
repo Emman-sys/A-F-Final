@@ -67,6 +67,8 @@
       width: 24px;
       height: 24px;
     }
+
+    
     .box1{
         position:absolute;
         left: 135px;
@@ -97,6 +99,7 @@
         border-radius:55px;
         z-index:2;
     }
+    
 
     .tsales{
         position:absolute;
@@ -134,6 +137,7 @@
         background: linear-gradient(to bottom, #7B87C6,#FFFFFF);
         border-radius:20px;
     }
+     
     .circ2{
         position:absolute;
         left: 430px;
@@ -191,6 +195,7 @@
         background: linear-gradient(to bottom, #7BC68F,#FFFFFF);
         border-radius:20px;
     }
+    
      .circ3{
         position:absolute;
         left: 668px;
@@ -250,6 +255,14 @@
         background: linear-gradient(to bottom, #C6B27B,#FFFFFF);
         border-radius:20px;
     }
+    .cart{
+      position: absolute;
+      left: 906px;
+      top: 200px;
+      transform: translateY(-50%);
+      width: 56px;
+      height: 57px;
+    }
      .circ4{
         position:absolute;
         left: 906px;
@@ -307,6 +320,7 @@
         background: linear-gradient(to bottom, #6A34D6,#FFFFFF);
         border-radius:20px;
     }
+    
      .circ5{
         position:absolute;
         left: 1158px;
@@ -510,20 +524,76 @@
       z-index:3;
     }
       
-.square1 { 
+   .square1 { 
     left: 190px;
- }
-.square2 { 
+    }
+   .square2 { 
     left: 390px; 
-}
-.square3 { 
+   }
+   .square3 { 
     left: 590px;
- }
-.square4 {
+   }
+   .square4 {
      left: 788px;
-     }
-.square5 { 
+   }
+   .square5 { 
     left: 990px;
+ }
+ .topsales{
+    position:absolute;
+    left: 208px;
+    top: 220px;
+    width:59px;
+    height: 55px;
+    z-index:3;
+ }
+ .dailysales{
+    position:absolute;
+    left: 452px;
+    top: 220px;
+    width:59px;
+    height: 55px;
+    z-index:3;
+ }
+ .usr{
+    position:absolute;
+    left: 932px;
+    top: 225px;
+    width:59px;
+    height:55px;
+    z-index:3;
+ }
+ .cart{
+    position:absolute;
+    left: 687px;
+    top: 248px;
+    width:59px;
+    height:55px;
+    z-index:3;
+ }
+ .deliv{
+    position:absolute;
+    left: 1180px;
+    top: 220px;
+    width:59px;
+    height:55px;
+    z-index:3;
+ }
+ .notifications{
+    position:absolute;
+    left:1240px;
+    top:65px;
+    width:37px;
+    height:40.23px;
+    z-index:2;
+ }
+ .iconn{
+    position:absolute;
+    left:1347px;
+    top:65px;
+    width:37px;
+    height:40.23px;
+    z-index:2;
  }
    
 
@@ -557,6 +627,30 @@
         <div class="search-bar">
         <img src="https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/search.png?v=1747633330905" class="search-icon" alt="Search">
       </div>
+        
+         <div class="notifications">
+        <img src="images/notif.png" alt="notif">
+      </div>
+      <div class="cart">
+        <img src="images/cart.png" alt="cart">
+      </div>
+      <div class="topsales">
+        <img src="images/topsales.png" alt="top">
+      </div>
+      <div class="dailysales">
+        <img src="images/dailysales.png" alt="daily">
+      </div>
+      <div class="deliv">
+        <img src="images/deliv.png" alt="deliveryyy">
+      </div>
+      <div class="usr">
+        <img src="images/users.png" alt="newcustomers">
+      </div>
+       <div class="iconn">
+        <img src="images/iconuser.png" alt="useracc">
+      </div>
+     
+
 
             <div class="box1"></div>
             <div class="box2"></div>
@@ -622,7 +716,7 @@
             <div class="number4">0</div>
         </div>
 
-        <div class="topsales-section">
+        <div class="sales-section">
             <h2 class="tpsales">Top Sales</h2>
             <div class="top-product top-product1"></div>
             <div class="top-product top-product2"></div>
