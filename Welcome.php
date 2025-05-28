@@ -141,6 +141,40 @@ $isLoggedIn = isset($_SESSION["user_id"]);
     max-width: 45vw;
     height: auto;
     z-index: 1;
+    /* Add animation properties */
+    opacity: 0;
+    transform: translateX(100px) scale(0.8);
+    animation: chocolateEntry 1.5s ease-out forwards;
+  }
+
+  /* Animation keyframes */
+  @keyframes chocolateEntry {
+    0% {
+      opacity: 0;
+      transform: translateX(100px) scale(0.8) rotate(10deg);
+    }
+    50% {
+      opacity: 0.7;
+      transform: translateX(20px) scale(0.95) rotate(-2deg);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0) scale(1) rotate(0deg);
+    }
+  }
+
+  /* Optional: Add a subtle floating effect after initial animation */
+  .chocolatesplash:hover {
+    animation: chocolateFloat 2s ease-in-out infinite;
+  }
+
+  @keyframes chocolateFloat {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-10px) rotate(1deg);
+    }
   }
 
   /* Tablet styles */
@@ -529,5 +563,5 @@ window.onclick = function(event) {
   }
 }
 </script>
-</body>   
+</body>
 </html>

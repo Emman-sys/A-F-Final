@@ -1,3 +1,33 @@
+<?php
+// Add this at the top of your MainPage.php
+require 'db_connect.php';
+
+// Fetch products from database
+function getProducts($category_id = null) {
+    global $conn;
+    
+    if ($category_id) {
+        $stmt = $conn->prepare("SELECT p.product_id, p.name, p.description, p.price, p.stock_quantity, c.category_name 
+                               FROM products p 
+                               JOIN categories c ON p.category_id = c.category_id 
+                               WHERE p.category_id = ?");
+        $stmt->bind_param("i", $category_id);
+    } else {
+        $stmt = $conn->prepare("SELECT p.product_id, p.name, p.description, p.price, p.stock_quantity, c.category_name 
+                               FROM products p 
+                               JOIN categories c ON p.category_id = c.category_id");
+    }
+    
+    $stmt->execute();
+    $result = $stmt->get_result();
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+// Get all products or filter by category
+$category_filter = isset($_GET['category']) ? $_GET['category'] : null;
+$products = getProducts($category_filter);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -359,27 +389,148 @@
 
     .product-card {
       background: #EEEFE8;
-      border-radius: 8px;
-      height: clamp(200px, 25vw, 250px); /* Responsive height */
+      border-radius: 12px;
+      height: 320px; /* Increased height for content */
       position: relative;
       overflow: hidden;
       cursor: pointer;
-      transition: transform 0.3s ease;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
     .product-card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-8px);
+      border-color: #C647CC;
+      box-shadow: 0 8px 25px rgba(198, 71, 204, 0.3);
     }
 
     .product-image-container {
       width: 90%;
-      height: 70%;
+      height: 60%;
       background: #FFFFFF;
-      border-radius: 20px;
+      border-radius: 15px;
       position: absolute;
       top: 10px;
       left: 50%;
       transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .product-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 15px;
+    }
+
+    .product-placeholder {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #ECC7ED, #C647CC);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 24px;
+    }
+
+    .product-info {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 12px;
+      background: linear-gradient(to top, rgba(255,255,255,0.95), rgba(255,255,255,0.8));
+      backdrop-filter: blur(5px);
+    }
+
+    .product-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #371b70;
+      margin-bottom: 4px;
+      line-height: 1.3;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .product-price {
+      font-size: 16px;
+      font-weight: 800;
+      color: #C647CC;
+      margin-bottom: 4px;
+    }
+
+    .product-stock {
+      font-size: 11px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .out-of-stock {
+      color: #e74c3c;
+      font-weight: 600;
+    }
+
+    .add-to-cart-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #C647CC;
+      color: white;
+      border: none;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: all 0.3s ease;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .product-card:hover .add-to-cart-btn {
+      opacity: 1;
+    }
+
+    .add-to-cart-btn:hover {
+      background: #a63d9f;
+      transform: scale(1.1);
+    }
+
+    .category-filter {
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .filter-btn {
+      background: #fff;
+      border: 2px solid #C647CC;
+      color: #C647CC;
+      padding: 8px 16px;
+      margin: 0 5px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      font-weight: 600;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: #C647CC;
+      color: white;
     }
 
     /* Responsive breakpoints */
@@ -420,6 +571,18 @@
       
       .sort-controls {
         justify-content: center;
+      }
+
+      .product-card {
+        height: 280px;
+      }
+      
+      .product-name {
+        font-size: 12px;
+      }
+      
+      .product-price {
+        font-size: 14px;
       }
     }
 
@@ -505,8 +668,17 @@
       <div class="products-header">
         <div class="products-title">
           <h2 class="brand-name-small">A&F</h2>
-          <h2 class="section-title">Chocolates</h2>
+          <h2 class="section-title">Products</h2>
         </div>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="category-filter">
+          <a href="MainPage.php" class="filter-btn <?php echo !$category_filter ? 'active' : ''; ?>">All Products</a>
+          <a href="MainPage.php?category=1" class="filter-btn <?php echo $category_filter == 1 ? 'active' : ''; ?>">Chocolate Bars</a>
+          <a href="MainPage.php?category=2" class="filter-btn <?php echo $category_filter == 2 ? 'active' : ''; ?>">Truffles</a>
+          <a href="MainPage.php?category=3" class="filter-btn <?php echo $category_filter == 3 ? 'active' : ''; ?>">Gift Boxes</a>
+          <a href="MainPage.php?category=4" class="filter-btn <?php echo $category_filter == 4 ? 'active' : ''; ?>">Dark Chocolate</a>
       </div>
 
       <div class="search-products"></div>
@@ -514,95 +686,131 @@
       <div class="sort-controls">
         <span class="sort-label">Sort by:</span>
         <div class="sort-buttons">
-          <button class="sort-btn">Popular</button>
-          <button class="sort-btn">Latest</button>
-          <button class="sort-btn">Top Price</button>
+          <button class="sort-btn" onclick="sortProducts('popular')">Popular</button>
+          <button class="sort-btn" onclick="sortProducts('price_low')">Price: Low</button>
+          <button class="sort-btn" onclick="sortProducts('price_high')">Price: High</button>
         </div>
       </div>
 
-      <div class="products-grid">
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
-        <div class="product-card">
-          <div class="product-image-container"></div>
-        </div>
+      <!-- Dynamic Products Grid -->
+      <div class="products-grid" id="productsGrid">
+          <?php if (empty($products)): ?>
+              <div style="grid-column: 1/-1; text-align: center; color: white; font-size: 18px; padding: 40px;">
+                  No products found in this category.
+              </div>
+          <?php else: ?>
+              <?php foreach ($products as $product): ?>
+                  <div class="product-card" data-product-id="<?php echo $product['product_id']; ?>" 
+                       data-price="<?php echo $product['price']; ?>" 
+                       data-name="<?php echo htmlspecialchars($product['name']); ?>">
+                  
+                      <div class="product-image-container">
+                          <?php 
+                          // Check if product image exists
+                          $imagePath = "images/products/product_" . $product['product_id'] . ".jpg";
+                          if (file_exists($imagePath)): 
+                          ?>
+                              <img src="<?php echo $imagePath; ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="product-image">
+                          <?php else: ?>
+                              <div class="product-placeholder">
+                                  <?php echo strtoupper(substr($product['name'], 0, 1)); ?>
+                              </div>
+                          <?php endif; ?>
+                      </div>
+
+                      <button class="add-to-cart-btn" onclick="addToCart(<?php echo $product['product_id']; ?>)" title="Add to Cart">
+                          +
+                      </button>
+
+                      <div class="product-info">
+                          <div class="product-name" title="<?php echo htmlspecialchars($product['name']); ?>">
+                              <?php echo htmlspecialchars($product['name']); ?>
+                          </div>
+                          <div class="product-price">
+                              $<?php echo number_format($product['price'], 2); ?>
+                          </div>
+                          <div class="product-stock <?php echo $product['stock_quantity'] <= 0 ? 'out-of-stock' : ''; ?>">
+                              <?php 
+                              if ($product['stock_quantity'] <= 0) {
+                                  echo "Out of Stock";
+                              } elseif ($product['stock_quantity'] <= 10) {
+                                  echo "Only " . $product['stock_quantity'] . " left";
+                              } else {
+                                  echo "In Stock";
+                              }
+                              ?>
+                          </div>
+                      </div>
+                  </div>
+              <?php endforeach; ?>
+          <?php endif; ?>
       </div>
     </section>
+
+    <script>
+        // Add to cart functionality
+        function addToCart(productId) {
+            // You can implement AJAX call to add product to cart
+            fetch('add_to_cart.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    quantity: 1
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Product added to cart!');
+                    // You can update cart count here
+                } else {
+                    alert('Error adding product to cart');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Sort products functionality
+        function sortProducts(sortType) {
+            const grid = document.getElementById('productsGrid');
+            const products = Array.from(grid.children);
+
+            products.sort((a, b) => {
+                switch(sortType) {
+                    case 'price_low':
+                        return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                    case 'price_high':
+                        return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                    case 'popular':
+                    default:
+                        return a.dataset.name.localeCompare(b.dataset.name);
+                }
+            });
+
+            // Clear grid and re-append sorted products
+            grid.innerHTML = '';
+            products.forEach(product => grid.appendChild(product));
+        }
+
+        // Product click to view details
+        document.addEventListener('DOMContentLoaded', function() {
+            const productCards = document.querySelectorAll('.product-card');
+            productCards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    // Don't trigger if clicking the add to cart button
+                    if (!e.target.closest('.add-to-cart-btn')) {
+                        const productId = this.dataset.productId;
+                        // Redirect to product detail page
+                        window.location.href = `product_detail.php?id=${productId}`;
+                    }
+                });
+            });
+        });
+    </script>
   </body>
 </html>

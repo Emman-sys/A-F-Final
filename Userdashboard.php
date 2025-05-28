@@ -64,6 +64,12 @@ html, body {
         font-weight: 700;
         letter-spacing: 2px;
         z-index: 2;
+        text-decoration: none; /* Remove underline */
+      }
+      
+      .brand-logo:hover {
+        text-decoration: none; /* Ensure no underline on hover */
+        opacity: 0.8; /* Optional: slight fade effect on hover */
       }
       .dashboard-container {
         background: rgba(217, 217, 217, 0.12);
@@ -155,14 +161,14 @@ html, body {
   </head>
   <body>
     <main class="dashboard-page">
-      <h1 class="brand-logo">A&F</h1>
+      <a href="Welcome.php" class="brand-logo">A&F</a>
       <div class="dashboard-container">
         <div class="dashboard-title">Welcome, <?php echo htmlspecialchars($username); ?>!</div>
         <div class="dashboard-buttons">
-          <button class="dashboard-btn" onclick="location.href='shopping.php'">Proceed to Shopping Center</button>
+          <button class="dashboard-btn" onclick="location.href='MainPage.php'">Proceed to Shopping Center</button>
           <button class="dashboard-btn" onclick="location.href='mypurchases.html'">My Purchases</button>
           <button class="dashboard-btn" onclick="location.href='myaddress.html'">My Address</button>
-          <button class="dashboard-btn" onclick="location.href='settings.html'">Settings</button>
+          <button class="dashboard-btn" onclick="location.href='Settings.html'">Settings</button>
           <button class="dashboard-btn logout-btn" onclick="location.href='logout.php'">Log Out</button>
         </div>
       </div>
