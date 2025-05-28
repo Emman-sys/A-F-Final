@@ -40,7 +40,7 @@
 
     .header h1 {
       font-size: 32px;
-      font-family: serif;
+      font-family: Merriweather;
       font-weight: bold;
     }
 
@@ -48,14 +48,14 @@
       margin-left: 15px;
       font-size: 20px;
       font-weight: bold;
-      color: #111;
+      color: #111;  
     }
 
     .section-label {
       color: #7a5b8b;
       font-weight: bold;
       font-size: 18px;
-      margin: 40px 60px 10px;
+      margin: 40px 20px 10px;
     }
 
     .settings-grid {
@@ -127,7 +127,7 @@
   <div class="container">
     <div class="header">
       <h1>A&F</h1>
-      <span>Settings</span>
+      <span>| Settings</span>
     </div>
 
     <div class="settings-grid">
