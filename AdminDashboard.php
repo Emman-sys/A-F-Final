@@ -589,8 +589,8 @@
  }
  .iconn{
     position:absolute;
-    left:1347px;
-    top:65px;
+    left:1295px;
+    top:55px;
     width:37px;
     height:40.23px;
     z-index:2;
