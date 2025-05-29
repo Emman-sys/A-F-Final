@@ -83,9 +83,9 @@
   width: 30px;
   height: 30px;
 }
-    
+ </style>   
 </head>
- </style> 
+ 
 <body>
     <header class="header">
         <nav class="navbar">
