@@ -195,13 +195,13 @@
 <body>
   <nav>
     <ul class="nav-links">
-      <li><a href="#">Home</a></li>
-      <li><a href="#">Contact</a></li>
+      <li><a href="Welcome.php">Home</a></li>
+      <li><a href="Contact.php">Contact</a></li>
       <li class="pic">
-        <img src="https://cdn.glitch.global/fd91927b-65ec-4c2a-8441-c78d39e09715/Untitled%20design%20(4).png?v=1747946047447" class="logo" alt="A&F Logo"/>
+        <img src='image/logoz.png' class="logo" alt="A&F Logo"/>
       </li>
-      <li><a href="#">About</a></li>
-      <li><a href="#">Login/Sign up</a></li>
+      <li><a href="About.php">About</a></li>
+      <li><a href="login_popup.php">Login/Sign up</a></li>
     </ul>
   </nav>
 
