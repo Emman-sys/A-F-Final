@@ -148,7 +148,6 @@ $products = getProducts($category_filter);
       position: relative;
     }
 
-  
     .hero-rectangles {
       position: relative;
       margin-top: clamp(20px, 4vw, 40px);
@@ -332,22 +331,9 @@ $products = getProducts($category_filter);
       color: white;
     }
 
-    .search-products {
-      position:relative;
-      left:250px;
-      width: 300%;
-      max-width: min(900px, 95vw); /* Responsive max-width */
-      height: clamp(50px, 8vw, 60px); /* Responsive height */
-      backdrop-filter: blur(10px);
-      background: #D8D0D9;
-      margin: 20px 0;
-    }
-
     .sort-controls {
       display: flex;
       align-items: center;
-      gap: clamp(15px, 3vw, 20px); /* Responsive gap */
-      flex-wrap: wrap;
       justify-content: center;
       margin-bottom:30px;
     }
