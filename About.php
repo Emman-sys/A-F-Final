@@ -93,7 +93,7 @@
                 <li><a href="#">Home</a></li>
                 <li><a href="#">Contact</a></li>
 <div class="social-item">
-              <img src="" alt="A&F Chocolates logo" />
+              <img src="images/logoz.png" alt="A&F Chocolates logo" />
               </div>
                 <li><a href="#">About</a></li>
                 <li><a href="#">Login/Sign up</a></li>
