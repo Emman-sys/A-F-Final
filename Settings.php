@@ -17,8 +17,15 @@
     }
 
     body {
-      font-family: Merriweather;
-      background-color: #4b00b3;
+      font-family: 'Merriweather';
+    background-image:url("https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/image%203.png?v=1747320934399");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;  
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;  
+    width: 90%;
     }
 
     .container {
@@ -31,7 +38,9 @@
     }
 
     .header {
-      background-color: #bca5a5;
+      background: linear-gradient(to top, #5127A3,#986C93, #E0B083);
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
       display: flex;
       align-items: center;
       padding: 25px 40px;
@@ -40,7 +49,7 @@
 
     .header h1 {
       font-size: 32px;
-      font-family: Merriweather;
+      font-family: 'Merriweather';
       font-weight: bold;
     }
 
@@ -51,6 +60,27 @@
       color: #111;  
     }
 
+    .back-btn {
+      background: none;
+      border: none;
+      color: #000;
+      font-size: 22px;
+      margin-right: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: color 0.2s;
+    }
+    .back-btn:hover {
+      color: #E0B083;
+    }
+    .back-btn i {
+      font-size: 26px;
+    }
+    .back-btn:focus {
+      outline: none;
+    }
+    
     .section-label {
       color: #7a5b8b;
       font-weight: bold;
@@ -126,9 +156,12 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>A&F</h1>
-      <span>| Settings</span>
-    </div>
+  <button class="back-btn" onclick="window.history.back()">
+    <i class="fas fa-arrow-left"></i>
+  </button>
+  <h1>A&F</h1>
+  <span>| Settings</span>
+</div>
 
     <div class="settings-grid">
       <div class="column">
@@ -143,7 +176,7 @@
         <div class="section-label">Other</div>
         <div class="setting-box"><i class="fas fa-bell"></i> Notification</div>
         <div class="setting-box"><i class="fas fa-globe"></i> Language</div>
-        <div class="setting-box"><i class="fas fa-desktop"></i> Customer Service</div>
+        <div class="setting-box"><i class="fas fa-headset"></i> Customer Service</div>
         <div class="setting-box"><i class="fas fa-question-circle"></i> About Us</div>
       </div>
     </div>

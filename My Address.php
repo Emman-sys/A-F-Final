@@ -11,8 +11,11 @@
   <style>
     body {
       margin: 0;
-      font-family: Merriweather;
+      font-family: 'Merriweather';
       background-color: #4b00b3;
+      background-image: url("https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/image%203.png?v=1747320934399");
+      background-size: cover;
+      background-repeat: no-repeat;
     }
 
     .container {
@@ -26,24 +29,48 @@
     }
 
     .header {
-      background-color: #fde7e7;
+      background: linear-gradient(to top, #5127A3,#986C93, #E0B083);
       padding: 20px;
       display: flex;
       align-items: center;
-      border-bottom: 2px solid #ccc;
     }
 
     .header h1 {
       margin: 0;
       font-size: 28px;
-      font-weight: 700;
-      font-family: Merriweather;
+      font-weight: bold;
+      font-family: 'Merriweather';
+      
     }
 
     .header span {
       margin-left: 10px;
       font-size: 18px;
-      font-weight: normal;
+      font-weight: bold;
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: #000000;
+      font-size: 22px;
+      margin-right: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: color 0.2s;
+    }
+    .back-btn:hover {
+      color: #E0B083;
+    }
+    .back-btn i {
+      font-size: 22px;
+    }
+    .back-btn:hover i {
+      color: #E0B083;
+    }
+    .back-btn:focus {
+      outline: none;
     }
 
     .address-card {
@@ -51,6 +78,12 @@
       padding: 20px;
       margin: 20px;
       border-radius: 5px;
+      cursor: pointer;
+    }
+    
+    .address-card:hover {
+      background-color: #eee;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
     .location-icon {
@@ -93,6 +126,7 @@
 
     .add-address:hover {
       background-color: #eee;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
     @media (max-width: 768px) {
@@ -114,9 +148,12 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>A&F</h1>
-      <span>| My Address</span>
-    </div>
+  <button class="back-btn" onclick="window.history.back()">
+    <i class="fas fa-arrow-left"></i>
+  </button>
+  <h1>A&F</h1>
+  <span>| My Address</span>
+</div>
 
     <div class="address-card">
       <div class="location-icon"><i class="fas fa-map-marker-alt"></i></div>
