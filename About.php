@@ -105,3 +105,12 @@
 <section class="about-us">
     <h1>About Us</h1>
     <div class="about-container">
+        <h2><img src="" alt="A&F Chocolates logo" /></h2>
+       
+        <p>Welcome to A&F CHOCOLATES, where the world’s finest flavors meet your neighborhood!</p>
+        <p>We’re your local passport to global indulgence, specializing in exported chocolates, snacks, and beverages you won’t find on typical shelves. From Exported Chocolates and Different Flavored Chips to exotic flavors, rare snacks, and fizzy drinks from far-off lands, we bring the globe’s culinary treasures right to Lipa City.</p>
+    </div> 
+</section>
+</body>
+</html>
+
