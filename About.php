@@ -11,13 +11,11 @@
     margin: 0;
     padding: 0;
     
-    background-image: url(); 
+    background-image: url('images/aboutzbackground.jpeg'); 
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed; 
-    color: #333;
-
 }
 
 .header {
