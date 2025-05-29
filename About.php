@@ -90,13 +90,13 @@
     <header class="header">
         <nav class="navbar">
             <ul class="nav-links">
-                <li><a href="#">Home</a></li>
-                <li><a href="#">Contact</a></li>
-<div class="social-item">
-              <img src="images/logoz.png" alt="A&F Chocolates logo" />
-              </div>
-                <li><a href="#">About</a></li>
-                <li><a href="#">Login/Sign up</a></li>
+    <li><a href="Welcome.php">Home</a></li>
+    <li><a href="Contact.php">Contact</a></li>
+    <div class="social-item">
+        <img src="images/logoz.png" alt="A&F Chocolates logo" />
+    </div>
+    <li><a href="About.php">About</a></li>
+    <li><a href="login_popup.php">Login/Sign up</a></li>
             </ul>
         </nav>
     </header>
