@@ -11,7 +11,7 @@
     margin: 0;
     padding: 0;
     
-    background-image: url('images/aboutzbackground.jpeg'); 
+    background-image: url('images/Aboutuzbackground.jpeg'); 
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
