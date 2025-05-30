@@ -1,0 +1,210 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-image: url("https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/image%203.png?v=1747320934399");
+  background-position: center;
+  background-attachment: fixed;
+  background-size: cover;
+  font-family: 'Merriweather Sans', 'Roboto';
+  min-height: 100vh;
+  overflow-x: hidden; 
+}
+
+.main-section {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: min(20px, 2vw);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  position: relative;
+  z-index: 10;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.brand-name {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: bold;
+  color: white;
+}
+
+.nav-items {
+  position: absolute;
+  left:125px;
+  display: flex;
+  gap: clamp(15px, 3vw, 30px);
+  color: white;
+  font-size: clamp(0.8rem, 2vw, 1rem);
+}
+
+.search-bar {
+  position:absolute;
+  left:50px;
+  top: -78px;
+  width: 100%;
+  max-width: min(600px, 90vw);
+  height: 56px;
+  border-radius: 55px;
+  background-color: white;
+  margin: 20px auto;
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+}
+
+.nav-icons {
+  position: fixed;
+  right: 30px;
+  top: 25px;
+  display: flex;
+  gap: 15px;
+  z-index: 11;
+}
+
+.nav-icon {
+  width: 35px;
+  height: 35px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.nav-icon:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.nav-icon img {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) invert(1);
+}
+
+.cart-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ff4444;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Hero Section */
+.hero-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(20px, 4vw, 40px);
+  align-items: center;
+  padding: clamp(20px, 4vw, 40px) 0;
+}
+
+.hero-left {
+  position: relative;
+}
+
+.hero-rectangles {
+  position: relative;
+  margin-top: clamp(20px, 4vw, 40px);
+}
+
+.rectangle1 {
+ top: -254px;
+ left: 78px;
+ width: 100%;
+ max-width: min(620px, 90vw); 
+ height: clamp(200px, 25vw, 250px);
+ background: linear-gradient(to bottom, #ECC7ED, #C647CC);
+ border-radius: 20px;
+ position: absolute; 
+}
+
+.shop-now {
+  left: 175px;
+  top:-100px;
+  font-size: clamp(2rem, 6vw, 3rem);
+  font-weight: bold;
+  color: white;
+  margin-bottom: 20px;
+  position:relative;
+  z-index: 10;
+}
+
+.phone-image {
+  position: absolute;
+  top: 50%;
+  left: 85%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: min(400px, 80vw);
+  height: auto;
+}
+
+.hero-right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rectangle2 {
+  width: 100%;
+  height: clamp(100px, 12vw, 120px);
+  background: linear-gradient(to right, #FFFFFF, #CDACB1, #59D759);
+  border-radius: 20px;
+  position: relative;
+  top: -87px;
+  left: -50px;
+}
+
+.rectangle3 {
+  width: 100%;
+  height: clamp(100px, 12vw, 120px);
+  background-color: #EEA7BD;
+  border-radius: 20px;
+  position: relative;
+  top: -87px;
+  left: -50px;
+}
+
+.pistachio-image{
+  position:relative;
+  top:-394px;
+  left:755px;
+  width:179px;
+  height:135px;
+  z-index:2;
+}
