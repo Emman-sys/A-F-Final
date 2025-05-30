@@ -13,7 +13,8 @@
       }
 
       body {
-         background-image: url('images/bg.png'); 
+         background-image:url("https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/image%203.png?v=1747320934399");
+         background-color: #fbcdfb; 
          background-position: center;
          background-size: cover;
          background-attachment: fixed;
@@ -41,18 +42,33 @@
         left: 0;
         right: 0;
         top: 0;
-        height: 200px;
+        height: 100px;
         background: linear-gradient(to top, #5127A3,#986C93, #E0B083);
         border: 1px solid gray;
         z-index: 1;
         margin: 10px;
       }
 
+      .header-right {
+         position: absolute;
+         right: 60px;
+         top: 35px;
+         z-index: 3;
+         display: flex;
+         align-items: center;
+         height: 50px;
+      }
+      .header-right i {
+         font-size: 32px;
+         color: rgb(255, 255, 255);
+         line-height: 1;
+      }
+
       .brand {
          position: absolute;
-         font-size: 60px;
-         left: 50px;
-         top: 50px;
+         font-size: 36px;
+         left: 30px;
+         top: 28px;
          font-weight: bold;
          color: white;
          z-index: 2;
@@ -65,7 +81,7 @@
          background: linear-gradient(to top, #371B70, #5127A3, #6A34D6);
          border-radius: 16px;
          padding: 2rem;
-         margin-top: 300px;
+         margin-top: 90px;
          position: relative;
          z-index: 2;
       }
@@ -187,6 +203,30 @@
         z-index: 3;
       }
 
+      .paymentchosen::before {
+        content: '₱ CASH';
+        position: absolute;
+        left: 10px;
+        top: 5px;
+        font-size: 14px;
+        color: white;
+        font-weight: bold;
+      }
+      .paymentchosen::after {
+        content: '';
+        position: absolute;
+        right: 10px;
+        top: 5px;
+        width: 16px;
+        height: 16px;
+        background-image: url('https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/check.png?v=1747830810539');
+        background-size: cover;
+      }
+      .paymentchosen:hover {
+        background-color: #6A34D6;
+        cursor: pointer;
+      }
+
       .check {
         position: absolute;
         left: 30px;
@@ -209,80 +249,115 @@
          margin: 0;
       }
 
+      .place-order-btn {
+         position: absolute;
+         left: 50%;
+         transform: translateX(-50%);
+         bottom: 2rem;
+         width: 80%;
+         padding: 1rem;
+         background: linear-gradient(to right, #32bbe4, #2786a3);
+         color: white;
+         font-size: 1.2rem;
+         font-weight: bold;
+         border: none;
+         border-radius: 8px;
+         cursor: pointer;
+         transition: background 0.2s;
+         box-sizing: border-box;
+         z-index: 4;
+      }
+      .place-order-btn:hover {
+         background: linear-gradient(to right, #2786a3, #32bbe4);
+      }
+      .place-order-btn:active {
+         background: linear-gradient(to right, #1f6f8a, #1a5b6d);
+      }
+
+        /* Order Items Section */
+
+
       .orderitems {
          flex: 1;
-         margin-top: 300px;
+         margin-top: 90px;
          background: white;
          border-radius: 10px;
          padding: 2rem;
          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      }
+          min-height: 650px; /* Match .shipping min-height */
+          height: 650px;     /* Fixed height to match .shipping */
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          box-sizing: border-box;
+          overflow-y: auto;
+        }
 
-      .order-header {
-         background: #f8f9fa;
-         padding: 1rem;
-         border-radius: 8px;
-         margin-bottom: 1rem;
-         display: grid;
-         grid-template-columns: 2fr 1fr 1fr 1fr;
-         gap: 1rem;
-         font-weight: bold;
-         color: #8D7D7D;
-      }
+        .order-header {
+          background: #f8f9fa;
+          padding: 1rem;
+          border-radius: 8px;
+          margin-bottom: 1rem;
+          display: grid;
+          grid-template-columns: 2fr 1fr 1fr 1fr;
+          gap: 1rem;
+          font-weight: bold;
+          color: #8D7D7D;
+        }
 
-      .order-item {
-         display: grid;
-         grid-template-columns: 2fr 1fr 1fr 1fr;
-         gap: 1rem;
-         align-items: center;
-         padding: 1.5rem 1rem;
-         border-bottom: 1px solid #eee;
-      }
+        .order-item {
+          display: grid;
+          grid-template-columns: 2fr 1fr 1fr 1fr;
+          gap: 1rem;
+          align-items: center;
+          padding: 1.5rem 1rem;
+          border-bottom: 1px solid #eee;
+        }
 
-      .product-info {
-         display: flex;
-         align-items: center;
-         gap: 1rem;
-      }
+        .product-info {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
 
-      .product-image {
-         width: 80px;
-         height: 80px;
-         object-fit: cover;
-         border-radius: 8px;
-      }
+        .product-image {
+          width: 80px;
+          height: 80px;
+          object-fit: cover;
+          border-radius: 8px;
+        }
 
-      .product-name {
-         font-size: 1rem;
-         font-weight: 500;
-         color: black;
-      }
+        .product-name {
+          font-size: 1rem;
+          font-weight: 500;
+          color: black;
+        }
 
-      .price, .quantity-val, .subtotal {
-         font-size: 1.2rem;
-         font-weight: 500;
-         color: black;
-         text-align: center;
-      }
+        .price, .quantity-val, .subtotal {
+          font-size: 1.2rem;
+          font-weight: 500;
+          color: black;
+          text-align: center;
+        }
 
-      .total-section {
-         margin-top: 2rem;
-         padding-top: 1rem;
-         border-top: 2px solid #5127A3;
-      }
+        .total-section {
+          margin-top: 2rem;
+          padding-top: 1rem;
+          border-top: 2px solid #5127A3;
+        }
 
-      .total-row {
-         display: flex;
-         justify-content: space-between;
-         padding: 0.5rem 0;
-         font-size: 1.1rem;
-      }
+        .total-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 0.5rem 0;
+          font-size: 1.1rem;
+        }
 
-      .total-final {
-         font-weight: bold;
-         font-size: 1.3rem;
-         color: #5127A3;
-      }
+        .total-final {
+          font-weight: bold;
+          font-size: 1.3rem;
+          color: #5127A3;
+        }
 
       /* Responsive Design */
       @media (max-width: 1200px) {
@@ -359,6 +434,10 @@
    <div class="header">
       <h1 class="brand">A&F</h1>
    </div>
+   <div class="header-right">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+      <i class="fas fa-user-circle"></i>
+   </div>
 
    <div class="orderedsum">
       <div class="shipping">
@@ -381,6 +460,7 @@
          <div class="paymentchosen"></div>
          <div class="check"></div>
          <div class="termsc">I have read the terms and conditions</div>
+         <button class="place-order-btn">Place Order</button>
       </div>
       
       <div class="orderitems">

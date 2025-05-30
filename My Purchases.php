@@ -16,21 +16,24 @@
     }
 
     body {
-      font-family: Merriweather;
-      background-color: #fbcdfb;
+      font-family: 'Merriweather';
+       background-image: url("https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/image%203.png?v=1747320934399");
+      background-size: cover;
+      background-repeat: no-repeat;
     }
 
     .header {
-      background-color: #efc7cb;
+      background: linear-gradient(to top, #5127A3,#986C93, #E0B083);
+      color: black;
       padding: 20px 30px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 2px solid #333;
+      margin: 10px;
     }
 
     .header-left h1 {
-      font-family: Merriweather;
+      font-family: 'Merriweather';
       font-size: 32px;
       font-weight: bold;
       display: inline;
@@ -45,6 +48,21 @@
       font-size: 26px;
     }
 
+    .back-btn {
+      background: none;
+      border: none;
+      color: #000;
+      font-size: 22px;
+      margin-right: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: color 0.2s;
+    }
+    .back-btn:hover {
+      color: #E0B083;
+    }
+
     .main {
       display: flex;
       padding: 20px;
@@ -52,7 +70,7 @@
     }
 
     .sidebar {
-      background-color: #4b00b3;
+      background: linear-gradient(to top, #371B70, #5127A3, #6A34D6);
       color: white;
       width: 300px;
       border-radius: 10px;
@@ -66,7 +84,7 @@
     }
 
     .sidebar label {
-      font-family: Merriweather;
+      font-family: 'Merriweather';
       display: block;
       margin-bottom: 100px;
       font-weight: bold;
@@ -91,8 +109,10 @@
       flex: 1;
       background-color: #fff;
       border-radius: 10px;
-      overflow-y: auto;
       padding: 10px;
+      display: flex;
+      flex-direction: column;
+      /* Remove overflow from .content */
     }
 
     .table-header {
@@ -102,6 +122,14 @@
       font-weight: bold;
       border-bottom: 2px solid #444;
       background-color: #fff;
+      flex-shrink: 0;
+    }
+
+    .order-list {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+      /* Ensures proper flexbox scrolling */
     }
 
     .purchase-row {
@@ -155,19 +183,28 @@
       .purchase-left {
         margin-bottom: 10px;
       }
+      .content {
+        height: auto;
+      }
+      .order-list {
+        max-height: 300px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <div class="header-left">
-      <h1>A&F</h1>
-      <span>| My Purchases</span>
-    </div>
-    <div class="header-right">
-      <i class="fas fa-user-circle"></i>
-    </div>
+  <div class="header-left" style="display: flex; align-items: center;">
+    <button class="back-btn" onclick="window.history.back()">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+    <h1 style="margin: 0 0 0 0;">A&F</h1>
+    <span style="margin-left: 10px;">| My Purchases</span>
   </div>
+  <div class="header-right">
+    <i class="fas fa-user-circle"></i>
+  </div>
+</div>
 
   <div class="main">
     <div class="sidebar">
@@ -185,78 +222,81 @@
         <div>ORDER SUMMARY</div>
       </div>
 
-      <div class="purchase-row">
-        <div class="purchase-left">
-          <i class="fas fa-cart-shopping"></i>
-          <div class="order-number">Order No. 20</div>
+      <div class="order-list">
+        <div class="purchase-row">
+          <div class="purchase-left">
+        <i class="fas fa-cart-shopping"></i>
+        <div class="order-number">Order No. 20</div>
+          </div>
+          <div class="items">[Items Placeholder]</div>
+          <div class="summary">[Summary Placeholder]</div>
         </div>
-        <div class="items">ITEMS</div>
-        <div class="summary">ORDER SUMMARY</div>
-      </div>
 
-      <div class="purchase-row">
-        <div class="purchase-left">
-          <i class="fas fa-cart-shopping"></i>
-          <div class="order-number">Order No. 19</div>
+        <div class="purchase-row">
+          <div class="purchase-left">
+        <i class="fas fa-cart-shopping"></i>
+        <div class="order-number">Order No. 19</div>
+          </div>
+          <div class="items">[Items Placeholder]</div>
+          <div class="summary">[Summary Placeholder]</div>
         </div>
-        <div class="items">ITEMS</div>
-        <div class="summary">ORDER SUMMARY</div>
-      </div>
 
-      <div class="purchase-row">
-        <div class="purchase-left">
-          <i class="fas fa-cart-shopping"></i>
-          <div class="order-number">Order No. 18</div>
+        <div class="purchase-row">
+          <div class="purchase-left">
+        <i class="fas fa-cart-shopping"></i>
+        <div class="order-number">Order No. 18</div>
+          </div>
+          <div class="items">[Items Placeholder]</div>
+          <div class="summary">[Summary Placeholder]</div>
         </div>
-        <div class="items">ITEMS</div>
-        <div class="summary">ORDER SUMMARY</div>
-      </div>
 
-      <div class="purchase-row">
-        <div class="purchase-left">
-          <i class="fas fa-cart-shopping"></i>
-          <div class="order-number">Order No. 17</div>
+        <div class="purchase-row">
+          <div class="purchase-left">
+        <i class="fas fa-cart-shopping"></i>
+        <div class="order-number">Order No. 17</div>
+          </div>
+          <div class="items">[Items Placeholder]</div>
+          <div class="summary">[Summary Placeholder]</div>
         </div>
-        <div class="items">ITEMS</div>
-        <div class="summary">ORDER SUMMARY</div>
-      </div>
 
-      <div class="purchase-row">
-        <div class="purchase-left">
-          <i class="fas fa-cart-shopping"></i>
-          <div class="order-number">Order No. 16</div>
+        <div class="purchase-row">
+          <div class="purchase-left">
+        <i class="fas fa-cart-shopping"></i>
+        <div class="order-number">Order No. 16</div>
+          </div>
+          <div class="items">[Items Placeholder]</div>
+          <div class="summary">[Summary Placeholder]</div>
         </div>
-        <div class="items">ITEMS</div>
-        <div class="summary">ORDER SUMMARY</div>
-      </div>
 
-      <div class="purchase-row">
-        <div class="purchase-left">
-          <i class="fas fa-cart-shopping"></i>
-          <div class="order-number">Order No. 15</div>
+        <div class="purchase-row">
+          <div class="purchase-left">
+        <i class="fas fa-cart-shopping"></i>
+        <div class="order-number">Order No. 15</div>
+          </div>
+          <div class="items">[Items Placeholder]</div>
+          <div class="summary">[Summary Placeholder]</div>
         </div>
-        <div class="items">ITEMS</div>
-        <div class="summary">ORDER SUMMARY</div>
-      </div>
 
-      <div class="purchase-row">
-        <div class="purchase-left">
-          <i class="fas fa-cart-shopping"></i>
-          <div class="order-number">Order No. 14</div>
+        <div class="purchase-row">
+          <div class="purchase-left">
+        <i class="fas fa-cart-shopping"></i>
+        <div class="order-number">Order No. 14</div>
+          </div>
+          <div class="items">[Items Placeholder]</div>
+          <div class="summary">[Summary Placeholder]</div>
         </div>
-        <div class="items">ITEMS</div>
-        <div class="summary">ORDER SUMMARY</div>
-      </div>
 
-      <div class="purchase-row">
-        <div class="purchase-left">
-          <i class="fas fa-cart-shopping"></i>
-          <div class="order-number">Order No. 13</div>
+        <div class="purchase-row">
+          <div class="purchase-left">
+        <i class="fas fa-cart-shopping"></i>
+        <div class="order-number">Order No. 13</div>
+          </div>
+          <div class="items">[Items Placeholder]</div>
+          <div class="summary">[Summary Placeholder]</div>
         </div>
-        <div class="items">ITEMS</div>
-        <div class="summary">ORDER SUMMARY</div>
       </div>
-      
+        </div>
+      </div>
     </div>
   </div>
 </body>
