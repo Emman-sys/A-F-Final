@@ -19,18 +19,33 @@ $user_stmt->bind_param("i", $user_id);
 $user_stmt->execute();
 $user_info = $user_stmt->get_result()->fetch_assoc();
 
+// Get user's order count for display
+$order_count_stmt = $conn->prepare("SELECT COUNT(*) as order_count FROM orders WHERE user_id = ?");
+$order_count_stmt->bind_param("i", $user_id);
+$order_count_stmt->execute();
+$order_count = $order_count_stmt->get_result()->fetch_assoc()['order_count'];
+
 // Check if cartitems table exists
 $table_check = $conn->query("SHOW TABLES LIKE 'cartitems'");
 if ($table_check->num_rows == 0) {
     $cart_items = [];
 } else {
-    // Get cart items
+    // Get cart items with enhanced stock checking
     $stmt = $conn->prepare("
-        SELECT ci.cart_item_id, ci.quantity, p.product_id, p.name, p.price, p.stock_quantity,
-               (ci.quantity * p.price) as subtotal
+        SELECT ci.cart_item_id, ci.quantity, p.product_id, p.name, p.description, p.price, p.stock_quantity,
+               (ci.quantity * p.price) as subtotal,
+               cat.category_name,
+               CASE WHEN p.product_image IS NOT NULL THEN 1 ELSE 0 END as has_image,
+               CASE 
+                   WHEN p.stock_quantity = 0 THEN 'out_of_stock'
+                   WHEN p.stock_quantity < ci.quantity THEN 'insufficient_stock' 
+                   WHEN p.stock_quantity <= 10 THEN 'low_stock'
+                   ELSE 'in_stock'
+               END as stock_status
         FROM cartitems ci
         JOIN cart c ON ci.cart_id = c.cart_id
         JOIN products p ON ci.product_id = p.product_id
+        JOIN categories cat ON p.category_id = cat.category_id
         WHERE c.user_id = ?
         ORDER BY ci.cart_item_id DESC
     ");
@@ -45,9 +60,15 @@ if ($table_check->num_rows == 0) {
 }
 
 $total = 0;
+$total_items = 0;
 foreach ($cart_items as $item) {
     $total += $item['subtotal'];
+    $total_items += $item['quantity'];
 }
+
+// Calculate estimated delivery fee (simple logic)
+$delivery_fee = $total >= 500 ? 0 : 50; // Free delivery for orders over ₱500
+$grand_total = $total + $delivery_fee;
 ?>
 
 <!DOCTYPE html>
@@ -58,7 +79,15 @@ foreach ($cart_items as $item) {
    <title>A&F - Your Cart</title>
    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family+Merriweather+Sans:wght@700&display=swap" rel="stylesheet" />
    <link rel="stylesheet" href="styles.css">
-    
+   
+   <!-- Free Map Alternatives - No API Key Required -->
+   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+   
+   <!-- Optional: Geocoding service -->
+   <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+   <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
     <style>
       body {
         background: linear-gradient(135deg, #5127A3, #986C93, #E0B083);
@@ -484,8 +513,8 @@ foreach ($cart_items as $item) {
   }
   
   .nav-icon {
-    width: 35px;
-    height: 35px;
+    width: 50px;
+    height: 50px;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
@@ -505,8 +534,8 @@ foreach ($cart_items as $item) {
   }
   
   .nav-icon img {
-    width: 20px;
-    height: 20px;
+    width: 28px;
+    height: 28px;
     filter: brightness(0) invert(1);
   }
   
@@ -537,6 +566,186 @@ foreach ($cart_items as $item) {
     justify-content: center;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
+  
+  /* Enhanced stock status styling */
+  .product-row.out_of_stock {
+    background: rgba(220, 53, 69, 0.1);
+    opacity: 0.7;
+  }
+  
+  .product-row.insufficient_stock {
+    background: rgba(255, 193, 7, 0.1);
+  }
+  
+  .product-row.low_stock {
+    background: rgba(253, 126, 20, 0.1);
+  }
+  
+  .qty-btn:disabled {
+    background: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+    border-color: #dee2e6;
+  }
+  
+  .qty-btn:disabled:hover {
+    background: #e9ecef;
+    color: #6c757d;
+    transform: none;
+  }
+  
+  /* Enhanced payment method selection */
+  .payment-method.selected {
+    background: rgba(198, 71, 204, 0.3) !important;
+    border: 2px solid #C647CC !important;
+    transform: scale(1.05);
+  }
+  
+  .payment-method.selected::after {
+    content: '✓';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #C647CC;
+    color: white;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+  
+      /* Map container styling */
+      .map-container {
+        position: relative;
+        margin-top: 8px;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.3);
+        background: rgba(255,255,255,0.1);
+      }
+      
+      .map-toggle {
+        width: 100%;
+        padding: 6px 10px;
+        background: rgba(138, 222, 241, 0.8);
+        color: #371B70;
+        border: none;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: 8px;
+      }
+      
+      .map-toggle:hover {
+        background: rgba(138, 222, 241, 1);
+        transform: translateY(-1px);
+      }
+      
+      #map {
+        height: 200px;
+        width: 100%;
+        border-radius: 6px;
+        display: none;
+      }
+      
+      .map-instructions {
+        font-size: 11px;
+        color: rgba(255,255,255,0.8);
+        text-align: center;
+        padding: 4px;
+        margin-top: 4px;
+      }
+      
+      .address-suggestions {
+        max-height: 120px;
+        overflow-y: auto;
+        background: rgba(0,0,0,0.8);
+        border-radius: 4px;
+        margin-top: 4px;
+        display: none;
+      }
+      
+      .address-suggestion {
+        padding: 8px 10px;
+        cursor: pointer;
+        font-size: 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        transition: background 0.2s ease;
+      }
+      
+      .address-suggestion:hover {
+        background: rgba(255,255,255,0.1);
+      }
+      
+      .address-suggestion:last-child {
+        border-bottom: none;
+      }
+      
+      .location-icon {
+        display: inline-block;
+        margin-right: 4px;
+        font-size: 10px;
+      }
+      
+      /* Checkout Modal Styles */
+      .checkout-modal {
+        display: none;
+        position: fixed;
+        z-index: 10000;
+        left: 0; top: 0; width: 100vw; height: 100vh;
+        background: rgba(0,0,0,0.45);
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .checkout-modal.show {
+        display: flex;
+      }
+      
+      .checkout-modal-content {
+        background: linear-gradient(to bottom, #371B70 90%, #8ADEF1 100%);
+        color: white;
+        border-radius: 18px;
+        padding: 30px 30px 20px 30px;
+        min-width: 320px;
+        max-width: 95vw;
+        width: 350px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+        position: relative;
+        animation: modalPop 0.25s cubic-bezier(.4,2,.6,1) 1;
+      }
+      
+      @keyframes modalPop {
+        0% { transform: scale(0.8); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+      }
+      
+      .checkout-modal-close {
+        position: absolute;
+        right: 18px;
+        top: 10px;
+        font-size: 28px;
+        color: #fff;
+        cursor: pointer;
+        font-weight: bold;
+        z-index: 1;
+        transition: color 0.2s;
+      }
+      
+      .checkout-modal-close:hover {
+        color: #C647CC;
+      }
+      
+      @media (max-width: 600px) {
+        .checkout-modal-content { width: 98vw; min-width: unset; padding: 12px; }
+        #open-checkout-btn { width: 90vw !important; left: 5vw !important; right: unset !important; }
+      }
     </style>
   </head>
   <body>
@@ -550,7 +759,15 @@ foreach ($cart_items as $item) {
       <!-- Cart Icon (current page - highlighted) -->
       <div class="nav-icon current" title="Cart (Current Page)">
         <img src="images/cart.png" alt="Cart">
-        <span class="cart-badge"><?php echo count($cart_items); ?></span>
+        <span class="cart-badge"><?php echo $total_items; ?></span>
+      </div>
+      
+      <!-- Order History Icon -->
+      <div class="nav-icon" onclick="goToOrderHistory()" title="Order History (<?php echo $order_count; ?> orders)">
+        <img src="images/history.png" alt="Orders">
+        <?php if ($order_count > 0): ?>
+          <span class="cart-badge" style="background: #28a745;"><?php echo $order_count; ?></span>
+        <?php endif; ?>
       </div>
       
       <!-- User Profile Icon -->
@@ -563,11 +780,19 @@ foreach ($cart_items as $item) {
         <div class="empty-cart">
           <h2>🛒 Your cart is empty</h2>
           <p><a href="MainPage.php">Continue Shopping</a></p>
+          <?php if ($order_count > 0): ?>
+            <p><a href="#" onclick="goToOrderHistory()" style="color: #8ADEF1;">View Order History (<?php echo $order_count; ?> orders)</a></p>
+          <?php endif; ?>
         </div>
       <?php else: ?>
         
         <!-- Main Cart Content -->
         <div class="main-content">
+          <!-- Cart Summary Header -->
+          <div style="background: linear-gradient(135deg, #C647CC, #ECC7ED); color: white; padding: 15px; text-align: center; font-weight: bold; border-radius: 10px 10px 0 0;">
+            🛒 Shopping Cart - <?php echo $total_items; ?> item(s)
+          </div>
+          
           <!-- Table Header -->
           <div class="table-header">
             <div>Image</div>
@@ -581,31 +806,48 @@ foreach ($cart_items as $item) {
           <!-- Products Container -->
           <div class="products-container" id="products-container">
             <?php foreach ($cart_items as $index => $item): ?>
-              <div class="product-row" id="product-row-<?php echo $index; ?>">
+              <div class="product-row <?php echo $item['stock_status']; ?>" id="product-row-<?php echo $index; ?>">
                 
                 <!-- Product Image -->
                 <div>
-                  <img src="display_image.php?id=<?php echo $item['product_id']; ?>" 
-                       alt="<?php echo htmlspecialchars($item['name']); ?>"
-                       class="product-image"
-                       id="product-image-<?php echo $index; ?>">
+                  <?php if ($item['has_image']): ?>
+                    <img src="display_image.php?id=<?php echo $item['product_id']; ?>" 
+                         alt="<?php echo htmlspecialchars($item['name']); ?>"
+                         class="product-image"
+                         id="product-image-<?php echo $index; ?>">
+                  <?php else: ?>
+                    <div class="product-placeholder" style="width: 60px; height: 60px; background: linear-gradient(135deg, #C647CC, #ECC7ED); color: white; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold;">
+                      <?php echo strtoupper(substr($item['name'], 0, 1)); ?>
+                    </div>
+                  <?php endif; ?>
                 </div>
                 
-                <!-- Product Name -->
+                <!-- Product Name with Category -->
                 <div class="product-name" id="product-name-<?php echo $index; ?>">
-                  <?php echo htmlspecialchars($item['name']); ?>
+                  <div style="font-weight: bold;"><?php echo htmlspecialchars($item['name']); ?></div>
+                  <div style="font-size: 11px; color: #666; margin-top: 2px;">
+                    📂 <?php echo htmlspecialchars($item['category_name']); ?>
+                  </div>
+                  <?php if ($item['stock_status'] == 'out_of_stock'): ?>
+                    <div style="color: #dc3545; font-size: 10px; font-weight: bold;">⚠️ OUT OF STOCK</div>
+                  <?php elseif ($item['stock_status'] == 'insufficient_stock'): ?>
+                    <div style="color: #ffc107; font-size: 10px; font-weight: bold;">⚠️ Only <?php echo $item['stock_quantity']; ?> available</div>
+                  <?php elseif ($item['stock_status'] == 'low_stock'): ?>
+                    <div style="color: #fd7e14; font-size: 10px;">⚡ Low stock (<?php echo $item['stock_quantity']; ?> left)</div>
+                  <?php endif; ?>
                 </div>
                 
                 <!-- Unit Price -->
                 <div class="price-display" id="unit-price-<?php echo $index; ?>">
-                  ₱<?php echo number_format($item['price'], 0); ?>
+                  ₱<?php echo number_format($item['price'], 2); ?>
                 </div>
                 
                 <!-- Quantity Controls -->
                 <div class="quantity-controls">
                   <button class="qty-btn" 
                           onclick="updateQuantity(<?php echo $item['cart_item_id']; ?>, -1, <?php echo $index; ?>)"
-                          id="minus-btn-<?php echo $index; ?>">-</button>
+                          id="minus-btn-<?php echo $index; ?>"
+                          <?php echo ($item['stock_status'] == 'out_of_stock') ? 'disabled' : ''; ?>>-</button>
                   
                   <span class="qty-display" id="quantity-display-<?php echo $index; ?>">
                     <?php echo $item['quantity']; ?>
@@ -613,12 +855,13 @@ foreach ($cart_items as $item) {
                   
                   <button class="qty-btn" 
                           onclick="updateQuantity(<?php echo $item['cart_item_id']; ?>, 1, <?php echo $index; ?>)"
-                          id="add-btn-<?php echo $index; ?>">+</button>
+                          id="add-btn-<?php echo $index; ?>"
+                          <?php echo ($item['stock_status'] == 'out_of_stock' || $item['quantity'] >= $item['stock_quantity']) ? 'disabled' : ''; ?>>+</button>
                 </div>
                 
                 <!-- Total Price -->
                 <div class="total-price" id="total-price-<?php echo $index; ?>">
-                  ₱<?php echo number_format($item['subtotal'], 0); ?>
+                  ₱<?php echo number_format($item['subtotal'], 2); ?>
                 </div>
                 
                 <!-- Delete Button -->
@@ -626,7 +869,7 @@ foreach ($cart_items as $item) {
                   <button class="delete-btn" 
                           onclick="removeFromCart(<?php echo $item['cart_item_id']; ?>, <?php echo $index; ?>)"
                           id="delete-btn-<?php echo $index; ?>">
-                    Delete
+                    🗑️ Remove
                   </button>
                 </div>
                 
@@ -636,58 +879,104 @@ foreach ($cart_items as $item) {
                      data-product-id="<?php echo $item['product_id']; ?>"
                      data-price="<?php echo $item['price']; ?>"
                      data-name="<?php echo htmlspecialchars($item['name']); ?>"
+                     data-stock="<?php echo $item['stock_quantity']; ?>"
+                     data-stock-status="<?php echo $item['stock_status']; ?>"
                      style="display: none;"></div>
                 
               </div>
             <?php endforeach; ?>
           </div>
-        </div>
-        
-        <!-- Payment Sidebar -->
-        <div class="payment-sidebar">
-          <div class="payment-title">Payment Info</div>
           
-          <div class="payment-section">
-            <div class="payment-label">Name:</div>
-            <input type="text" class="payment-input" 
-                   value="<?php echo htmlspecialchars($user_info['name']); ?>" readonly>
-          </div>
-          
-          <div class="payment-section">
-            <div class="payment-label">Email:</div>
-            <input type="email" class="payment-input" 
-                   value="<?php echo htmlspecialchars($user_info['email']); ?>" readonly>
-          </div>
-          
-          <div class="payment-section">
-            <div class="payment-label">Address:</div>
-            <input type="text" class="payment-input" placeholder="Enter your address">
-          </div>
-          
-          <div class="payment-section">
-            <div class="payment-label">Phone:</div>
-            <input type="tel" class="payment-input" placeholder="Enter phone number">
-          </div>
-          
-          <div class="payment-section">
-            <div class="payment-label">Payment Method:</div>
-            <div class="payment-methods">
-              <div class="payment-method" title="Credit Card">
-                <img src="images/credit-card.png" alt="Card">
-              </div>
-              <div class="payment-method" title="GCash">
-                <img src="images/gcash.png" alt="GCash">
-              </div>
-              <div class="payment-method" title="Cash">
-                <img src="images/peso.png" alt="Cash">
-              </div>
+          <!-- Cart Summary Footer -->
+          <div style="background: #f8f9fa; padding: 15px; border-top: 2px solid #dee2e6;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <span>Subtotal (<span id="total-items-count"><?php echo $total_items; ?></span> items):</span>
+              <span style="font-weight: bold;" id="subtotal-display">₱<?php echo number_format($total, 2); ?></span>
+            </div>
+            <div id="free-delivery-notice" style="font-size: 12px; color: #28a745; margin-bottom: 10px; <?php echo ($total >= 500 || $delivery_fee == 0) ? 'display: none;' : ''; ?>">
+              💡 Add ₱<span id="free-delivery-amount"><?php echo number_format(500 - $total, 2); ?></span> more for FREE delivery!
             </div>
           </div>
-          
-          <button class="checkout-btn" onclick="checkout()" id="checkout-btn">
-            Checkout - ₱<span id="total-amount"><?php echo number_format($total, 0); ?></span>
-          </button>
         </div>
+        
+        <!-- Payment Sidebar Modal -->
+        <div id="checkout-modal" class="checkout-modal">
+          <div class="checkout-modal-content">
+            <span class="checkout-modal-close" onclick="closeCheckoutModal()">&times;</span>
+            <div class="payment-title">💳 Checkout Details</div>
+            
+            <div class="payment-section">
+              <div class="payment-label">👤 Customer Name:</div>
+              <input type="text" class="payment-input" id="customer-name"
+                     value="<?php echo htmlspecialchars($user_info['name']); ?>" readonly>
+            </div>
+            
+            <div class="payment-section">
+              <div class="payment-label">📧 Email Address:</div>
+              <input type="email" class="payment-input" id="customer-email"
+                     value="<?php echo htmlspecialchars($user_info['email']); ?>" readonly>
+            </div>
+            
+            <div class="payment-section">
+              <div class="payment-label">🏠 Delivery Address:</div>
+              <textarea class="payment-input" id="delivery-address"
+                        placeholder="Enter your complete delivery address or use map below"
+                        rows="3"
+                        style="resize: vertical; min-height: 60px; line-height: 1.4;"
+                        required></textarea>
+              
+              <!-- Map Integration -->
+              <div class="map-container">
+                <button type="button" class="map-toggle" onclick="toggleMap()">
+                  📍 Pick Location on Map
+                </button>
+                <div id="map"></div>
+                <div class="map-instructions" id="map-instructions" style="display: none;">
+                  🎯 Click anywhere on the map to set your delivery location
+                </div>
+              </div>
+              
+              <!-- Address Suggestions -->
+              <div class="address-suggestions" id="address-suggestions"></div>
+            </div>
+            
+            <div class="payment-section">
+              <div class="payment-label">📱 Contact Number:</div>
+              <input type="tel" class="payment-input" id="customer-phone"
+                     placeholder="09XXXXXXXXX" pattern="[0-9]{11}" required>
+            </div>
+            
+            <div class="payment-section">
+              <div class="payment-label">💰 Payment Method:</div>
+              <div class="payment-methods">
+                <div class="payment-method" data-method="credit_card" title="Credit Card">
+                  <img src="images/credit-card.png" alt="Card">
+                </div>
+                <div class="payment-method" data-method="gcash" title="GCash">
+                  <img src="images/gcash.png" alt="GCash">
+                </div>
+                <div class="payment-method" data-method="cash_on_delivery" title="Cash on Delivery">
+                  <img src="images/peso.png" alt="COD">
+                </div>
+              </div>
+            </div>
+            
+            <button class="checkout-btn" onclick="checkout()" id="checkout-btn">
+              🛒 Confirm Checkout - ₱<span id="total-amount"><?php echo number_format($grand_total, 2); ?></span>
+            </button>
+            
+            <div style="text-align: center; margin-top: 10px;">
+              <button onclick="clearCart()" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                🗑️ Clear All Items
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Checkout trigger button (replace sidebar button) -->
+        <button class="checkout-btn" style="position: absolute; right: 60px; top: 600px; width: 300px; z-index: 10;" onclick="openCheckoutModal()" id="open-checkout-btn">
+          🛒 Proceed to Checkout - ₱<span id="total-amount"><?php echo number_format($grand_total, 2); ?></span>
+        </button>
         
       <?php endif; ?>
     </div>
@@ -696,6 +985,336 @@ foreach ($cart_items as $item) {
       // Global variables
       let isUpdating = false;
       let cartTotal = <?php echo $total; ?>;
+      let deliveryFee = <?php echo $delivery_fee; ?>;
+      let grandTotal = <?php echo $grand_total; ?>;
+      let totalItems = <?php echo $total_items; ?>;
+      
+      // Map variables
+      let map;
+      let marker;
+      let isMapVisible = false;
+      let isMapLoaded = false;
+      
+      // Initialize Free Map (using Leaflet + OpenStreetMap)
+      function initMap() {
+        try {
+          // Default location (Manila, Philippines)
+          const defaultLocation = [14.5995, 120.9842];
+          
+          // Create map with OpenStreetMap tiles (completely free)
+          map = L.map('map', {
+            center: defaultLocation,
+            zoom: 13,
+            zoomControl: true,
+            scrollWheelZoom: true
+          });
+          
+          // Add free OpenStreetMap tiles
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+          }).addTo(map);
+          
+          // Alternative free tile providers (you can switch):
+          // Satellite view: https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}
+          // Dark theme: https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png
+          
+          isMapLoaded = true;
+          
+          // Add click listener to map
+          map.on('click', function(e) {
+            setMarker(e.latlng);
+            reverseGeocode(e.latlng);
+          });
+          
+          // Try to get user's current location
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              function(position) {
+                const userLocation = [position.coords.latitude, position.coords.longitude];
+                map.setView(userLocation, 15);
+                
+                // Add a "You are here" marker
+                L.marker(userLocation)
+                  .addTo(map)
+                  .bindPopup('📍 Your current location')
+                  .openPopup();
+              },
+              function() {
+                console.log('Geolocation not available, using default location');
+              }
+            );
+          }
+          
+          // Setup address autocomplete
+          setupAddressAutocomplete();
+          
+        } catch (error) {
+          console.error('Error initializing map:', error);
+          hideMapFeatures();
+        }
+      }
+      
+      // Hide map features if map fails to load
+      function hideMapFeatures() {
+        const mapContainer = document.querySelector('.map-container');
+        if (mapContainer) {
+          mapContainer.style.display = 'none';
+        }
+        
+        // Add fallback message
+        const addressSection = document.querySelector('.payment-section:has(#delivery-address)');
+        if (addressSection && !document.getElementById('map-fallback-notice')) {
+          const fallbackNotice = document.createElement('div');
+          fallbackNotice.id = 'map-fallback-notice';
+          fallbackNotice.style.cssText = 'font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 8px; text-align: center;';
+          fallbackNotice.textContent = '📍 Map feature unavailable - please enter address manually';
+          addressSection.appendChild(fallbackNotice);
+        }
+      }
+      
+      // Toggle map visibility
+      function toggleMap() {
+        if (!isMapLoaded) {
+          showNotification('Map not available - please enter address manually', 'error');
+          return;
+        }
+        
+        const mapElement = document.getElementById('map');
+        const mapInstructions = document.getElementById('map-instructions');
+        const toggleButton = document.querySelector('.map-toggle');
+        
+        if (isMapVisible) {
+          mapElement.style.display = 'none';
+          mapInstructions.style.display = 'none';
+          toggleButton.textContent = '📍 Pick Location on Map';
+          isMapVisible = false;
+        } else {
+          mapElement.style.display = 'block';
+          mapInstructions.style.display = 'block';
+          toggleButton.textContent = '🔼 Hide Map';
+          isMapVisible = true;
+          
+          // Trigger map resize to ensure proper rendering
+          setTimeout(() => {
+            if (map) {
+              map.invalidateSize();
+            }
+          }, 100);
+        }
+      }
+      
+      // Set marker on map
+      function setMarker(location) {
+        if (marker) {
+          map.removeLayer(marker);
+        }
+        
+        // Create custom delivery marker
+        const deliveryIcon = L.divIcon({
+          html: '📦',
+          className: 'delivery-marker',
+          iconSize: [30, 30],
+          iconAnchor: [15, 15]
+        });
+        
+        marker = L.marker([location.lat, location.lng], {
+          icon: deliveryIcon,
+          title: 'Delivery Location'
+        }).addTo(map);
+        
+        // Add popup with delivery info
+        marker.bindPopup('🚚 Delivery Location<br><small>Click elsewhere to change</small>').openPopup();
+      }
+      
+      // Reverse geocode using free Nominatim service
+      async function reverseGeocode(location) {
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${location.lat}&lon=${location.lng}&zoom=18&addressdetails=1`
+          );
+          
+          const data = await response.json();
+          
+          if (data && data.display_name) {
+            const address = data.display_name;
+            document.getElementById('delivery-address').value = address;
+            
+            // Visual feedback
+            const addressField = document.getElementById('delivery-address');
+            addressField.style.background = 'rgba(40, 167, 69, 0.2)';
+            addressField.style.borderColor = '#28a745';
+            
+            setTimeout(() => {
+              addressField.style.background = 'rgba(255,255,255,0.1)';
+              addressField.style.borderColor = '#8ADEF1';
+            }, 2000);
+            
+            showNotification('📍 Location selected from map!', 'success');
+          } else {
+            showNotification('Could not get address for this location', 'error');
+          }
+        } catch (error) {
+          console.error('Geocoding error:', error);
+          showNotification('Could not get address for this location', 'error');
+        }
+      }
+      
+      // Address autocomplete using free Nominatim service
+      function setupAddressAutocomplete() {
+        if (!isMapLoaded) return;
+        
+        const addressInput = document.getElementById('delivery-address');
+        const suggestionsContainer = document.getElementById('address-suggestions');
+        
+        let timeout;
+        
+        addressInput.addEventListener('input', function() {
+          const query = this.value.trim();
+          
+          clearTimeout(timeout);
+          
+          if (query.length < 3) {
+            suggestionsContainer.style.display = 'none';
+            return;
+          }
+          
+          timeout = setTimeout(() => {
+            getAddressSuggestions(query);
+          }, 500); // Longer delay to be respectful to free service
+        });
+        
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(event) {
+          if (!addressInput.contains(event.target) && !suggestionsContainer.contains(event.target)) {
+            suggestionsContainer.style.display = 'none';
+          }
+        });
+      }
+      
+      // Get address suggestions using free Nominatim service
+      async function getAddressSuggestions(query) {
+        const suggestionsContainer = document.getElementById('address-suggestions');
+        
+        try {
+          // Use Nominatim search (free OpenStreetMap geocoding)
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=ph&limit=5&addressdetails=1`
+          );
+          
+          const suggestions = await response.json();
+          displayAddressSuggestions(suggestions);
+          
+        } catch (error) {
+          console.error('Error getting address suggestions:', error);
+          suggestionsContainer.style.display = 'none';
+        }
+      }
+      
+      // Display address suggestions
+      function displayAddressSuggestions(suggestions) {
+        const suggestionsContainer = document.getElementById('address-suggestions');
+        suggestionsContainer.innerHTML = '';
+        
+        if (!suggestions || suggestions.length === 0) {
+          suggestionsContainer.style.display = 'none';
+          return;
+        }
+        
+        suggestions.forEach(function(suggestion) {
+          const suggestionElement = document.createElement('div');
+          suggestionElement.className = 'address-suggestion';
+          
+          suggestionElement.innerHTML = `
+            <span class="location-icon">📍</span>
+            ${suggestion.display_name}
+          `;
+          
+          suggestionElement.addEventListener('click', function() {
+            document.getElementById('delivery-address').value = suggestion.display_name;
+            suggestionsContainer.style.display = 'none';
+            
+            // Center map on selected location
+            const lat = parseFloat(suggestion.lat);
+            const lon = parseFloat(suggestion.lon);
+            
+            if (lat && lon) {
+              map.setView([lat, lon], 16);
+              setMarker({ lat: lat, lng: lon });
+              
+              // Show map if hidden
+              if (!isMapVisible) {
+                toggleMap();
+              }
+              
+              showNotification('📍 Address selected!', 'success');
+            }
+          });
+          
+          suggestionsContainer.appendChild(suggestionElement);
+        });
+        
+        suggestionsContainer.style.display = 'block';
+      }
+      
+      // Function to update all totals dynamically
+      function updateCartTotals() {
+        // Recalculate subtotal from all visible items
+        cartTotal = 0;
+        totalItems = 0;
+        
+        const productRows = document.querySelectorAll('.product-row');
+        productRows.forEach((row, index) => {
+          const quantityElement = document.getElementById(`quantity-display-${index}`);
+          const itemData = document.getElementById(`item-data-${index}`);
+          
+          if (quantityElement && itemData) {
+            const quantity = parseInt(quantityElement.textContent);
+            const price = parseFloat(itemData.dataset.price);
+            cartTotal += (quantity * price);
+            totalItems += quantity;
+          }
+        });
+        
+        // Calculate delivery fee dynamically
+        deliveryFee = cartTotal >= 500 ? 0 : 50;
+        grandTotal = cartTotal + deliveryFee;
+        
+        // Update all displays
+        document.getElementById('subtotal-display').textContent = `₱${cartTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        document.getElementById('total-amount').textContent = cartTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('total-items-count').textContent = totalItems;
+        
+        // Update cart badge
+        const cartBadge = document.querySelector('.cart-badge');
+        if (cartBadge) {
+          cartBadge.textContent = totalItems;
+        }
+        
+        // Update free delivery notice
+        const freeDeliveryNotice = document.getElementById('free-delivery-notice');
+        const freeDeliveryAmount = document.getElementById('free-delivery-amount');
+        
+        if (cartTotal < 500 && deliveryFee > 0) {
+          freeDeliveryNotice.style.display = 'block';
+          freeDeliveryAmount.textContent = (500 - cartTotal).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        } else {
+          freeDeliveryNotice.style.display = 'none';
+        }
+        
+        // Add visual feedback for total updates
+        const subtotalDisplay = document.getElementById('subtotal-display');
+        const totalAmountDisplay = document.getElementById('total-amount');
+        
+        [subtotalDisplay, totalAmountDisplay].forEach(element => {
+          element.style.transform = 'scale(1.05)';
+          element.style.transition = 'transform 0.2s ease';
+          
+          setTimeout(() => {
+            element.style.transform = 'scale(1)';
+          }, 200);
+        });
+      }
       
       // AJAX function to update quantity
       async function updateQuantity(cartItemId, change, itemIndex) {
@@ -740,10 +1359,20 @@ foreach ($cart_items as $item) {
               quantityDisplay.textContent = newQuantity;
               
               const newSubtotal = newQuantity * price;
-              totalPriceElement.textContent = `₱${Math.round(newSubtotal).toLocaleString()}`;
+              totalPriceElement.textContent = `₱${newSubtotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
               
-              cartTotal += (change * price);
-              document.getElementById('total-amount').textContent = Math.round(cartTotal).toLocaleString();
+              // Update stock status buttons
+              const stock = parseInt(itemData.dataset.stock);
+              const addButton = document.getElementById(`add-btn-${itemIndex}`);
+              
+              if (newQuantity >= stock) {
+                addButton.disabled = true;
+              } else {
+                addButton.disabled = false;
+              }
+              
+              // Update totals dynamically
+              updateCartTotals();
               
               quantityDisplay.classList.add('success-flash');
               setTimeout(() => {
@@ -765,7 +1394,7 @@ foreach ($cart_items as $item) {
         }
       }
       
-      // AJAX function to remove item - UPDATED: No confirmation dialog
+      // AJAX function to remove item
       async function removeFromCart(cartItemId, itemIndex) {
         if (isUpdating) return;
         
@@ -792,17 +1421,13 @@ foreach ($cart_items as $item) {
           const data = await response.json();
           
           if (data.success) {
-            const itemData = document.getElementById(`item-data-${itemIndex}`);
-            const quantityDisplay = document.getElementById(`quantity-display-${itemIndex}`);
-            const price = parseFloat(itemData.dataset.price);
-            const quantity = parseInt(quantityDisplay.textContent);
-            const itemSubtotal = price * quantity;
-            
-            cartTotal -= itemSubtotal;
-            document.getElementById('total-amount').textContent = Math.round(cartTotal).toLocaleString();
-            
             removeItemFromDisplay(itemIndex);
             showNotification('Item removed from cart', 'success');
+            
+            // Update totals after item removal
+            setTimeout(() => {
+              updateCartTotals();
+            }, 100);
             
           } else {
             // Restore visual state if error
@@ -833,6 +1458,9 @@ foreach ($cart_items as $item) {
           
           setTimeout(() => {
             productRow.remove();
+            
+            // Update totals after removal animation
+            updateCartTotals();
             
             // Check if cart is now empty
             const container = document.getElementById('products-container');
@@ -868,42 +1496,285 @@ foreach ($cart_items as $item) {
         }, 3000);
       }
       
-      // Checkout function
-      function checkout() {
+      // Enhanced checkout function - save directly to database
+      async function checkout() {
+        // Recalculate totals before checkout
+        updateCartTotals();
+        
         if (cartTotal <= 0) {
           showNotification('Your cart is empty', 'error');
+          return;
+        }
+        
+        // Check for out of stock items
+        const outOfStockItems = document.querySelectorAll('.product-row.out_of_stock');
+        if (outOfStockItems.length > 0) {
+          showNotification('Please remove out of stock items before checkout', 'error');
+          return;
+        }
+        
+        // Validate required fields
+        const deliveryAddress = document.getElementById('delivery-address').value.trim();
+        const customerPhone = document.getElementById('customer-phone').value.trim();
+        
+        if (!deliveryAddress) {
+          showNotification('Please enter your delivery address', 'error');
+          document.getElementById('delivery-address').focus();
+          return;
+        }
+        
+        if (!customerPhone) {
+          showNotification('Please enter your phone number', 'error');
+          document.getElementById('customer-phone').focus();
+          return;
+        }
+        
+        // Validate phone number format
+        const phoneRegex = /^[0-9]{11}$/;
+        if (!phoneRegex.test(customerPhone)) {
+          showNotification('Please enter a valid 11-digit phone number', 'error');
+          document.getElementById('customer-phone').focus();
+          return;
+        }
+        
+        // Get selected payment method
+        const selectedPaymentMethod = document.querySelector('.payment-method.selected');
+        if (!selectedPaymentMethod) {
+          showNotification('Please select a payment method', 'error');
           return;
         }
         
         const checkoutBtn = document.getElementById('checkout-btn');
         checkoutBtn.style.opacity = '0.7';
         checkoutBtn.style.pointerEvents = 'none';
-        checkoutBtn.textContent = 'Processing...';
+        checkoutBtn.textContent = '🔄 Processing Order...';
         
-        setTimeout(() => {
-          window.location.href = 'checkout.php';
-        }, 500);
+        // Collect cart items data
+        const cartItems = [];
+        const productRows = document.querySelectorAll('.product-row');
+        productRows.forEach((row, index) => {
+          const itemData = document.getElementById(`item-data-${index}`);
+          const quantityElement = document.getElementById(`quantity-display-${index}`);
+          
+          if (itemData && quantityElement) {
+            cartItems.push({
+              product_id: itemData.dataset.productId,
+              quantity: parseInt(quantityElement.textContent),
+              price: parseFloat(itemData.dataset.price),
+              name: itemData.dataset.name
+            });
+          }
+        });
+        
+        // Create checkout data
+        const checkoutData = {
+          delivery_address: deliveryAddress,
+          phone: customerPhone,
+          payment_method: selectedPaymentMethod.dataset.method,
+          subtotal: cartTotal,
+          delivery_fee: deliveryFee,
+          total_amount: grandTotal,
+          item_count: totalItems,
+          cart_items: cartItems
+        };
+        
+        try {
+          // Send order to database
+          const response = await fetch('process_checkout.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(checkoutData)
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            // Show success message
+            showNotification('🎉 Order placed successfully!', 'success');
+            
+            // Close modal and show success screen
+            closeCheckoutModal();
+            
+            // Show order confirmation
+            showOrderConfirmation(result.order_id, result.total_amount);
+            
+            // Clear cart after successful order
+            setTimeout(() => {
+              clearCartAfterOrder();
+            }, 2000);
+            
+          } else {
+            throw new Error(result.message || 'Failed to process order');
+          }
+          
+        } catch (error) {
+          console.error('Checkout error:', error);
+          showNotification('❌ Order failed: ' + error.message, 'error');
+          
+          // Restore checkout button
+          checkoutBtn.style.opacity = '1';
+          checkoutBtn.style.pointerEvents = 'auto';
+          checkoutBtn.textContent = '🛒 Confirm Checkout - ₱' + grandTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+      }
+      
+      // Show order confirmation modal
+      function showOrderConfirmation(orderId, totalAmount) {
+        const confirmationModal = document.createElement('div');
+        confirmationModal.className = 'checkout-modal show';
+        confirmationModal.innerHTML = `
+          <div class="checkout-modal-content" style="text-align: center; background: linear-gradient(135deg, #28a745, #20c997);">
+            <h2 style="margin: 0 0 20px 0; color: white;">🎉 Order Confirmed!</h2>
+            <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+              <p style="margin: 5px 0; color: white;"><strong>Order ID:</strong> #${orderId}</p>
+              <p style="margin: 5px 0; color: white;"><strong>Total Amount:</strong> ₱${totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2})}</p>
+              <p style="margin: 15px 0 5px 0; color: white; font-size: 14px;">📧 Confirmation email sent!</p>
+              <p style="margin: 5px 0; color: white; font-size: 14px;">🚚 Estimated delivery: 3-5 business days</p>
+            </div>
+            <button onclick="this.parentElement.parentElement.remove(); location.reload();" 
+                    style="background: white; color: #28a745; border: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px;">
+              Continue Shopping
+            </button>
+          </div>
+        `;
+        document.body.appendChild(confirmationModal);
+      }
+      
+      // Clear cart after successful order
+      async function clearCartAfterOrder() {
+        try {
+          await fetch('clear_cart.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          });
+        } catch (error) {
+          console.error('Error clearing cart:', error);
+        }
+      }
+
+      // Navigate to order history
+      function goToOrderHistory() {
+        window.location.href = 'order_history.php';
       }
       
       // Navigation function for profile
       function goToProfile() {
-        // You can redirect to profile page or show profile dropdown
-        window.location.href = 'profile.php'; // or whatever your profile page is called
-        // Alternative: show a profile dropdown menu
-        // showProfileDropdown();
+        window.location.href = 'profile.php';
       }
       
-      // Optional: Add cart click function (since we're on cart page)
-      function goToCart() {
-        showNotification('You are already on the cart page!', 'success');
-      }
-      
-      // Initialize page
+      // Add enhanced payment method selection with styling
       document.addEventListener('DOMContentLoaded', function() {
-        console.log('Dynamic cart system initialized');
+        console.log('Enhanced cart system with free map initialized');
         showNotification('Cart loaded successfully', 'success');
+        
+        // Initialize totals
+        updateCartTotals();
+        
+        // Initialize map immediately (no API key needed)
+        initMap();
+        
+        // Payment method selection with enhanced styling
+        const paymentMethods = document.querySelectorAll('.payment-method');
+        paymentMethods.forEach(method => {
+          method.addEventListener('click', function() {
+            // Remove selected class from all methods
+            paymentMethods.forEach(m => m.classList.remove('selected'));
+            // Add selected class to clicked method
+            this.classList.add('selected');
+            
+            const methodName = this.getAttribute('title');
+            showNotification(`${methodName} selected`, 'success');
+          });
+        });
+        
+        // Add periodic total refresh (every 30 seconds) to catch any discrepancies
+        setInterval(() => {
+          if (!isUpdating) {
+            updateCartTotals();
+          }
+        }, 30000);
       });
       
+      // Modal open/close logic
+      function openCheckoutModal() {
+        document.getElementById('checkout-modal').classList.add('show');
+        document.body.style.overflow = 'hidden';
+        // Focus on delivery address for accessibility
+        setTimeout(() => {
+          const addr = document.getElementById('delivery-address');
+          if (addr) addr.focus();
+        }, 200);
+      }
+      
+      function closeCheckoutModal() {
+        document.getElementById('checkout-modal').classList.remove('show');
+        document.body.style.overflow = '';
+      }
+      
+      // Optional: close modal on ESC key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeCheckoutModal();
+      });
+      
+      // Remove the old payment-sidebar div if present
+      const oldSidebar = document.querySelector('.payment-sidebar');
+      if (oldSidebar) {
+        oldSidebar.remove();
+      }
     </script>
+    
+    <style>
+      /* Custom marker styling */
+      .delivery-marker {
+        background: #C647CC;
+        border: 2px solid white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      }
+      
+      /* Leaflet popup customization */
+      .leaflet-popup-content-wrapper {
+        background: linear-gradient(135deg, #C647CC, #ECC7ED);
+        color: white;
+        border-radius: 8px;
+      }
+      
+      .leaflet-popup-content {
+        margin: 8px 12px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+      
+      .leaflet-popup-tip {
+        background: #C647CC;
+      }
+      
+      /* Map container enhancements */
+      #map {
+        border: 2px solid rgba(198, 71, 204, 0.3);
+        border-radius: 6px;
+      }
+      
+      /* Address suggestions styling */
+      .address-suggestion {
+        background: rgba(0,0,0,0.8);
+        color: white;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+      
+      .address-suggestion:hover {
+        background: rgba(198, 71, 204, 0.8);
+      }
+    </style>
   </body>
 </html>

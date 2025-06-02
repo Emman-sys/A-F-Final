@@ -366,7 +366,7 @@ $isLoggedIn = isset($_SESSION["user_id"]);
   <div class="page-wrapper">
     <nav class="navigation">
       <div class="nav-links-left">
-        <a href="#" class="nav-link">Home</a>
+        <a href="#" class="nav-link">AdminDash</a>
         <a href="#" class="nav-link">Contact</a>
       </div>
        

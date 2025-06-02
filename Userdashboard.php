@@ -157,7 +157,34 @@ html, body {
         .dashboard-title { font-size: 22px; }
         .dashboard-btn { font-size: 15px; padding: 14px 0;}
         .image-1, .image-2, .image-3, .image-4, .image-5 { display: none; }
-      }    </style>
+      }    
+      .nav-icon {
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    
+    .nav-icon:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .nav-icon img {
+      width: 28px;
+      height: 28px;
+      filter: brightness(0) invert(1);
+    }
+    </style>
   </head>
   <body>
     <main class="dashboard-page">

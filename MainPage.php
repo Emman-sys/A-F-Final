@@ -237,16 +237,16 @@ if (isset($_SESSION['user_id'])) {
 
     .nav-icons {
       position: fixed;
-      right: 30px;
-      top: 25px;
+      right: 20px;
+      top: 35px;
       display: flex;
       gap: 15px;
       z-index: 11;
     }
     
     .nav-icon {
-      width: 35px;
-      height: 35px;
+      width: 65px !important;
+      height: 65px !important;
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.3);
       border-radius: 50%;
@@ -257,6 +257,7 @@ if (isset($_SESSION['user_id'])) {
       transition: all 0.3s ease;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
+      flex-shrink: 0;
     }
     
     .nav-icon:hover {
@@ -266,9 +267,10 @@ if (isset($_SESSION['user_id'])) {
     }
     
     .nav-icon img {
-      width: 20px;
-      height: 20px;
+      width: 35px !important;
+      height: 35px !important;
       filter: brightness(0) invert(1);
+      flex-shrink: 0;
     }
     
     .cart-badge {
@@ -278,9 +280,9 @@ if (isset($_SESSION['user_id'])) {
       background: #ff4444;
       color: white;
       border-radius: 50%;
-      width: 18px;
-      height: 18px;
-      font-size: 10px;
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
       font-weight: bold;
       display: flex;
       align-items: center;
@@ -1118,14 +1120,22 @@ if (isset($_SESSION['user_id'])) {
     
     <!-- NAVIGATION ICONS -->
     <div class="nav-icons">
-      <div class="nav-icon" title="Profile">
-        <img src="https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/user.png?v=1747320936064" alt="Profile">
-      </div>
-      <div class="nav-icon" title="Cart">
-        <img src="https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/shopping-cart.png?v=1747320935692" alt="Cart">
+      <!-- Cart Icon -->
+      <div class="nav-icon" onclick="goToCart()" title="Shopping Cart">
+        <img src="images/cart.png" alt="Cart">
         <?php if ($cart_count > 0): ?>
           <span class="cart-badge"><?php echo $cart_count; ?></span>
         <?php endif; ?>
+      </div>
+      
+      <!-- Order History Icon -->
+      <div class="nav-icon" onclick="goToOrderHistory()" title="Order History">
+        <img src="images/history.png" alt="Orders">
+      </div>
+      
+      <!-- User Profile Icon -->
+      <div class="nav-icon" onclick="goToProfile()" title="Profile">
+        <img src="images/users.png" alt="Profile">
       </div>
     </div>
   </div>
@@ -2112,6 +2122,17 @@ function goToCart() {
         window.location.href = 'Cart.php';
     <?php else: ?>
         showNotification('Please login to view cart', 'error');
+        setTimeout(() => {
+            window.location.href = 'Welcome.php';
+        }, 1500);
+    <?php endif; ?>
+}
+
+function goToOrderHistory() {
+    <?php if (isset($_SESSION['user_id'])): ?>
+        window.location.href = 'order_history.php';
+    <?php else: ?>
+        showNotification('Please login to view order history', 'error');
         setTimeout(() => {
             window.location.href = 'Welcome.php';
         }, 1500);
