@@ -1,58 +1,63 @@
 <?php
-require 'db_connect.php';
+session_start();
+ob_start();
+ob_clean();
+header('Content-Type: application/json');
 
-$message = "";
-
-// Handle login form submission
-if (isset($_POST["login_submit"])) {
-  session_start();
-  $email = trim($_POST["email"]);
-  $password = $_POST["password"];
-
-  $stmt = $conn->prepare("SELECT user_id, password_hash FROM users WHERE email = ?");
-  if ($stmt === false) {
-    echo json_encode(['success' => false, 'message' => 'Database error: ' . $conn->error]);
-    exit();
-  }
-
-  $stmt->bind_param("s", $email);
-  $stmt->execute();
-  $stmt->store_result();
-
-  if ($stmt->num_rows > 0) {
-    $stmt->bind_result($user_id, $stored_password);
-    $stmt->fetch();
-    
-    // Check if password is hashed
-    $is_hashed = strlen($stored_password) === 60 && substr($stored_password, 0, 4) === '$2y$';
-    
-    if ($is_hashed) {
-      // Password is hashed, use password_verify
-      if (password_verify($password, $stored_password)) {
-        $_SESSION["user_id"] = $user_id;
-        $_SESSION["login_success"] = true;
-        echo json_encode(['success' => true, 'redirect' => 'Userdashboard.php']);
-        exit();
-      } else {
-        $message = "Invalid password.";
-      }
-    } else {
-      // Password is plain text, do direct comparison
-      if ($password === $stored_password) {
-        $_SESSION["user_id"] = $user_id;
-        $_SESSION["login_success"] = true;
-        echo json_encode(['success' => true, 'redirect' => 'Userdashboard.php']);
-        exit();
-      } else {
-        $message = "Invalid password.";
-      }
+try {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        echo json_encode(['success' => false, 'message' => 'Invalid request']);
+        exit;
     }
-  } else {
-    $message = "User not found.";
-  }
-  $stmt->close();
-  
-  echo json_encode(['success' => false, 'message' => $message]);
-  exit();
+
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    if (empty($email) || empty($password)) {
+        echo json_encode(['success' => false, 'message' => 'Please fill in all fields']);
+        exit;
+    }
+
+    $conn = new mysqli("localhost", "root", "", "a&f chocolate");
+    
+    if ($conn->connect_error) {
+        echo json_encode(['success' => false, 'message' => 'Database connection failed']);
+        exit;
+    }
+
+    $stmt = $conn->prepare("SELECT user_id, name, email, password_hash FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows === 0) {
+        echo json_encode(['success' => false, 'message' => 'Email not found']);
+        exit;
+    }
+
+    $user = $result->fetch_assoc();
+
+    if (!password_verify($password, $user['password_hash'])) {
+        echo json_encode(['success' => false, 'message' => 'Incorrect password']);
+        exit;
+    }
+
+    $_SESSION['user_id'] = $user['user_id'];
+    $_SESSION['user_name'] = $user['name'];
+    $_SESSION['user_email'] = $user['email'];
+    $_SESSION['user_role'] = 'customer';
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Login successful!',
+        'redirect' => 'MainPage.php'
+    ]);
+
+    $stmt->close();
+    $conn->close();
+
+} catch (Exception $e) {
+    echo json_encode(['success' => false, 'message' => 'System error occurred']);
 }
+exit;
 ?>

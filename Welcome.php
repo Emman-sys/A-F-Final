@@ -367,7 +367,7 @@ $isLoggedIn = isset($_SESSION["user_id"]);
     <nav class="navigation">
       <div class="nav-links-left">
         <a href="#" class="nav-link">AdminDash</a>
-        <a href="#" class="nav-link">Contact</a>
+        <a href="Contact.html" class="nav-link">Contact</a>
       </div>
        
       <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/cbc700ac3a9cc70c2561f787dc7a724761a462ad" alt="Logo" class="nav-logo" />
@@ -496,57 +496,148 @@ function switchToSignup() {
   openPopup('signupPopup');
 }
 
-// Handle login form submission
+// Login form submission
 document.getElementById('loginForm').addEventListener('submit', function(e) {
   e.preventDefault();
   
-  var formData = new FormData(this);
-  formData.append('login_submit', 'true');
+  const formData = new FormData(this);
+  const submitButton = this.querySelector('button[type="submit"]');
+  const originalText = submitButton.textContent;
   
-  fetch('login_popup.php', {
+  // Clear previous messages
+  document.getElementById('loginMessage').innerHTML = '';
+  
+  submitButton.textContent = 'Signing In...';
+  submitButton.disabled = true;
+  
+  fetch('login_popup.php', {  // Make sure this points to your working login file
     method: 'POST',
     body: formData
   })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      window.location.href = data.redirect;
-    } else {
-      document.getElementById('loginMessage').innerHTML = '<div class="error-message">' + data.message + '</div>';
+  .then(response => {
+    console.log('Response status:', response.status);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+    
+    return response.text();
+  })
+  .then(text => {
+    console.log('Raw response:', text);
+    
+    // Check if response is empty
+    if (!text.trim()) {
+      throw new Error('Empty response from server');
+    }
+    
+    // Find the JSON part (in case there's extra content)
+    const jsonStart = text.indexOf('{');
+    const jsonEnd = text.lastIndexOf('}') + 1;
+    
+    if (jsonStart === -1) {
+      throw new Error('No JSON found in response');
+    }
+    
+    const jsonText = text.substring(jsonStart, jsonEnd);
+    
+    try {
+      const data = JSON.parse(jsonText);
+      
+      if (data.success) {
+        document.getElementById('loginMessage').innerHTML = '<div class="success-message">' + data.message + '</div>';
+        setTimeout(() => {
+          window.location.href = data.redirect;
+        }, 1000);
+      } else {
+        document.getElementById('loginMessage').innerHTML = '<div class="error-message">' + data.message + '</div>';
+      }
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      document.getElementById('loginMessage').innerHTML = '<div class="error-message">Server response error</div>';
+    }
+    
+    submitButton.textContent = originalText;
+    submitButton.disabled = false;
   })
   .catch(error => {
-    document.getElementById('loginMessage').innerHTML = '<div class="error-message">An error occurred. Please try again.</div>';
+    console.error('Fetch error:', error);
+    document.getElementById('loginMessage').innerHTML = '<div class="error-message">Connection error: ' + error.message + '</div>';
+    submitButton.textContent = originalText;
+    submitButton.disabled = false;
   });
 });
 
-// Handle signup form submission
+// Signup form submission
 document.getElementById('signupForm').addEventListener('submit', function(e) {
   e.preventDefault();
   
-  var formData = new FormData(this);
-  formData.append('signup_submit', 'true');
+  const formData = new FormData(this);
+  const submitButton = this.querySelector('button[type="submit"]');
+  const originalText = submitButton.textContent;
+  
+  // Clear previous messages
+  document.getElementById('signupMessage').innerHTML = '';
+  
+  submitButton.textContent = 'Creating Account...';
+  submitButton.disabled = true;
   
   fetch('signup_popup.php', {
     method: 'POST',
     body: formData
   })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      document.getElementById('signupMessage').innerHTML = '<div style="background-color:rgba(39,174,96,0.7);color:white;padding:10px;border-radius:5px;margin-bottom:15px;text-align:center;">' + data.message + '</div>';
-      // Clear form
-      document.getElementById('signupForm').reset();
-      // Auto switch to login after 2 seconds
-      setTimeout(() => {
-        switchToLogin();
-      }, 2000);
-    } else {
-      document.getElementById('signupMessage').innerHTML = '<div class="error-message">' + data.message + '</div>';
+  .then(response => {
+    console.log('Signup response status:', response.status);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+    
+    return response.text();
+  })
+  .then(text => {
+    console.log('Signup raw response:', text);
+    
+    // Check if response is empty
+    if (!text.trim()) {
+      throw new Error('Empty response from server');
+    }
+    
+    // Find the JSON part (in case there's extra content)
+    const jsonStart = text.indexOf('{');
+    const jsonEnd = text.lastIndexOf('}') + 1;
+    
+    if (jsonStart === -1) {
+      throw new Error('No JSON found in response');
+    }
+    
+    const jsonText = text.substring(jsonStart, jsonEnd);
+    
+    try {
+      const data = JSON.parse(jsonText);
+      
+      if (data.success) {
+        document.getElementById('signupMessage').innerHTML = '<div class="success-message">' + data.message + '</div>';
+        setTimeout(() => {
+          closePopup('signupPopup');
+          openPopup('loginPopup');
+        }, 1500);
+      } else {
+        document.getElementById('signupMessage').innerHTML = '<div class="error-message">' + data.message + '</div>';
+      }
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      document.getElementById('signupMessage').innerHTML = '<div class="error-message">Server response error</div>';
+    }
+    
+    submitButton.textContent = originalText;
+    submitButton.disabled = false;
   })
   .catch(error => {
-    document.getElementById('signupMessage').innerHTML = '<div class="error-message">An error occurred. Please try again.</div>';
+    console.error('Signup error:', error);
+    document.getElementById('signupMessage').innerHTML = '<div class="error-message">Network error: ' + error.message + '</div>';
+    submitButton.textContent = originalText;
+    submitButton.disabled = false;
   });
 });
 

@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>A&F Chocolates</title>
+  <title>Contact</title>
   <link rel="stylesheet" href="style.css" />
   <style>
     * {
       box-sizing: border-box;
     }
 
-    body {
+    html, body {
       font-family: 'Merriweather', serif;
       margin: 0;
       padding: 0;
@@ -18,12 +18,13 @@
       background-size: cover;
       background-position: center;
       color: white;
-      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
     }
 
     nav {
       position: relative;
-      padding: 2rem 0;
+      padding: 1rem 0;
     }
 
     .nav-links {
@@ -40,7 +41,7 @@
       color: white;
       text-decoration: none;
       font-weight: bold;
-      font-size: 1.1rem;
+      font-size: 1rem;
       transition: opacity 0.3s ease;
     }
 
@@ -53,8 +54,8 @@
     }
 
     .logo {
-      width: 108.2px;
-      height: 108.2px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
@@ -62,30 +63,31 @@
     .contact-section {
       display: flex;
       justify-content: center;
-      align-items: flex-start;
-      gap: 5rem;
-      padding: 3rem 2rem;
-      flex-wrap: wrap;
+      align-items: center;
+      gap: 3rem;
+      padding: 1rem 2rem;
+      flex-wrap: nowrap;
       max-width: 1200px;
       margin: 0 auto;
+      height: calc(100vh - 120px);
     }
 
     .contact-info {
       display: flex;
       flex-direction: column;
-      gap: 2.8rem;
+      gap: 1.5rem;
     }
 
     .social-item {
       display: flex;
       align-items: center;
-      gap: 2rem;
+      gap: 1.5rem;
       background-color: #4a148c;
-      padding: 1.5rem 2rem;
+      padding: 1rem 1.5rem;
       border-radius: 50px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-      width: 16rem;
-      font-size: 1.1rem;
+      width: 18rem;
+      font-size: 0.95rem;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
@@ -95,8 +97,8 @@
     }
 
     .social-item img {
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       filter: brightness(0) invert(1);
     }
 
@@ -104,70 +106,39 @@
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      width: 500px;
+      width: 450px;
+      height: 400px;
     }
 
     .map-container iframe {
       width: 100%;
-      height: 550px;
+      height: 100%;
       border: 0;
     }
 
-    /* Responsive Design */
     @media (max-width: 1024px) {
       .contact-section {
-        gap: 3rem;
-        padding: 2rem 1rem;
+        gap: 2rem;
+        padding: 1rem;
       }
       
       .nav-links {
-        flex-wrap: wrap;
         gap: 1.5rem;
       }
       
-      .logo {
-        width: 80px;
-        height: 80px;
+      .map-container {
+        width: 400px;
+        height: 350px;
       }
     }
 
     @media (max-width: 768px) {
       .nav-links {
-        flex-direction: column;
         gap: 1rem;
       }
       
-      .nav-links li:nth-child(3) {
-        order: -1;
-      }
-      
-      .contact-section {
-        flex-direction: column;
-        align-items: center;
-        gap: 2rem;
-      }
-      
-      .social-item {
-        width: 100%;
-        max-width: 280px;
-      }
-      
-      .map-container {
-        max-width: 100%;
-      }
-      
-      .map-container iframe {
-        height: 300px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      nav {
-        padding: 1rem 0;
-      }
-      
       .nav-links a {
-        font-size: 1rem;
+        font-size: 0.9rem;
       }
       
       .logo {
@@ -176,18 +147,67 @@
       }
       
       .contact-section {
-        padding: 1.5rem 1rem;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        height: calc(100vh - 100px);
+      }
+      
+      .contact-info {
+        gap: 1rem;
       }
       
       .social-item {
-        padding: 1rem 1.5rem;
-        font-size: 1rem;
-        gap: 1.5rem;
+        width: 15rem;
+        padding: 0.8rem 1.2rem;
+        font-size: 0.85rem;
+        gap: 1rem;
       }
       
       .social-item img {
-        width: 24px;
-        height: 24px;
+        width: 20px;
+        height: 20px;
+      }
+      
+      .map-container {
+        width: 300px;
+        height: 250px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      nav {
+        padding: 0.5rem 0;
+      }
+      
+      .nav-links a {
+        font-size: 0.8rem;
+      }
+      
+      .logo {
+        width: 50px;
+        height: 50px;
+      }
+      
+      .contact-section {
+        padding: 0.5rem;
+        height: calc(100vh - 80px);
+      }
+      
+      .social-item {
+        width: 16rem;
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
+      }
+      
+      .social-item img {
+        width: 18px;
+        height: 18px;
+      }
+      
+      .map-container {
+        width: 250px;
+        height: 200px;
       }
     }
   </style>
@@ -196,12 +216,12 @@
   <nav>
     <ul class="nav-links">
       <li><a href="Welcome.php">Home</a></li>
-      <li><a href="Contact.php">Contact</a></li>
+      <li><a href="Contact.html">Contact</a></li>
       <li class="pic">
-        <img src='image/logoz.png' class="logo" alt="A&F Logo"/>
+        <img src='https://cdn.builder.io/api/v1/image/assets/TEMP/cbc700ac3a9cc70c2561f787dc7a724761a462ad' class="logo" alt="A&F Logo"/>
       </li>
-      <li><a href="About.php">About</a></li>
-      <li><a href="login_popup.php">Login/Sign up</a></li>
+      <li><a href="About.html">About</a></li>
+      <li><a href="Welcome.php">Login/Sign up</a></li>
     </ul>
   </nav>
 
@@ -224,7 +244,7 @@
         <span>+639123456789</span>
       </div>
       <div class="social-item">
-        <img src="icons/location.image" alt="Location Icon" />
+        <img src="icons/location.png" alt="Location Icon" />
         <span>W5R7+H8 Lipa, Batangas</span>
       </div>
     </div>

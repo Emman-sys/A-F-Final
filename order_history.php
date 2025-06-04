@@ -416,7 +416,7 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         
         <!-- Order History Icon (current page - highlighted) -->
         <div class="nav-icon current" title="Order History (Current Page)">
-          <img src="images/history.png" alt="Orders">
+          <img src="images/deliv.png" alt="Orders">
         </div>
         
         <!-- User Profile Icon -->
@@ -514,7 +514,7 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
     
     function goToProfile() {
-      window.location.href = 'profile.php';
+      window.location.href = 'Userdashboard.php';
     }
   </script>
 </body>

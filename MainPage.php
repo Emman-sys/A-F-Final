@@ -1112,10 +1112,9 @@ if (isset($_SESSION['user_id'])) {
   <div class="header">
     <div class="brand-name">A&F</div>
     <div class="nav-items">
-      <span>Home</span>
+      <span onclick="window.location.href='Welcome.php'" style="cursor: pointer;">Home</span>
       <span>About</span>
-      <span>Services</span>
-      <span>Contact</span>
+      <span onclick="window.location.href='Contact.php'" style="cursor: pointer;">Contact</span>
     </div>
     
     <!-- NAVIGATION ICONS -->

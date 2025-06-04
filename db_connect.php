@@ -1,14 +1,14 @@
 <?php
-$servername = "127.0.0.1";
+$servername = "localhost";
 $username = "root";
-$password = ""; // XAMPP default
-$dbname = "a&f chocolate"; // Use your actual database name
+$password = "";
+$dbname = "a&f chocolate";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 if ($conn->connect_error) {
-  die("Connection failed: " . $conn->connect_error);
-}// else {
-//  echo "Connection successful!";
-//}
+    die("Connection failed: " . $conn->connect_error);
+}
+
+$conn->set_charset("utf8");
 ?>

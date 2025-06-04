@@ -193,9 +193,7 @@ html, body {
         <div class="dashboard-title">Welcome, <?php echo htmlspecialchars($username); ?>!</div>
         <div class="dashboard-buttons">
           <button class="dashboard-btn" onclick="location.href='MainPage.php'">Proceed to Shopping Center</button>
-          <button class="dashboard-btn" onclick="location.href='mypurchases.html'">My Purchases</button>
-          <button class="dashboard-btn" onclick="location.href='myaddress.html'">My Address</button>
-          <button class="dashboard-btn" onclick="location.href='Settings.html'">Settings</button>
+          <button class="dashboard-btn" onclick="location.href='Settings.php'">Settings</button>
           <button class="dashboard-btn logout-btn" onclick="location.href='logout.php'">Log Out</button>
         </div>
       </div>
