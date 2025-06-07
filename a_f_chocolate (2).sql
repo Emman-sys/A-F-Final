@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 30, 2025 at 04:41 AM
+-- Generation Time: Jun 05, 2025 at 06:56 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -150,7 +150,7 @@ CREATE TABLE `payments` (
   `payment_status` varchar(50) DEFAULT 'completed',
   `amount_paid` decimal(10,2) DEFAULT NULL,
   `payment_date` timestamp NOT NULL DEFAULT current_timestamp(),
-  `delivery_address` text 
+  `delivery_address` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -198,6 +198,33 @@ INSERT INTO `products` (`product_id`, `name`, `description`, `price`, `stock_qua
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `product_comments`
+--
+
+CREATE TABLE `product_comments` (
+  `comment_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `comment_text` text NOT NULL,
+  `rating` tinyint(1) DEFAULT NULL CHECK (`rating` >= 1 and `rating` <= 5),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `product_comments`
+--
+
+INSERT INTO `product_comments` (`comment_id`, `product_id`, `user_id`, `comment_text`, `rating`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 'Amazing milk chocolate! So smooth and creamy. Perfect for gifting.', 5, '2025-06-05 04:30:35', '2025-06-05 04:30:35'),
+(2, 2, 2, 'Great quality dark chocolate. Rich flavor and not too bitter.', 4, '2025-06-05 04:30:35', '2025-06-05 04:30:35'),
+(3, 3, 1, 'Beautiful gift box presentation. The chocolates inside were delicious!', 5, '2025-06-05 04:30:35', '2025-06-05 04:30:35'),
+(4, 4, 3, 'Good chocolate but a bit sweet for my taste. Still enjoyable.', 3, '2025-06-05 04:30:35', '2025-06-05 04:30:35'),
+(5, 1, 2, 'My kids love this chocolate bar. Will definitely buy again!', 4, '2025-06-05 04:30:35', '2025-06-05 04:30:35');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -208,21 +235,28 @@ CREATE TABLE `users` (
   `password_hash` varchar(255) NOT NULL,
   `phone_number` varchar(20) DEFAULT NULL,
   `address` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `order_notifications` tinyint(1) DEFAULT 1,
+  `promo_notifications` tinyint(1) DEFAULT 0,
+  `email_notifications` tinyint(1) DEFAULT 1,
+  `language` varchar(10) DEFAULT 'en',
+  `data_sharing` tinyint(1) DEFAULT 0,
+  `marketing_emails` tinyint(1) DEFAULT 0,
+  `profile_visibility` varchar(20) DEFAULT 'private'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`user_id`, `name`, `email`, `password_hash`, `phone_number`, `address`, `created_at`) VALUES
-(1, 'Alice', 'alice@example.com', '$2y$10$KmUzJoqSO/JBb2ftTntnTeR17Zms/2e2b8Cej7/GOm6n94EcWmH8y', '1234567890', '123 Main St', '2025-05-06 04:04:07'),
-(2, 'Bob', 'bob@example.com', '$2y$10$SCNh6kibVpxqTeHQK3tFxeVD2nfSDiUbC6lB/EWPvxV./g96uGMkm', '0987654321', '456 Elm St', '2025-05-06 04:04:07'),
-(3, 'Charlie', 'charlie@example.com', '$2y$10$lkLri57ZaqgVo7jn0gTU4uWxd2JbKEV2rEVKS39BFSi6bxEn/TRei', '1122334455', '789 Oak St', '2025-05-06 04:04:07'),
-(4, 'Diana', 'diana@example.com', '$2y$10$CQd0AfZeCCra/rVASNiuvebsVvRHh8WLQxIPABZKtSZttPDaUXuPO', '6677889900', '321 Pine St', '2025-05-06 04:04:07'),
-(5, 'ewrgwerg', 'wergsdfvsefger', '$2y$10$euxYJmZNXluJQdrEIFTPC.wnldVFt4ksTS2wEHj1NKuKbH0OozbJm', '1234567', 'random', '2025-05-16 02:41:40'),
-(6, 'Emman', 'Emman@gmail.com', '$2y$10$SkIXQ8JmJYaapZjo.Jwx9OASRJ1MEk.RyIPwcRYZ1V/YKjAiVgNNC', '123456789', '1234567890', '2025-05-26 05:25:43'),
-(7, '1234', '1234@gmail.com', '$2y$10$2qrfYvJn.tXZnVEn8ZX.ieN.YgZuFHlPfrdoQYVrdxL1m.tdxWty2', '1234', '1234', '2025-05-26 05:30:59');
+INSERT INTO `users` (`user_id`, `name`, `email`, `password_hash`, `phone_number`, `address`, `created_at`, `order_notifications`, `promo_notifications`, `email_notifications`, `language`, `data_sharing`, `marketing_emails`, `profile_visibility`) VALUES
+(1, 'Alice', 'alice@example.com', '$2y$10$KmUzJoqSO/JBb2ftTntnTeR17Zms/2e2b8Cej7/GOm6n94EcWmH8y', '1234567890', '123 Main St', '2025-05-06 04:04:07', 1, 0, 1, 'en', 0, 0, 'private'),
+(2, 'Bob', 'bob@example.com', '$2y$10$SCNh6kibVpxqTeHQK3tFxeVD2nfSDiUbC6lB/EWPvxV./g96uGMkm', '0987654321', '456 Elm St', '2025-05-06 04:04:07', 1, 0, 1, 'en', 0, 0, 'private'),
+(3, 'Charlie', 'charlie@example.com', '$2y$10$lkLri57ZaqgVo7jn0gTU4uWxd2JbKEV2rEVKS39BFSi6bxEn/TRei', '1122334455', '789 Oak St', '2025-05-06 04:04:07', 1, 0, 1, 'en', 0, 0, 'private'),
+(4, 'Diana', 'diana@example.com', '$2y$10$CQd0AfZeCCra/rVASNiuvebsVvRHh8WLQxIPABZKtSZttPDaUXuPO', '6677889900', '321 Pine St', '2025-05-06 04:04:07', 1, 0, 1, 'en', 0, 0, 'private'),
+(5, 'ewrgwerg', 'wergsdfvsefger', '$2y$10$euxYJmZNXluJQdrEIFTPC.wnldVFt4ksTS2wEHj1NKuKbH0OozbJm', '1234567', 'random', '2025-05-16 02:41:40', 1, 0, 1, 'en', 0, 0, 'private'),
+(6, 'Emman', 'Emman@gmail.com', '$2y$10$SkIXQ8JmJYaapZjo.Jwx9OASRJ1MEk.RyIPwcRYZ1V/YKjAiVgNNC', '123456789', '1234567890', '2025-05-26 05:25:43', 1, 0, 1, 'en', 0, 0, 'private'),
+(7, '1234', '1234@gmail.com', '$2y$10$2qrfYvJn.tXZnVEn8ZX.ieN.YgZuFHlPfrdoQYVrdxL1m.tdxWty2', '1234', '1234', '2025-05-26 05:30:59', 1, 0, 1, 'en', 0, 0, 'private');
 
 --
 -- Indexes for dumped tables
@@ -279,6 +313,15 @@ ALTER TABLE `products`
   ADD KEY `category_id` (`category_id`);
 
 --
+-- Indexes for table `product_comments`
+--
+ALTER TABLE `product_comments`
+  ADD PRIMARY KEY (`comment_id`),
+  ADD KEY `idx_product_id` (`product_id`),
+  ADD KEY `idx_user_id` (`user_id`),
+  ADD KEY `idx_created_at` (`created_at`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -332,6 +375,12 @@ ALTER TABLE `products`
   MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
+-- AUTO_INCREMENT for table `product_comments`
+--
+ALTER TABLE `product_comments`
+  MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
@@ -352,32 +401,45 @@ ALTER TABLE `cart`
 --
 ALTER TABLE `cartitems`
   ADD CONSTRAINT `cartitems_ibfk_1` FOREIGN KEY (`cart_id`) REFERENCES `cart` (`cart_id`),
-  ADD CONSTRAINT `cartitems_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`);
+  ADD CONSTRAINT `cartitems_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`),
+  ADD CONSTRAINT `cartitems_ibfk_3` FOREIGN KEY (`cart_id`) REFERENCES `cart` (`cart_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `cartitems_ibfk_4` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `orderitems`
 --
 ALTER TABLE `orderitems`
   ADD CONSTRAINT `orderitems_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`),
-  ADD CONSTRAINT `orderitems_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`);
+  ADD CONSTRAINT `orderitems_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`),
+  ADD CONSTRAINT `orderitems_ibfk_3` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `orderitems_ibfk_4` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `orders`
 --
 ALTER TABLE `orders`
-  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
+  ADD CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `payments`
 --
 ALTER TABLE `payments`
-  ADD CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`);
+  ADD CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`),
+  ADD CONSTRAINT `payments_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `products`
 --
 ALTER TABLE `products`
   ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`);
+
+--
+-- Constraints for table `product_comments`
+--
+ALTER TABLE `product_comments`
+  ADD CONSTRAINT `product_comments_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `product_comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

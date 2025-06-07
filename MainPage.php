@@ -182,6 +182,7 @@ if (isset($_SESSION['user_id'])) {
    <title>A&F</title>
    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Merriweather+Sans:wght@700&display=swap" rel="stylesheet" />
    <link rel="stylesheet" href="styles.css">
+   <link rel="stylesheet" href="comments.css"> 
 
 <style>
     * {
@@ -1003,6 +1004,136 @@ if (isset($_SESSION['user_id'])) {
         transform: scale(1.05);
     }
 
+    /* Comments Section Styles */
+    .modal-comments-section {
+        margin-top: 20px;
+        border-top: 1px solid #eee;
+        padding-top: 20px;
+    }
+
+    .modal-comments-section h3 {
+        color: #C647CC;
+        margin-bottom: 15px;
+        font-size: 18px;
+    }
+
+    .add-comment-form {
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+    .add-comment-form h4 {
+        margin: 0 0 10px 0;
+        color: #333;
+        font-size: 16px;
+    }
+
+    .rating-input {
+        margin-bottom: 10px;
+    }
+
+    .rating-input label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    .star-rating {
+        display: flex;
+        gap: 2px;
+    }
+
+    .star {
+        font-size: 20px;
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+    .star:hover,
+    .star.active {
+        color: #ffc107;
+    }
+
+    #commentText {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        resize: vertical;
+        font-family: inherit;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+    }
+
+    .submit-comment-btn {
+        background: #C647CC;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .submit-comment-btn:hover {
+        background: #a63d9f;
+    }
+
+    .comments-list {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .comment-item {
+        background: white;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .comment-author {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .comment-rating {
+        color: #ffc107;
+    }
+
+    .comment-date {
+        font-size: 12px;
+        color: #666;
+    }
+
+    .comment-text {
+        color: #333;
+        line-height: 1.4;
+    }
+
+    .no-comments {
+        text-align: center;
+        color: #666;
+        padding: 20px;
+        font-style: italic;
+    }
+
+    .loading {
+        text-align: center;
+        color: #666;
+        padding: 20px;
+    }
+
     /* Mobile responsive adjustments */
     @media (max-width: 768px) {
         .header {
@@ -1278,14 +1409,203 @@ if (isset($_SESSION['user_id'])) {
           <span>Add to Cart</span>
         </button>
       </div>
+      
+      <!-- Comments Section -->
+      <div class="modal-comments-section">
+        <h3>Customer Comments</h3>
+        
+        <!-- Add Comment Form -->
+        <div class="add-comment-form">
+          <h4>Leave a comment</h4>
+          <div class="rating-input">
+            <label for="rating">Rating:</label>
+            <div class="star-rating">
+              <span class="star" data-value="1">&#9733;</span>
+              <span class="star" data-value="2">&#9733;</span>
+              <span class="star" data-value="3">&#9733;</span>
+              <span class="star" data-value="4">&#9733;</span>
+              <span class="star" data-value="5">&#9733;</span>
+            </div>
+          </div>
+          <textarea id="commentText" placeholder="Write your comment here..." rows="3"></textarea>
+          <button class="submit-comment-btn" onclick="submitComment()">Submit Comment</button>
+        </div>
+        
+        <!-- Comments List -->
+        <div class="comments-list" id="commentsList">
+          <!-- Comments will be populated here by JavaScript -->
+        </div>
+        
+        <!-- No comments message -->
+        <div class="no-comments" id="noCommentsMessage" style="display: none;">
+          No comments yet. Be the first to comment!
+        </div>
+        
+        <!-- Loading message -->
+        <div class="loading" id="commentsLoading" style="display: none;">
+          Loading comments...
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
+<script src="comments.js"></script> <!-- Add this line -->
 <script>
 // Product Modal Variables
 let currentProduct = null;
 let modalQuantity = 1;
+
+// Comments functionality variables
+let currentRating = 0;
+
+// Initialize star rating functionality
+function initStarRating() {
+    const stars = document.querySelectorAll('.star-rating .star');
+    
+    stars.forEach((star, index) => {
+        // Click event
+        star.addEventListener('click', function() {
+            currentRating = parseInt(this.dataset.value);
+            updateStarDisplay();
+        });
+        
+        // Hover events
+        star.addEventListener('mouseenter', function() {
+            const hoverRating = parseInt(this.dataset.value);
+            highlightStars(hoverRating, true);
+        });
+    });
+    
+    // Reset on mouse leave
+    const starRating = document.querySelector('.star-rating');
+    if (starRating) {
+        starRating.addEventListener('mouseleave', function() {
+            updateStarDisplay();
+        });
+    }
+}
+
+// Highlight stars up to given rating
+function highlightStars(rating, isHover = false) {
+    const stars = document.querySelectorAll('.star-rating .star');
+    stars.forEach((star, index) => {
+        const starValue = parseInt(star.dataset.value);
+        
+        star.classList.remove('active', 'hover');
+        
+        if (starValue <= rating) {
+            star.classList.add(isHover ? 'hover' : 'active');
+        }
+    });
+}
+
+// Update star display based on current rating
+function updateStarDisplay() {
+    highlightStars(currentRating);
+}
+
+// Helper function to render star rating
+function renderStarRating(rating) {
+    let stars = '';
+    for (let i = 1; i <= 5; i++) {
+        if (i <= rating) {
+            stars += '<span style="color: #ffc107;">★</span>';
+        } else {
+            stars += '<span style="color: #ddd;">★</span>';
+        }
+    }
+    return stars;
+}
+
+// Helper function to format date
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Notification system
+function showNotification(message, type) {
+    // Remove existing notifications
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notification => notification.remove());
+    
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; margin-left: 10px; cursor: pointer;">&times;</button>
+    `;
+    
+    // Add notification styles if not already present
+    if (!document.querySelector('#notification-styles')) {
+        const style = document.createElement('style');
+        style.id = 'notification-styles';
+        style.textContent = `
+            .notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 5px;
+                color: white;
+                font-weight: bold;
+                z-index: 10000;
+                animation: slideInRight 0.3s ease;
+                max-width: 300px;
+                word-wrap: break-word;
+            }
+            .notification-success {
+                background: #28a745;
+            }
+            .notification-error {
+                background: #dc3545;
+            }
+            .notification-info {
+                background: #17a2b8;
+            }
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Add missing navigation function
+function goToOrderHistory() {
+    <?php if (isset($_SESSION['user_id'])): ?>
+        window.location.href = 'OrderHistory.php';
+    <?php else: ?>
+        showNotification('Please login to view order history', 'error');
+        setTimeout(() => {
+            window.location.href = 'Welcome.php';
+        }, 1500);
+    <?php endif; ?>
+}
 
 // Categories click functionality
 document.addEventListener('DOMContentLoaded', function() {
@@ -1294,16 +1614,16 @@ document.addEventListener('DOMContentLoaded', function() {
     initProductClicks();
     initNavigationButtons();
     initSearchFunctionality();
-});
-
-function initNavigationButtons() {
-    // Profile button
-    const profileBtn = document.querySelector('.nav-icon[title="Profile"]');
-    if (profileBtn) {
-        profileBtn.addEventListener('click', goToProfile);
-    }
     
-    // Cart button
+    // Initialize star rating
+    initStarRating();
+    
+    // Modal click outside to close
+    const modal = document.getElementById('productModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeProductModal();
     const cartBtn = document.querySelector('.nav-icon[title="Cart"]');
     if (cartBtn) {
         cartBtn.addEventListener('click', goToCart);
@@ -1805,70 +2125,51 @@ function openProductModal(productId) {
         console.error('❌ Modal not found');
         return;
     }
-    console.log('2. ✓ Modal found');
     
-    // Reset modal add-to-cart button state FIRST
+    // Reset modal state
     const modalAddToCartBtn = document.getElementById('modalAddToCart');
     if (modalAddToCartBtn) {
         modalAddToCartBtn.innerHTML = '<span>Add to Cart</span>';
         modalAddToCartBtn.style.background = 'linear-gradient(135deg, #C647CC, #ECC7ED)';
         modalAddToCartBtn.disabled = false;
-        console.log('✓ Modal button reset');
     }
     
     // Show modal
     modal.classList.add('show');
     document.body.style.overflow = 'hidden';
-    console.log('3. ✓ Modal shown');
     
-    // Find the product card (could be carousel item or regular product card)
+    // Find the product card
     const productCard = document.querySelector(`[data-product-id="${productId}"]`);
-    console.log('4. Product card query result:', productCard);
     
     if (!productCard) {
         console.error('❌ Product card not found for ID:', productId);
         return;
     }
     
-    // Debug: log the HTML structure
-    console.log('Product card HTML:', productCard.innerHTML);
-    
-    // Try different selectors for carousel vs regular product cards
+    // Get product data from card
     let productNameElement, productPriceElement, productStockElement, productImageElement;
     
-    // Check if this is a carousel item
     if (productCard.classList.contains('carousel-item')) {
-        console.log('5. Detected: CAROUSEL ITEM');
         productNameElement = productCard.querySelector('.product-name') || productCard.querySelector('h4');
         productPriceElement = productCard.querySelector('.carousel-price');
         productStockElement = productCard.querySelector('.stock-info');
         productImageElement = productCard.querySelector('.carousel-product-image img') || productCard.querySelector('img');
     } else {
-        console.log('5. Detected: REGULAR PRODUCT CARD');
         productNameElement = productCard.querySelector('.product-name');
         productPriceElement = productCard.querySelector('.product-price');
         productStockElement = productCard.querySelector('.product-stock');
         productImageElement = productCard.querySelector('.product-image');
     }
     
-    console.log('6. Found elements:', {
-        nameElement: !!productNameElement,
-        priceElement: !!productPriceElement,
-        stockElement: !!productStockElement,
-        imageElement: !!productImageElement
-    });
-    
-    // Extract data from the visible text
+    // Extract data
     const productName = productNameElement ? productNameElement.textContent.trim() : 'Unknown Product';
     const priceText = productPriceElement ? productPriceElement.textContent.trim() : '$0.00';
     const productPrice = parseFloat(priceText.replace('$', '') || 0);
     
-    // Handle stock text differently for carousel vs regular cards
     let stockText = 'In Stock';
     if (productStockElement) {
         const stockRawText = productStockElement.textContent.trim();
         if (stockRawText.includes('Stock:')) {
-            // Carousel format: "Stock: 150"
             const stockNumber = parseInt(stockRawText.replace('Stock:', '').trim());
             if (stockNumber <= 0) {
                 stockText = 'Out of Stock';
@@ -1878,49 +2179,27 @@ function openProductModal(productId) {
                 stockText = 'In Stock';
             }
         } else {
-            // Regular card format: "In Stock", "Out of Stock", etc.
             stockText = stockRawText;
         }
     }
     
     const imageSrc = productImageElement ? productImageElement.src : null;
     
-    console.log('7. Extracted data:', {
-        name: productName,
-        priceText: priceText,
-        price: productPrice,
-        stockText: stockText,
-        imageSrc: imageSrc
-    });
-    
-    // Get modal elements
+    // Update modal elements
     const modalName = document.getElementById('modalProductName');
     const modalPrice = document.getElementById('modalProductPrice');
     const modalStock = document.getElementById('modalProductStock');
     const imageContainer = document.getElementById('modalImageContainer');
     const modalQuantityDisplay = document.getElementById('modalQuantity');
     
-    console.log('8. Modal elements found:', {
-        modalName: !!modalName,
-        modalPrice: !!modalPrice,
-        modalStock: !!modalStock,
-        imageContainer: !!imageContainer
-    });
-    
-    // Set the content
     if (modalName) {
-        modalName.innerHTML = '';
         modalName.textContent = productName;
-        console.log('9. ✓ Name set to:', modalName.textContent);
     }
     
     if (modalPrice) {
-        modalPrice.innerHTML = '';
         modalPrice.textContent = priceText;
-        console.log('10. ✓ Price set to:', modalPrice.textContent);
     }
     
-    // Set stock status
     if (modalStock) {
         modalStock.textContent = stockText;
         if (stockText.includes('Out of Stock')) {
@@ -1930,10 +2209,8 @@ function openProductModal(productId) {
         } else {
             modalStock.className = 'modal-product-stock modal-stock-in';
         }
-        console.log('11. ✓ Stock set to:', stockText);
     }
     
-    // Set product image
     if (imageContainer) {
         if (imageSrc) {
             imageContainer.innerHTML = `
@@ -1941,18 +2218,15 @@ function openProductModal(productId) {
                      alt="${productName}" 
                      style="width: 200px; height: 200px; object-fit: cover; border-radius: 15px; margin: 0 auto; display: block;">
             `;
-            console.log('12. ✓ Real image set');
         } else {
             imageContainer.innerHTML = `
                 <div style="width: 200px; height: 200px; background: linear-gradient(135deg, #C647CC, #ECC7ED); border-radius: 15px; display: flex; align-items: center; justify-content: center; color: white; font-size: 48px; font-weight: bold; margin: 0 auto;">
                     ${productName.charAt(0).toUpperCase() || 'P'}
                 </div>
             `;
-            console.log('12. ✓ Placeholder image set');
         }
     }
     
-    // Reset quantity
     if (modalQuantityDisplay) {
         modalQuantityDisplay.textContent = '1';
     }
@@ -1967,8 +2241,22 @@ function openProductModal(productId) {
     
     modalQuantity = 1;
     
-    // Fetch description
+    // Reset comments form
+    const commentText = document.getElementById('commentText');
+    if (commentText) {
+        commentText.value = '';
+    }
+    currentRating = 0;
+    updateStarDisplay();
+    
+    // Fetch description and comments
     fetchProductDescription(productId);
+    fetchProductComments(productId);
+    
+    // Initialize star rating for this modal
+    setTimeout(() => {
+        initStarRating();
+    }, 100);
     
     console.log('=== MODAL DEBUG END ===');
 }
@@ -2051,7 +2339,7 @@ function addToCartFromModal() {
         } else {
             button.innerHTML = '✗ Error';
             button.style.background = '#dc3545';
-            showNotification(data.message || 'Error adding product to cart', 'error');
+            showNotification(data.message || 'Error adding comment', 'error');
             
             setTimeout(() => {
                 button.innerHTML = originalText;
@@ -2082,6 +2370,7 @@ function fetchProductDescription(productId) {
         descElement.textContent = 'Loading description...';
     }
     
+    
     fetch(`get_product_details.php?id=${productId}`)
     .then(response => {
         if (!response.ok) {
@@ -2107,6 +2396,160 @@ function fetchProductDescription(productId) {
     });
 }
 
+// Replace your fetchProductComments function:
+function fetchProductComments(productId) {
+    console.log('Fetching comments for product ID:', productId);
+    
+    const commentsList = document.getElementById('commentsList');
+    const noCommentsMessage = document.getElementById('noCommentsMessage');
+    const commentsLoading = document.getElementById('commentsLoading');
+    
+    if (commentsLoading) {
+        commentsLoading.style.display = 'block';
+    }
+    
+    if (commentsList) {
+        commentsList.innerHTML = '';
+    }
+    
+    if (noCommentsMessage) {
+        noCommentsMessage.style.display = 'none';
+    }
+    
+    fetch('product-comments.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'get_comments',
+            product_id: productId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Comments fetch successful:', data);
+        if (data.success && Array.isArray(data.comments)) {
+            if (commentsList) {
+                commentsList.innerHTML = '';
+            }
+            
+            if (data.comments.length === 0) {
+                if (noCommentsMessage) {
+                    noCommentsMessage.style.display = 'block';
+                }
+            } else {
+                if (noCommentsMessage) {
+                    noCommentsMessage.style.display = 'none';
+                }
+                
+                data.comments.forEach(comment => {
+                    const commentItem = document.createElement('div');
+                    commentItem.className = 'comment-item';
+                    
+                    commentItem.innerHTML = `
+                        <div class="comment-header">
+                            <div class="comment-author">${escapeHtml(comment.user_name)}</div>
+                            <div class="comment-rating">${renderStarRating(comment.rating)}</div>
+                            <div class="comment-date">${formatDate(comment.date)}</div>
+                        </div>
+                        <div class="comment-text">${escapeHtml(comment.text)}</div>
+                    `;
+                    
+                    if (commentsList) {
+                        commentsList.appendChild(commentItem);
+                    }
+                });
+            }
+        } else {
+            if (commentsList) {
+                commentsList.innerHTML = '<div class="no-comments">Error loading comments.</div>';
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Comments fetch error:', error);
+        if (commentsList) {
+            commentsList.innerHTML = '<div class="no-comments">Error loading comments.</div>';
+        }
+    })
+    .finally(() => {
+        if (commentsLoading) {
+            commentsLoading.style.display = 'none';
+        }
+    });
+}
+
+// Submit a comment
+function submitComment() {
+    if (!currentProduct) {
+        showNotification('No product selected', 'error');
+        return;
+    }
+    
+    const commentText = document.getElementById('commentText');
+    if (!commentText) return;
+    
+    const text = commentText.value.trim();
+    
+    // Validation
+    if (currentRating === 0) {
+        showNotification('Please select a rating', 'error');
+        return;
+    }
+    
+    if (text.length < 5) {
+        showNotification('Comment must be at least 5 characters long', 'error');
+        return;
+    }
+    
+    // Disable submit button
+    const submitBtn = document.querySelector('.submit-comment-btn');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Posting...';
+    }
+    
+    fetch('product-comments.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'add_comment',
+            product_id: currentProduct.id,
+            comment_text: text,
+            rating: currentRating
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Review posted successfully!', 'success');
+            
+            // Clear form
+            commentText.value = '';
+            currentRating = 0;
+            updateStarDisplay();
+            
+            // Reload comments
+            fetchProductComments(currentProduct.id);
+        } else {
+            showNotification(data.message || 'Error posting review', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error posting comment:', error);
+        showNotification('Network error while posting review', 'error');
+    })
+    .finally(() => {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Comment';
+        }
+    });
+}
+
 // Navigation functions
 function goToProfile() {
     <?php if (isset($_SESSION['user_id'])): ?>
@@ -2124,111 +2567,9 @@ function goToCart() {
         setTimeout(() => {
             window.location.href = 'Welcome.php';
         }, 1500);
+        
     <?php endif; ?>
 }
-
-function goToOrderHistory() {
-    <?php if (isset($_SESSION['user_id'])): ?>
-        window.location.href = 'order_history.php';
-    <?php else: ?>
-        showNotification('Please login to view order history', 'error');
-        setTimeout(() => {
-            window.location.href = 'Welcome.php';
-        }, 1500);
-    <?php endif; ?>
-}
-
-// Carousel functions
-let currentSlide = 0;
-
-function moveCarousel(direction) {
-    const track = document.getElementById('carouselTrack');
-    const items = track.querySelectorAll('.carousel-item');
-    const totalItems = items.length;
-    
-    if (totalItems === 0) return;
-    
-    currentSlide = (currentSlide + direction + totalItems) % totalItems;
-    
-    const translateX = -currentSlide * 100;
-    track.style.transform = `translateX(${translateX}%)`;
-    
-    updateIndicators();
-}
-
-function goToSlide(index) {
-    const track = document.getElementById('carouselTrack');
-    const items = track.querySelectorAll('.carousel-item');
-    
-    if (index >= 0 && index < items.length) {
-        currentSlide = index;
-        const translateX = -currentSlide * 100;
-        track.style.transform = `translateX(${translateX}%)`;
-        updateIndicators();
-    }
-}
-
-function updateIndicators() {
-    const indicators = document.querySelectorAll('.indicator');
-    indicators.forEach((indicator, index) => {
-        indicator.classList.toggle('active', index === currentSlide);
-    });
-}
-
-function viewProduct(productId) {
-    openProductModal(productId);
-}
-
-// Utility functions
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
-        color: white;
-        padding: 15px 20px;
-        border-radius: 5px;
-        z-index: 10000;
-        font-weight: bold;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        animation: slideInRight 0.3s ease;
-    `;
-    notification.textContent = message;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.3s ease';
-        setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 300);
-    }, 3000);
-}
-
-// Close modal when clicking outside
-document.addEventListener('click', function(e) {
-    const modal = document.getElementById('productModal');
-    if (modal && e.target === modal) {
-        closeProductModal();
-    }
-});
-
-// Close modal with Escape key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeProductModal();
-    }
-});
-
 </script>
 </body>
 </html>

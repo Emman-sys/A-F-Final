@@ -11,18 +11,18 @@
     }
 
     html, body {
-      font-family: 'Merriweather', serif;
+      background-image:url('images/bg.png');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
       margin: 0;
       padding: 0;
-      background: linear-gradient(to bottom, #5127A3, #693375, #813F47);
-      background-size: cover;
-      background-position: center;
-      color: white;
-      height: 100vh;
-      overflow: hidden;
+      overflow-x: hidden;  
+      width: 90%; 
+      font-family: 'Merriweather', serif;
     }
 
-    nav {
+    nav{
       position: relative;
       padding: 1rem 0;
     }
@@ -82,12 +82,13 @@
       display: flex;
       align-items: center;
       gap: 1.5rem;
-      background-color: #4a148c;
+      background-color: #7447ac;
       padding: 1rem 1.5rem;
       border-radius: 50px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
       width: 18rem;
       font-size: 0.95rem;
+      color:white;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
@@ -161,6 +162,8 @@
         width: 15rem;
         padding: 0.8rem 1.2rem;
         font-size: 0.85rem;
+        color:white;
+        font-weight: bold;
         gap: 1rem;
       }
       
