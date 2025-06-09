@@ -137,11 +137,13 @@ html, body {
         z-index: 1;
         opacity: 0.7;
       }
-      .image-1 { left: 0; top: 128px; width: 180px; transform: rotate(-11deg);}
-      .image-2 { right: 0; top: 94px; width: 180px; transform: rotate(-8deg);}
-      .image-3 { left: 63px; bottom: 0; width: 120px;}
-      .image-4 { right: 100px; bottom: 0; width: 90px; transform: rotate(-18deg);}
-      .image-5 { right: 100px; top: 66px; width: 60px; transform: rotate(33deg);}
+      .image-1 { left: 0; top: 75px; width: 540px; transform: rotate(-11deg);}
+      .image-2 { right: 0; top: 94px; width: 540px; transform: rotate(-8deg);}
+      .image-3 { left: 63px; bottom: 0; width: 520px;}
+      .image-4 { right: 100px; bottom: 0; width: 250px; transform: rotate(-18deg);}
+      .image-5 { right: 100px; top: 66px; width: 260px; transform: rotate(33deg);}
+
+
       @media (max-width: 1000px) {
         .dashboard-container {
           min-width: 90vw;

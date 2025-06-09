@@ -219,11 +219,11 @@
   <nav>
     <ul class="nav-links">
       <li><a href="Welcome.php">Home</a></li>
-      <li><a href="Contact.html">Contact</a></li>
+      <li><a href="Contact.php">Contact</a></li>
       <li class="pic">
         <img src='https://cdn.builder.io/api/v1/image/assets/TEMP/cbc700ac3a9cc70c2561f787dc7a724761a462ad' class="logo" alt="A&F Logo"/>
       </li>
-      <li><a href="About.html">About</a></li>
+      <li><a href="About.php">About</a></li>
       <li><a href="Welcome.php">Login/Sign up</a></li>
     </ul>
   </nav>

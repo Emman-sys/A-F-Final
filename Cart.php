@@ -116,8 +116,8 @@ $grand_total = $total + $delivery_fee;
         left: 0;
         right: 0;
         top: 0;
-        width: 100vw;
-        height: 100px; /* DECREASED from 140px */
+        width: 500vw;
+        height: 100px; 
         background: linear-gradient(
           to bottom, 
           rgba(81, 39, 163, 0.9), 
@@ -132,7 +132,7 @@ $grand_total = $total + $delivery_fee;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       }
       
-      /* Brand - make it smaller */
+     
       .brand {
         position: fixed;
         font-size: 40px; /* DECREASED from 56px */

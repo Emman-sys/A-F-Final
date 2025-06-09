@@ -367,13 +367,13 @@ $isLoggedIn = isset($_SESSION["user_id"]);
     <nav class="navigation">
       <div class="nav-links-left">
         <a href="#" class="nav-link">AdminDash</a>
-        <a href="Contact.html" class="nav-link">Contact</a>
+        <a href="Contact.php" class="nav-link">Contact</a>
       </div>
        
       <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/cbc700ac3a9cc70c2561f787dc7a724761a462ad" alt="Logo" class="nav-logo" />
 
       <div class="nav-links-right">
-        <a href="About.html" class="nav-link">About</a>
+        <a href="About.php" class="nav-link">About</a>
         <?php if ($isLoggedIn): ?>
           <a href="Userdashboard.php" class="nav-link">Dashboard</a>
         <?php else: ?>

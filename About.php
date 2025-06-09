@@ -7,15 +7,13 @@
     <link rel="stylesheet" href="style.css">
   <style>
     body {
-    font-family: Merriweather Bold;
-    margin: 0;
-    padding: 0;
-    
-    background-image: url('images/Aboutuzbackground.jpeg'); 
+    background-image:url('images/aboutbg.png'); 
     background-size: cover;
     background-position: center;
-    background-repeat: no-repeat;
     background-attachment: fixed; 
+    font-family: Merriweather Bold;
+    margin: 0;
+    padding: 0; 
 }
 
 .header {
@@ -76,6 +74,7 @@
 
 .about-container p {
     font-size: 18px;
+    font-weight:bold;
     line-height: 1.6;
 }
 
@@ -91,11 +90,11 @@
         <nav class="navbar">
             <ul class="nav-links">
     <li><a href="Welcome.php">Home</a></li>
-    <li><a href="Contact.html">Contact</a></li>
+    <li><a href="Contact.php">Contact</a></li>
     <div class="social-item">
         <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/cbc700ac3a9cc70c2561f787dc7a724761a462ad" alt="A&F Chocolates logo" />
     </div>
-    <li><a href="About.html">About</a></li>
+    <li><a href="About.php">About</a></li>
     <li><a href="Welcome.php">Login/Sign up</a></li>
             </ul>
         </nav>
