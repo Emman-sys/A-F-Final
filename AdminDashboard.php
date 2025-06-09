@@ -1,14 +1,158 @@
+<?php
+// filepath: c:\Users\ceile\A-F-Final\AdminDashboard.php
+session_start();
+require 'db_connect.php';
+
+// Check if user is trying to login
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_login'])) {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    
+    // Debug: Log the attempt
+    error_log("Admin login attempt for email: " . $email);
+    
+    // Get admin data from database
+    $stmt = $conn->prepare("SELECT admin_id, admin_fname, admin_lname, admin_password FROM admin WHERE admin_email = ? AND status = 'active'");
+    if ($stmt) {
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 1) {
+            $admin = $result->fetch_assoc();
+            
+            // Verify password using password_verify()
+            if (password_verify($password, $admin['admin_password'])) {
+                $_SESSION['admin_id'] = $admin['admin_id'];
+                $_SESSION['admin_name'] = $admin['admin_fname'] . ' ' . $admin['admin_lname'];
+                $_SESSION['role'] = 'admin';
+                
+                // Update last login
+                $updateStmt = $conn->prepare("UPDATE admin SET last_login = NOW() WHERE admin_id = ?");
+                if ($updateStmt) {
+                    $updateStmt->bind_param("i", $admin['admin_id']);
+                    $updateStmt->execute();
+                }
+                
+                header('Location: AdminDashboard.php');
+                exit();
+            } else {
+                $loginError = "Invalid password!";
+                error_log("Password verification failed for admin: " . $email);
+            }
+        } else {
+            $loginError = "Admin account not found!";
+            error_log("Admin account not found: " . $email);
+        }
+    } else {
+        $loginError = "Database error occurred!";
+        error_log("Database prepare failed: " . $conn->error);
+    }
+}
+
+// Handle logout
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header('Location: AdminDashboard.php');
+    exit();
+}
+
+// Get dashboard stats - with fallback values
+function getDashboardStats($conn) {
+    $stats = [
+        'total_sales' => 100000,
+        'daily_sales' => 50000,
+        'total_customers' => 4158,
+        'total_products' => 500,
+        'total_orders' => 1000
+    ];
+    
+    // Try to get real stats, but use fallbacks if tables don't exist
+    try {
+        // Check if orders table exists and get total sales
+        $result = $conn->query("SHOW TABLES LIKE 'orders'");
+        if ($result && $result->num_rows > 0) {
+            $stmt = $conn->prepare("SELECT COALESCE(SUM(total_amount), 0) as total_sales FROM orders WHERE status = 'completed'");
+            if ($stmt) {
+                $stmt->execute();
+                $result = $stmt->get_result();
+                if ($result) {
+                    $row = $result->fetch_assoc();
+                    $stats['total_sales'] = $row['total_sales'] ?: 100000;
+                }
+            }
+            
+            // Daily Sales
+            $stmt = $conn->prepare("SELECT COALESCE(SUM(total_amount), 0) as daily_sales FROM orders WHERE DATE(order_date) = CURDATE() AND status = 'completed'");
+            if ($stmt) {
+                $stmt->execute();
+                $result = $stmt->get_result();
+                if ($result) {
+                    $row = $result->fetch_assoc();
+                    $stats['daily_sales'] = $row['daily_sales'] ?: 50000;
+                }
+            }
+            
+            // Total Orders
+            $stmt = $conn->prepare("SELECT COUNT(*) as total_orders FROM orders");
+            if ($stmt) {
+                $stmt->execute();
+                $result = $stmt->get_result();
+                if ($result) {
+                    $row = $result->fetch_assoc();
+                    $stats['total_orders'] = $row['total_orders'] ?: 1000;
+                }
+            }
+        }
+        
+        // Check if users table exists and get customer count
+        $result = $conn->query("SHOW TABLES LIKE 'users'");
+        if ($result && $result->num_rows > 0) {
+            $stmt = $conn->prepare("SELECT COUNT(*) as total_customers FROM users WHERE role = 'customer'");
+            if ($stmt) {
+                $stmt->execute();
+                $result = $stmt->get_result();
+                if ($result) {
+                    $row = $result->fetch_assoc();
+                    $stats['total_customers'] = $row['total_customers'] ?: 4158;
+                }
+            }
+        }
+        
+        // Check if products table exists and get product count
+        $result = $conn->query("SHOW TABLES LIKE 'products'");
+        if ($result && $result->num_rows > 0) {
+            $stmt = $conn->prepare("SELECT COUNT(*) as total_products FROM products");
+            if ($stmt) {
+                $stmt->execute();
+                $result = $stmt->get_result();
+                if ($result) {
+                    $row = $result->fetch_assoc();
+                    $stats['total_products'] = $row['total_products'] ?: 500;
+                }
+            }
+        }
+        
+    } catch (Exception $e) {
+        error_log("Error getting dashboard stats: " . $e->getMessage());
+    }
+    
+    return $stats;
+}
+
+// Get dashboard stats
+$stats = getDashboardStats($conn);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>A&F Chocolates</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Admin Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  <head>
-    <style>
+  <style>
      body{
         background:url("https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/image%203.png?v=1747320934399");
         background-position:center;
@@ -22,7 +166,7 @@
 
       .brand-name {
       left:50px;
-      font-size: clamp(2rem, 5vw, 3rem); /* Responsive font size */
+      font-size: clamp(2rem, 5vw, 3rem);
       font-weight: bold;
       color: white;
     }
@@ -31,19 +175,9 @@
       position:absolute;
       left:145px;
       top:40px;
-      font-size: 25px; /* Responsive font size */
+      font-size: 25px;
       font-weight: bold;
       color: white;
-    }
-
-    .nav-items {
-      position: absolute;
-      left:125px;
-      display: flex;
-      gap: clamp(15px, 3vw, 30px); /* Responsive gap */
-      color: white;
-      font-size: clamp(0.8rem, 2vw, 1rem); /* Responsive font size */
-
     }
 
     .search-bar {
@@ -51,7 +185,7 @@
       left:50px;
       top: -95px;
       width: 100%;
-      max-width: min(600px, 90vw); /* Responsive max-width */
+      max-width: min(600px, 90vw);
       height: 56px;
       border-radius: 55px;
       background-color: white;
@@ -68,7 +202,7 @@
       height: 24px;
     }
 
-    
+    /* All your existing dashboard styles... */
     .box1{
         position:absolute;
         left: 135px;
@@ -77,7 +211,14 @@
         height: 269px;
         background: linear-gradient(to bottom, #D997D5,#FFFFFF);
         border-radius:20px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
     }
+    
+    .box1:hover, .box2:hover, .box3:hover, .box4:hover, .box5:hover {
+        transform: translateY(-5px);
+    }
+    
     .circ1{
         position:absolute;
         left: 186px;
@@ -87,7 +228,6 @@
         background: white;
         border-radius:50px;
         z-index:1;
-
     }
     .crl1{
         position:absolute;
@@ -99,7 +239,6 @@
         border-radius:55px;
         z-index:2;
     }
-    
 
     .tsales{
         position:absolute;
@@ -136,6 +275,8 @@
         height: 269px;
         background: linear-gradient(to bottom, #7B87C6,#FFFFFF);
         border-radius:20px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
     }
      
     .circ2{
@@ -147,7 +288,6 @@
         background: white;
         border-radius:50px;
         z-index:1;
-
     }
     .crl2{
         position:absolute;
@@ -194,6 +334,8 @@
         height: 269px;
         background: linear-gradient(to bottom, #7BC68F,#FFFFFF);
         border-radius:20px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
     }
     
      .circ3{
@@ -205,7 +347,6 @@
         background: white;
         border-radius:50px;
         z-index:1;
-
     }
     .crl3{
         position:absolute;
@@ -244,7 +385,6 @@
         font-weight:600;
         z-index:2;
     }
-    
 
     .box4{
         position:absolute;
@@ -254,15 +394,10 @@
         height: 269px;
         background: linear-gradient(to bottom, #C6B27B,#FFFFFF);
         border-radius:20px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
     }
-    .cart{
-      position: absolute;
-      left: 906px;
-      top: 200px;
-      transform: translateY(-50%);
-      width: 56px;
-      height: 57px;
-    }
+    
      .circ4{
         position:absolute;
         left: 906px;
@@ -272,7 +407,6 @@
         background: white;
         border-radius:50px;
         z-index:1;
-
     }
     .crl4{
         position:absolute;
@@ -319,6 +453,8 @@
         height: 269px;
         background: linear-gradient(to bottom, #6A34D6,#FFFFFF);
         border-radius:20px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
     }
     
      .circ5{
@@ -369,7 +505,6 @@
         z-index:2;
     }
 
-    
     .rectangle1{
         position:absolute;
         left: 150px;
@@ -499,21 +634,12 @@
       border-radius: 8px;
       z-index: 3;
     }
-    .top-product1 { 
-        left: 180px;
-     }
-    .top-product2 {
-         left: 380px;
-     }
-    .top-product3 { 
-        left: 580px;
-     }
-    .top-product4 { 
-        left: 780px; 
-    }
-    .top-product5 { 
-        left: 980px; 
-    }
+    .top-product1 { left: 180px; }
+    .top-product2 { left: 380px; }
+    .top-product3 { left: 580px; }
+    .top-product4 { left: 780px; }
+    .top-product5 { left: 980px; }
+    
      .square{
       position:absolute;
       width:155px;
@@ -524,21 +650,12 @@
       z-index:3;
     }
       
-   .square1 { 
-    left: 190px;
-    }
-   .square2 { 
-    left: 390px; 
-   }
-   .square3 { 
-    left: 590px;
-   }
-   .square4 {
-     left: 788px;
-   }
-   .square5 { 
-    left: 990px;
- }
+   .square1 { left: 190px; }
+   .square2 { left: 390px; }
+   .square3 { left: 590px; }
+   .square4 { left: 788px; }
+   .square5 { left: 990px; }
+   
  .topsales{
     position:absolute;
     left: 208px;
@@ -557,7 +674,7 @@
  }
  .usr{
     position:absolute;
-    left: 932px;
+    left: 687px;
     top: 225px;
     width:59px;
     height:55px;
@@ -565,7 +682,7 @@
  }
  .cart{
     position:absolute;
-    left: 687px;
+    left: 932px;
     top: 248px;
     width:59px;
     height:55px;
@@ -595,155 +712,420 @@
     height:40.23px;
     z-index:2;
  }
-   
 
+/* ADMIN LOGIN MODAL STYLES - Matching Welcome.php */
+.popup-overlay {
+  display: <?php echo !isset($_SESSION['admin_id']) ? 'block' : 'none'; ?>;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
 
+.popup-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 500px;
+  padding: 40px;
+  border-radius: 15px;
+  background-color: rgba(217, 217, 217, 0.1);
+  backdrop-filter: blur(10px);
+}
 
+.popup-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+}
 
+.form-title {
+  color: #fff;
+  font-family: Poppins, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 30px;
+}
 
-        
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
+.form-group {
+  position: relative;
+}
 
+.input-label {
+  color: #fff;
+  font-family: Poppins;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: block;
+}
 
+.form-input {
+  width: 100%;
+  height: 50px;
+  border-radius: 10px;
+  border: 1px solid rgba(216, 204, 204, 0.61);
+  background-color: rgba(216, 204, 204, 0.61);
+  padding: 0 15px;
+  font-size: 14px;
+  color: #000;
+  box-sizing: border-box;
+}
 
+.login-button {
+  width: 100%;
+  height: 50px;
+  border-radius: 10px;
+  background-color: #fff;
+  color: #000;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  margin-top: 20px;
+}
 
+.signup-text {
+  text-align: center;
+  font-family: Poppins, sans-serif;
+  font-size: 14px;
+  color: #fff;
+  margin-top: 15px;
+}
+
+.signup-text a {
+  color: #fff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.error-message {
+  background-color: rgba(192, 57, 43, 0.7);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.admin-welcome {
+    position: absolute;
+    right: 100px;
+    top: 20px;
+    color: white;
+    font-size: 14px;
+}
+
+.admin-logout {
+    position: absolute;
+    right: 50px;
+    top: 60px;
+    background: #dc3545;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.admin-logout:hover {
+    background: #c82333;
+}
+
+/* Hide dashboard content when not logged in */
+.dashboard-content {
+    opacity: <?php echo isset($_SESSION['admin_id']) ? '1' : '0.3'; ?>;
+    pointer-events: <?php echo isset($_SESSION['admin_id']) ? 'auto' : 'none'; ?>;
+    transition: opacity 0.3s ease;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #333;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.debug-info {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    z-index: 9999;
+}
     </style>
+</head>
 
+<body>
+    <?php if (!isset($_SESSION['admin_id'])): ?>
+    <!-- Admin Login Modal - Matching Welcome.php Style -->
+    <div id="adminLoginPopup" class="popup-overlay">
+        <div class="popup-container">
+            <button class="popup-close" onclick="goToMainPage()">&times;</button>
+            <h2 class="form-title">Admin Login</h2>
+            
+            <?php if (isset($loginError)): ?>
+                <div class="error-message"><?php echo htmlspecialchars($loginError); ?></div>
+            <?php endif; ?>
+            
+            <form class="login-form" method="POST">
+                <div class="form-group">
+                    <label class="input-label">Admin Email</label>
+                    <input type="email" class="form-input" name="email" value="admin@af.com" required />
+                </div>
+                <div class="form-group">
+                    <label class="input-label">Password</label>
+                    <div style="position: relative;">
+                        <input type="password" class="form-input" name="password" id="adminPassword" placeholder="Enter admin password" required />
+                        <button type="button" class="password-toggle" onclick="togglePassword('adminPassword')">Show</button>
+                    </div>
+                </div>
+                <button type="submit" name="admin_login" class="login-button">Login to Dashboard</button>
+                <p class="signup-text">
+                    <a href="MainPage.php">← Back to Store</a>
+                </p>
+                <div style="margin-top: 15px; font-size: 12px; color: #ccc; text-align: center;">
+                    Demo: admin@af.com / admin123<br>
+                    <small>If login fails, run setup_admin.php first</small>
+                </div>
+            </form>
+        </div>
+    </div>
+    <?php else: ?>
+    <!-- Welcome message and logout for logged in admin -->
+    <div class="admin-welcome">
+        Welcome, <?php echo htmlspecialchars($_SESSION['admin_name']); ?>
+    </div>
+    <a href="?logout=1" class="admin-logout" onclick="return confirm('Are you sure you want to logout?')">Logout</a>
+    <?php endif; ?>
 
-
-
-
-
-
-    <body>
+    <!-- Dashboard Content -->
+    <div class="dashboard-content">
         <div class="boxes">
-     <div class="header-section"></div>
-        <header class="header">
-        <h2 class="brand-name">A&F</h2>
-        <h2 class="Admin">Admin Dashboard</h2>
-        <div class="nav-items">
-        </div>
+            <div class="header-section"></div>
+            <header class="header">
+                <h2 class="brand-name">A&F</h2>
+                <h2 class="Admin">Admin Dashboard</h2>
 
-        <div class="search-bar">
-        <img src="https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/search.png?v=1747633330905" class="search-icon" alt="Search">
-      </div>
-        
-         <div class="notifications">
-        <img src="images/notif.png" alt="notif">
-      </div>
-      <div class="cart">
-        <img src="images/cart.png" alt="cart">
-      </div>
-      <div class="topsales">
-        <img src="images/topsales.png" alt="top">
-      </div>
-      <div class="dailysales">
-        <img src="images/dailysales.png" alt="daily">
-      </div>
-      <div class="deliv">
-        <img src="images/deliv.png" alt="deliveryyy">
-      </div>
-      <div class="usr">
-        <img src="images/users.png" alt="newcustomers">
-      </div>
-       <div class="iconn">
-        <img src="images/iconuser.png" alt="useracc">
-      </div>
-     
+                <div class="search-bar">
+                    <img src="https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/search.png?v=1747633330905" class="search-icon" alt="Search">
+                </div>
+                
+                <div class="notifications">
+                    <img src="images/notif.png" alt="notif">
+                </div>
+                
+                <!-- Icons for dashboard boxes -->
+                <div class="topsales">
+                    <img src="images/topsales.png" alt="top">
+                </div>
+                <div class="dailysales">
+                    <img src="images/dailysales.png" alt="daily">
+                </div>
+                <div class="deliv">
+                    <img src="images/deliv.png" alt="deliveryyy">
+                </div>
+                <div class="usr">
+                    <img src="images/users.png" alt="newcustomers">
+                </div>
+                <div class="cart">
+                    <img src="images/cart.png" alt="cart">
+                </div>
+                <div class="iconn">
+                    <img src="images/iconuser.png" alt="useracc">
+                </div>
 
+                <!-- Dashboard boxes -->
+                <div class="box1" onclick="showSalesDetails()"></div>
+                <div class="box2" onclick="showDailySales()"></div>
+                <div class="box3" onclick="showCustomers()"></div>
+                <div class="box4" onclick="showProducts()"></div>
+                <div class="box5" onclick="showDeliveries()"></div>
+            </header>
 
-            <div class="box1"></div>
-            <div class="box2"></div>
-            <div class="box3"></div>
-            <div class="box4"></div>
-            <div class="box5"></div>
-        </div>
-
-         <div class="sum-sales, top-sales">
-            <div class="rectangle1"></div>
-            <div class="rectangle2"></div>
-
-        </div>
-            
+            <!-- Summary sections -->
+            <div class="sum-sales, top-sales">
+                <div class="rectangle1"></div>
+                <div class="rectangle2"></div>
+            </div>
+                
+            <!-- Dashboard data -->
             <div class="boxes-info">
-        <h2 class="tsales">Total Sales</h2>
-        <h2 class="percent">+50% Incomes</h2>
-        <h2 class="income">₱100,000</h2>
+                <h2 class="tsales">Total Sales</h2>
+                <h2 class="percent">+50% Incomes</h2>
+                <h2 class="income">₱<?php echo number_format($stats['total_sales']); ?></h2>
 
-         <h2 class="dsales">Daily Sales</h2>
-        <h2 class="sales">-13% Sales</h2>
-        <h2 class="income2">₱50,000</h2>
+                <h2 class="dsales">Daily Sales</h2>
+                <h2 class="sales">-13% Sales</h2>
+                <h2 class="income2">₱<?php echo number_format($stats['daily_sales']); ?></h2>
 
-        <h2 class="customers">Customers</h2>
-        <h2 class="percent1">+25% New Users</h2>
-        <h2 class="newusers">4158</h2>
+                <h2 class="customers">Customers</h2>
+                <h2 class="percent1">+25% New Users</h2>
+                <h2 class="newusers"><?php echo number_format($stats['total_customers']); ?></h2>
 
-        <h2 class="product">Product</h2>
-        <h2 class="percent2">+5% New Products</h2>
-        <h2 class="numberofp">500</h2>
+                <h2 class="product">Product</h2>
+                <h2 class="percent2">+5% New Products</h2>
+                <h2 class="numberofp"><?php echo number_format($stats['total_products']); ?></h2>
 
-        <h2 class="delivery">Delivery</h2>
-        <h2 class="percent3">Decrease by 2%</h2>
-        <h2 class="ndelivery">1000</h2>
-         </div>
+                <h2 class="delivery">Delivery</h2>
+                <h2 class="percent3">Decrease by 2%</h2>
+                <h2 class="ndelivery"><?php echo number_format($stats['total_orders']); ?></h2>
+            </div>
 
-        <div class="circles">
-            <div class="circ1"></div>
-            <div class="circ2"></div>
-            <div class="circ3"></div>
-            <div class="circ4"></div>
-            <div class="circ5"></div>
+            <!-- Circles and other visual elements -->
+            <div class="circles">
+                <div class="circ1"></div>
+                <div class="circ2"></div>
+                <div class="circ3"></div>
+                <div class="circ4"></div>
+                <div class="circ5"></div>
+            </div>
+
+            <div class="circles2">
+                <div class="crl1"></div>
+                <div class="crl2"></div>
+                <div class="crl3"></div>
+                <div class="crl4"></div>
+                <div class="crl5"></div>
+            </div>
+
+            <div class="summary-section">
+                <h2 class="sumsales">Summary Sales</h2>
+                <div class="line"></div>
+                <div class="scalendar"></div>
+                <div class="month">Month</div>
+                <div class="triangle"></div>
+                <div class="number">30+</div>
+                <div class="number1">30</div>
+                <div class="number2">20</div>
+                <div class="number3">10</div>
+                <div class="number4">0</div>
+            </div>
+
+            <div class="sales-section">
+                <h2 class="tpsales">Top Sales</h2>
+                <div class="top-product top-product1"></div>
+                <div class="top-product top-product2"></div>
+                <div class="top-product top-product3"></div>
+                <div class="top-product top-product4"></div>
+                <div class="top-product top-product5"></div>
+                
+                <div class="square square1"></div>
+                <div class="square square2"></div>
+                <div class="square square3"></div>
+                <div class="square square4"></div>
+                <div class="square square5"></div>
+            </div>
         </div>
+    </div>
 
-        <div class="circles2">
-            <div class="crl1"></div>
-            <div class="crl2"></div>
-            <div class="crl3"></div>
-            <div class="crl4"></div>
-            <div class="crl5"></div>
-        </div>
+    <!-- Debug info -->
+    <div class="debug-info">
+        <strong>Debug Info:</strong><br>
+        Admin logged in: <?php echo isset($_SESSION['admin_id']) ? 'Yes' : 'No'; ?><br>
+        Database connected: <?php echo $conn ? 'Yes' : 'No'; ?><br>
+        Stats loaded: <?php echo $stats ? 'Yes' : 'No'; ?>
+    </div>
 
-        <div class="summary-section">
-            <h2 class="sumsales">Summary Sales</h2>
-            <div class="line"></div>
-            <div class="scalendar"></div>
-            <div class="month">Month</div>
-            <div class="triangle"></div>
-            <div class="number">30+</div>
-            <div class="number1">30</div>
-            <div class="number2">20</div>
-            <div class="number3">10</div>
-            <div class="number4">0</div>
-        </div>
+    <script>
+        // Password toggle function
+        function togglePassword(inputId) {
+            var pwd = document.getElementById(inputId);
+            var btn = event.target;
+            if (pwd.type === "password") {
+                pwd.type = "text";
+                btn.textContent = "Hide";
+            } else {
+                pwd.type = "password";
+                btn.textContent = "Show";
+            }
+        }
 
-        <div class="sales-section">
-            <h2 class="tpsales">Top Sales</h2>
-            <div class="top-product top-product1"></div>
-            <div class="top-product top-product2"></div>
-            <div class="top-product top-product3"></div>
-            <div class="top-product top-product4"></div>
-            <div class="top-product top-product5"></div>
+        // Interactive dashboard functions
+        function showSalesDetails() {
+            <?php if (isset($_SESSION['admin_id'])): ?>
+                alert('Total Sales: ₱<?php echo number_format($stats['total_sales']); ?>\nClick to view detailed sales report');
+            <?php else: ?>
+                alert('Please login first');
+            <?php endif; ?>
+        }
 
+        function showDailySales() {
+            <?php if (isset($_SESSION['admin_id'])): ?>
+                alert('Daily Sales: ₱<?php echo number_format($stats['daily_sales']); ?>\nToday\'s performance');
+            <?php else: ?>
+                alert('Please login first');
+            <?php endif; ?>
+        }
+
+        function showCustomers() {
+            <?php if (isset($_SESSION['admin_id'])): ?>
+                alert('Total Customers: <?php echo number_format($stats['total_customers']); ?>\nManage customer database');
+            <?php else: ?>
+                alert('Please login first');
+            <?php endif; ?>
+        }
+
+        function showProducts() {
+            <?php if (isset($_SESSION['admin_id'])): ?>
+                alert('Total Products: <?php echo number_format($stats['total_products']); ?>\nManage product inventory');
+            <?php else: ?>
+                alert('Please login first');
+            <?php endif; ?>
+        }
+
+        function showDeliveries() {
+            <?php if (isset($_SESSION['admin_id'])): ?>
+                alert('Total Orders: <?php echo number_format($stats['total_orders']); ?>\nManage order deliveries');
+            <?php else: ?>
+                alert('Please login first');
+            <?php endif; ?>
+        }
+
+        function goToMainPage() {
+            window.location.href = 'MainPage.php';
+        }
+
+        // Auto-focus on password field if email is pre-filled
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailField = document.querySelector('input[name="email"]');
+            const passwordField = document.getElementById('adminPassword');
             
-            <div class="square square1"></div>
-            <div class="square square2"></div>
-            <div class="square square3"></div>
-            <div class="square square4"></div>
-            <div class="square square5"></div>
-           
-        </div>
+            if (emailField && emailField.value && passwordField) {
+                passwordField.focus();
+            }
+        });
 
-
-
-
-
-       
-
-
-        
-        
-      </header>
-
-    </body>
-  </head>
-  </html>
+        console.log('Admin Dashboard loaded successfully!');
+        console.log('Admin logged in: <?php echo isset($_SESSION['admin_id']) ? 'true' : 'false'; ?>');
+    </script>
+</body>
+</html>

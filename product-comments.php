@@ -5,7 +5,6 @@ require 'db_connect.php';
 
 header('Content-Type: application/json');
 
-// Handle AJAX requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     $action = $input['action'] ?? '';
@@ -25,7 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// Get comments for a product
 function getProductComments($conn, $input) {
     if (!isset($input['product_id'])) {
         echo json_encode(['success' => false, 'message' => 'Product ID required']);
@@ -35,6 +33,17 @@ function getProductComments($conn, $input) {
     $product_id = (int)$input['product_id'];
     
     try {
+        // Check if table exists first
+        $tableCheck = $conn->query("SHOW TABLES LIKE 'product_comments'");
+        if ($tableCheck->num_rows == 0) {
+            // Table doesn't exist, return empty comments
+            echo json_encode([
+                'success' => true,
+                'comments' => []
+            ]);
+            return;
+        }
+        
         $stmt = $conn->prepare("
             SELECT 
                 pc.comment_id,
@@ -66,30 +75,17 @@ function getProductComments($conn, $input) {
             ];
         }
         
-        // Get average rating
-        $avg_stmt = $conn->prepare("
-            SELECT AVG(rating) as avg_rating, COUNT(*) as total_comments
-            FROM product_comments 
-            WHERE product_id = ?
-        ");
-        $avg_stmt->bind_param("i", $product_id);
-        $avg_stmt->execute();
-        $avg_result = $avg_stmt->get_result();
-        $avg_data = $avg_result->fetch_assoc();
-        
         echo json_encode([
             'success' => true,
-            'comments' => $comments,
-            'average_rating' => round($avg_data['avg_rating'], 1),
-            'total_comments' => (int)$avg_data['total_comments']
+            'comments' => $comments
         ]);
         
     } catch (Exception $e) {
+        error_log("Error fetching comments: " . $e->getMessage());
         echo json_encode(['success' => false, 'message' => 'Error loading comments']);
     }
 }
 
-// Add a new comment
 function addProductComment($conn, $input) {
     if (!isset($_SESSION['user_id'])) {
         echo json_encode(['success' => false, 'message' => 'Please login to add comments']);
@@ -109,13 +105,7 @@ function addProductComment($conn, $input) {
     $comment_text = trim($input['comment_text']);
     $rating = (int)$input['rating'];
     
-    // Validation
-    if (empty($comment_text)) {
-        echo json_encode(['success' => false, 'message' => 'Comment cannot be empty']);
-        return;
-    }
-    
-    if (strlen($comment_text) < 5) {
+    if (empty($comment_text) || strlen($comment_text) < 5) {
         echo json_encode(['success' => false, 'message' => 'Comment must be at least 5 characters']);
         return;
     }
@@ -126,30 +116,62 @@ function addProductComment($conn, $input) {
     }
     
     try {
-        // Check if product exists
-        $check_stmt = $conn->prepare("SELECT product_id FROM products WHERE product_id = ?");
-        $check_stmt->bind_param("i", $product_id);
-        $check_stmt->execute();
-        if ($check_stmt->get_result()->num_rows === 0) {
-            echo json_encode(['success' => false, 'message' => 'Product not found']);
-            return;
+        // Check if table exists, create if not
+        $tableCheck = $conn->query("SHOW TABLES LIKE 'product_comments'");
+        if ($tableCheck->num_rows == 0) {
+            // Create the table
+            $createTable = "
+                CREATE TABLE product_comments (
+                    comment_id INT PRIMARY KEY AUTO_INCREMENT,
+                    product_id INT NOT NULL,
+                    user_id INT NOT NULL,
+                    comment_text TEXT NOT NULL,
+                    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_product_id (product_id),
+                    INDEX idx_user_id (user_id)
+                )
+            ";
+            
+            if (!$conn->query($createTable)) {
+                throw new Exception("Failed to create comments table");
+            }
         }
         
-        // Insert new comment
-        $stmt = $conn->prepare("
-            INSERT INTO product_comments (product_id, user_id, comment_text, rating) 
-            VALUES (?, ?, ?, ?)
-        ");
-        $stmt->bind_param("iisi", $product_id, $user_id, $comment_text, $rating);
+        // Check if user already commented on this product
+        $checkStmt = $conn->prepare("SELECT comment_id FROM product_comments WHERE product_id = ? AND user_id = ?");
+        $checkStmt->bind_param("ii", $product_id, $user_id);
+        $checkStmt->execute();
+        $existing = $checkStmt->get_result()->fetch_assoc();
+        
+        if ($existing) {
+            // Update existing comment
+            $stmt = $conn->prepare("
+                UPDATE product_comments 
+                SET comment_text = ?, rating = ?, created_at = CURRENT_TIMESTAMP 
+                WHERE product_id = ? AND user_id = ?
+            ");
+            $stmt->bind_param("siii", $comment_text, $rating, $product_id, $user_id);
+            $message = 'Comment updated successfully';
+        } else {
+            // Insert new comment
+            $stmt = $conn->prepare("
+                INSERT INTO product_comments (product_id, user_id, comment_text, rating) 
+                VALUES (?, ?, ?, ?)
+            ");
+            $stmt->bind_param("iisi", $product_id, $user_id, $comment_text, $rating);
+            $message = 'Comment added successfully';
+        }
         
         if ($stmt->execute()) {
-            echo json_encode(['success' => true, 'message' => 'Comment added successfully']);
+            echo json_encode(['success' => true, 'message' => $message]);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Error adding comment']);
+            throw new Exception("Failed to save comment");
         }
         
     } catch (Exception $e) {
-        echo json_encode(['success' => false, 'message' => 'Database error']);
+        error_log("Error adding comment: " . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Error saving comment. Please try again.']);
     }
 }
 ?>
