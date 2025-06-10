@@ -3,6 +3,8 @@
 session_start();
 require 'db_connect.php';
 
+
+
 // Check if user is trying to login
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_login'])) {
     $email = $_POST['email'];
@@ -169,7 +171,7 @@ $stats = getDashboardStats($conn);
       font-size: clamp(2rem, 5vw, 3rem);
       font-weight: bold;
       color: white;
-    }
+     }
 
     .Admin{
       position:absolute;
@@ -180,7 +182,7 @@ $stats = getDashboardStats($conn);
       color: white;
     }
 
-    .search-bar {
+    .search-bar{
       position:absolute;
       left:50px;
       top: -95px;
@@ -193,7 +195,7 @@ $stats = getDashboardStats($conn);
       position: relative;
     }
 
-    .search-icon {
+    .search-icon{
       position: absolute;
       left: 20px;
       top: 50%;
@@ -532,51 +534,6 @@ $stats = getDashboardStats($conn);
         color:black;
         z-index:2;
     }
-    .number{
-        position:absolute;
-        left:185px;
-        top:605px;
-        font-size:15px;
-        font-weight:medium;
-        color:#8D7D7D;
-        z-index:2;
-    }
-    .number1{
-        position:absolute;
-        left:185px;
-        top:640px;
-        font-size:15px;
-        font-weight:medium;
-        color:#8D7D7D;
-        z-index:2;
-    }
-    .number2{
-        position:absolute;
-        left:185px;
-        top:676px;
-        font-size:15px;
-        font-weight:medium;
-        color:#8D7D7D;
-        z-index:2;
-    }
-    .number3{
-        position:absolute;
-        left:185px;
-        top:710px;
-        font-size:15px;
-        font-weight:medium;
-        color:#8D7D7D;
-        z-index:2;
-    }
-    .number4{
-        position:absolute;
-        left:185px;
-        top:745px;
-        font-size:15px;
-        font-weight:medium;
-        color:#8D7D7D;
-        z-index:2;
-    }
     .line{
        position: absolute;
        left: 234px;
@@ -586,26 +543,7 @@ $stats = getDashboardStats($conn);
        width: 57%; 
        z-index: 3;
       }
-    .scalendar{
-      position:absolute;
-      right:215px;
-      top:515px;
-      width:96px;
-      height:35px;
-      background-color:white;
-      border-radius:14px;
-      border: 1px solid #8D7D7D;
-      z-index:2;
-    }
-    .month{
-      position:absolute;
-      right:246px;
-      top:523px;
-      font-size:16px;
-      font-weight:700;
-      color:black;
-      z-index:2;
-    }
+   
     .triangle{
       position:absolute;
       right:227px;
@@ -674,7 +612,7 @@ $stats = getDashboardStats($conn);
  }
  .usr{
     position:absolute;
-    left: 687px;
+    left: 695px;
     top: 225px;
     width:59px;
     height:55px;
@@ -682,8 +620,8 @@ $stats = getDashboardStats($conn);
  }
  .cart{
     position:absolute;
-    left: 932px;
-    top: 248px;
+    left: 926px;
+    top: 220px;
     width:59px;
     height:55px;
     z-index:3;
@@ -696,22 +634,8 @@ $stats = getDashboardStats($conn);
     height:55px;
     z-index:3;
  }
- .notifications{
-    position:absolute;
-    left:1240px;
-    top:65px;
-    width:37px;
-    height:40.23px;
-    z-index:2;
- }
- .iconn{
-    position:absolute;
-    left:1295px;
-    top:55px;
-    width:37px;
-    height:40.23px;
-    z-index:2;
- }
+ 
+ 
 
 /* ADMIN LOGIN MODAL STYLES - Matching Welcome.php */
 .popup-overlay {
@@ -881,6 +805,77 @@ $stats = getDashboardStats($conn);
     font-size: 12px;
     z-index: 9999;
 }
+
+/* Chart Container */
+.chart-container {
+    position: absolute;
+    left: 180px;
+    top: 540px;
+    width: 1110px;
+    height: 280px;
+    z-index: 3;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.chart-canvas {
+    width: 100% !important;
+    height: 100% !important;
+    background: transparent;
+}
+
+/* Update existing elements to work with chart */
+.sumsales{
+    position:absolute;
+    left:180px;
+    top:515px;
+    font-size:24px;
+    font-weight:bold;
+    color:black;
+    z-index:4;
+}
+
+.scalendar{
+    position:absolute;
+    right:235px;
+    top:515px;
+    width:96px;
+    height:35px;
+    background-color:white;
+    border-radius:14px;
+    border: 1px solid #8D7D7D;
+    z-index:4;
+}
+
+.month{
+    position:absolute;
+    right:250px;
+    top:523px;
+    font-size:16px;
+    font-weight:700;
+    color:black;
+    z-index:4;
+}
+
+.triangle{
+    position:absolute;
+    right:192px;
+    top:529px;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 17px solid black;
+    color:black;
+    z-index:4;
+}
+
+
+.number, .number1, .number2, .number3, .number4 {
+    display: none;
+}
+
+.line {
+    display: none;
+}
     </style>
 </head>
 
@@ -939,9 +934,11 @@ $stats = getDashboardStats($conn);
                     <img src="https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/search.png?v=1747633330905" class="search-icon" alt="Search">
                 </div>
                 
-                <div class="notifications">
-                    <img src="images/notif.png" alt="notif">
-                </div>
+ <!-- Add this after your existing summary-section div -->
+<!-- Sales Chart -->
+        <div class="chart-container">
+           <canvas id="salesChart" class="chart-canvas"></canvas>
+            </div>
                 
                 <!-- Icons for dashboard boxes -->
                 <div class="topsales">
@@ -959,10 +956,7 @@ $stats = getDashboardStats($conn);
                 <div class="cart">
                     <img src="images/cart.png" alt="cart">
                 </div>
-                <div class="iconn">
-                    <img src="images/iconuser.png" alt="useracc">
-                </div>
-
+                
                 <!-- Dashboard boxes -->
                 <div class="box1" onclick="showSalesDetails()"></div>
                 <div class="box2" onclick="showDailySales()"></div>
@@ -1023,11 +1017,7 @@ $stats = getDashboardStats($conn);
                 <div class="scalendar"></div>
                 <div class="month">Month</div>
                 <div class="triangle"></div>
-                <div class="number">30+</div>
-                <div class="number1">30</div>
-                <div class="number2">20</div>
-                <div class="number3">10</div>
-                <div class="number4">0</div>
+               
             </div>
 
             <div class="sales-section">
@@ -1055,7 +1045,166 @@ $stats = getDashboardStats($conn);
         Stats loaded: <?php echo $stats ? 'Yes' : 'No'; ?>
     </div>
 
+     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+
     <script>
+        // Add this to your existing JavaScript section in AdminDashboard.php
+
+let salesChart;
+
+function createSalesChart() {
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    
+    // Sample data - you can replace this with real data from PHP
+    const salesData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        datasets: [{
+            label: 'Monthly Sales (₱)',
+            data: [45000, 52000, 48000, 61000, 55000, 67000, 73000, 69000, 76000, 85000, 82000, 95000],
+            borderColor: '#D997D5',
+            backgroundColor: 'rgba(217, 151, 213, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#D997D5',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 8
+        }]
+    };
+
+    const config = {
+        type: 'line',
+        data: salesData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    borderColor: '#D997D5',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            return 'Sales: ₱' + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)',
+                        lineWidth: 1
+                    },
+                    ticks: {
+                        color: '#666666',
+                        font: {
+                            size: 12,
+                            family: 'Poppins'
+                        }
+                    }
+                },
+                y: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)',
+                        lineWidth: 1
+                    },
+                    ticks: {
+                        color: '#666666',
+                        font: {
+                            size: 12,
+                            family: 'Poppins'
+                        },
+                        callback: function(value) {
+                            return '₱' + (value / 1000) + 'k';
+                        }
+                    },
+                    beginAtZero: true
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            elements: {
+                line: {
+                    borderJoinStyle: 'round'
+                }
+            }
+        }
+    };
+
+    salesChart = new Chart(ctx, config);
+}
+
+// Update the existing DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', function() {
+    const emailField = document.querySelector('input[name="email"]');
+    const passwordField = document.getElementById('adminPassword');
+    
+    if (emailField && emailField.value && passwordField) {
+        passwordField.focus();
+    }
+    
+    // Initialize chart if admin is logged in
+    <?php if (isset($_SESSION['admin_id'])): ?>
+        createSalesChart();
+    <?php endif; ?>
+});
+
+// Function to update chart with real data (you can call this from PHP)
+function updateChartData(newData) {
+    if (salesChart) {
+        salesChart.data.datasets[0].data = newData;
+        salesChart.update();
+    }
+}
+
+// Function to animate chart on box click
+function showSalesDetails() {
+    <?php if (isset($_SESSION['admin_id'])): ?>
+        // Animate the chart
+        if (salesChart) {
+            salesChart.update('active');
+        }
+        alert('Total Sales: ₱<?php echo number_format($stats['total_sales']); ?>\nClick to view detailed sales report');
+    <?php else: ?>
+        alert('Please login first');
+    <?php endif; ?>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // Password toggle function
         function togglePassword(inputId) {
             var pwd = document.getElementById(inputId);

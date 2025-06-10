@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Contact</title>
   <link rel="stylesheet" href="style.css" />
+  
   <style>
     * {
       box-sizing: border-box;
@@ -18,8 +19,16 @@
       margin: 0;
       padding: 0;
       overflow-x: hidden;  
-      width: 90%; 
+       
       font-family: 'Merriweather', serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
     nav{
@@ -68,8 +77,8 @@
       padding: 1rem 2rem;
       flex-wrap: nowrap;
       max-width: 1200px;
-      margin: 0 auto;
-      height: calc(100vh - 120px);
+      margin: auto;
+      min-height: 80vh;
     }
 
     .contact-info {
@@ -219,11 +228,11 @@
   <nav>
     <ul class="nav-links">
       <li><a href="Welcome.php">Home</a></li>
-      <li><a href="Contact.php">Contact</a></li>
+      <li><a href="Contact.html">Contact</a></li>
       <li class="pic">
         <img src='https://cdn.builder.io/api/v1/image/assets/TEMP/cbc700ac3a9cc70c2561f787dc7a724761a462ad' class="logo" alt="A&F Logo"/>
       </li>
-      <li><a href="About.php">About</a></li>
+      <li><a href="About.html">About</a></li>
       <li><a href="Welcome.php">Login/Sign up</a></li>
     </ul>
   </nav>
