@@ -18,8 +18,16 @@
       margin: 0;
       padding: 0;
       overflow-x: hidden;  
-      width: 90%; 
+       
       font-family: 'Merriweather', serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
     nav{
@@ -68,8 +76,8 @@
       padding: 1rem 2rem;
       flex-wrap: nowrap;
       max-width: 1200px;
-      margin: 0 auto;
-      height: calc(100vh - 120px);
+      margin: auto;
+      min-height: 80vh;
     }
 
     .contact-info {
