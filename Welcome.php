@@ -394,7 +394,7 @@ $isLoggedIn = isset($_SESSION["user_id"]);
           Discover a world of flavor with A&F Chocolate! From affordable chocolates to your favorite Korean snacks and classic Filipino treats — all in one place.
         </p>
         
-        <button class="cta-button">Order</button>
+        <button class="cta-button" onclick="goToOrder()">Order</button>
       </div>
       
       <img src="https://cdn.glitch.global/585aee42-d89c-4ece-870c-5b01fc1bab61/chocolatesplash?v=1747319066989" alt="Chocolate splash" class="chocolatesplash" />
@@ -652,6 +652,17 @@ window.onclick = function(event) {
   if (event.target == signupPopup) {
     closePopup('signupPopup');
   }
+}
+
+// Order button functionality
+function goToOrder() {
+  <?php if ($isLoggedIn): ?>
+    // User is logged in - go directly to shopping
+    window.location.href = 'MainPage.php';
+  <?php else: ?>
+    // User not logged in - show login popup first
+    openPopup('loginPopup');
+  <?php endif; ?>
 }
 </script>
 </body>

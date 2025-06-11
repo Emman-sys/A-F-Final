@@ -1,8 +1,9 @@
 <?php
+// Start session and include database connection
 session_start();
 require 'db_connect.php';
 
-// Check if user is logged in
+// Security check - redirect to login if user not authenticated
 if (!isset($_SESSION['user_id'])) {
     header('Location: Welcome.php');
     exit;
@@ -10,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// Get user info
+// Fetch user information for sidebar display
 $user_stmt = $conn->prepare("SELECT name, email FROM users WHERE user_id = ?");
 if (!$user_stmt) {
     die("Error preparing user query: " . $conn->error);
@@ -19,11 +20,16 @@ $user_stmt->bind_param("i", $user_id);
 $user_stmt->execute();
 $user_info = $user_stmt->get_result()->fetch_assoc();
 
-// Get user's orders with payment info
+// Get user's orders with payment info and map payment status to delivery status
 $orders_stmt = $conn->prepare("
     SELECT o.order_id, o.order_date, o.status, o.total_amount, o.shipping_address,
            p.payment_method, p.payment_status,
-           COUNT(oi.order_item_id) as item_count
+           COUNT(oi.order_item_id) as item_count,
+           CASE 
+               WHEN p.payment_status = 'completed' THEN 'delivered'
+               WHEN p.payment_status = 'pending' THEN 'pending'
+               ELSE COALESCE(o.status, 'pending')
+           END as display_status
     FROM orders o
     LEFT JOIN payments p ON o.order_id = p.order_id
     LEFT JOIN orderitems oi ON o.order_id = oi.order_id
@@ -52,6 +58,7 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
   <title>Order History - A&F</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
+    /* Global reset and base styles */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -65,6 +72,7 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
       background-repeat: no-repeat;
     }
 
+    /* Header styling with gradient background */
     .header {
       background: linear-gradient(to top, #5127A3,#986C93, #E0B083);
       color: black;
@@ -91,7 +99,7 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
       font-size: 26px;
     }
 
-    /* Navigation icons */
+    /* Navigation icons positioned in top-right corner */
     .nav-icons {
       position: fixed;
       right: 30px;
@@ -101,6 +109,7 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
       z-index: 11;
     }
     
+    /* Individual navigation icon styling with glass morphism effect */
     .nav-icon {
       width: 50px;
       height: 50px;
@@ -128,7 +137,7 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
       filter: brightness(0) invert(1);
     }
     
-    /* Order history icon - highlight current page */
+    /* Highlight current page icon */
     .nav-icon.current {
       background: rgba(198, 71, 204, 0.4);
       border: 1px solid rgba(198, 71, 204, 0.6);
@@ -156,6 +165,7 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
+    /* Back button in header */
     .back-btn {
       background: none;
       border: none;
@@ -171,12 +181,14 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
       color: #E0B083;
     }
 
+    /* Main layout container */
     .main {
       display: flex;
       padding: 20px;
       height: calc(100vh - 90px);
     }
 
+    /* Sidebar with user info and statistics */
     .sidebar {
       background: linear-gradient(to top, #371B70, #5127A3, #6A34D6);
       color: white;
@@ -205,6 +217,7 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
       margin-left: 5px;
     }
 
+    /* Statistics section in sidebar */
     .sidebar .stats {
       background: rgba(255,255,255,0.1);
       padding: 15px;
@@ -223,6 +236,7 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
       margin: 5px 0;
     }
 
+    /* Main content area for orders table */
     .content {
       flex: 1;
       background-color: #fff;
@@ -232,6 +246,7 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
       flex-direction: column;
     }
 
+    /* Table header with grid layout */
     .table-header {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -243,15 +258,16 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
       flex-shrink: 0;
     }
 
+    /* Container for order rows */
     .order-list {
       flex: 1;
-      /* Remove overflow-y: auto; to prevent scrolling */
       min-height: 0;
       display: flex;
       flex-direction: column;
       gap: 5px;
     }
 
+    /* Individual order row styling */
     .purchase-row {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -267,6 +283,7 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
       background-color: #f8f9fa;
     }
 
+    /* Order information section with icon and details */
     .order-info {
       display: flex;
       align-items: center;
@@ -290,6 +307,7 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
       color: #666;
     }
 
+    /* Status badge styling with different colors for each status */
     .status-badge {
       padding: 4px 8px;
       border-radius: 4px;
@@ -298,6 +316,7 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
       text-transform: uppercase;
     }
 
+    /* Status color variants */
     .status-pending {
       background: #fff3cd;
       color: #856404;
@@ -323,6 +342,13 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
       color: #721c24;
     }
 
+    /* Delivered status (mapped from completed payment) */
+    .status-delivered {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    /* Payment information styling */
     .payment-info {
       font-size: 14px;
     }
@@ -343,6 +369,7 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
       color: #C647CC;
     }
 
+    /* Empty state when no orders exist */
     .empty-orders {
       text-align: center;
       padding: 50px;
@@ -355,6 +382,7 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
       color: #ccc;
     }
 
+    /* View details button */
     .view-details-btn {
       background: #C647CC;
       color: white;
@@ -371,6 +399,7 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
       background: #a03aa3;
     }
 
+    /* Responsive design for mobile devices */
     @media (max-width: 768px) {
       .main {
         flex-direction: column;
@@ -381,6 +410,7 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         margin-bottom: 20px;
       }
 
+      /* Stack grid columns on mobile */
       .table-header,
       .purchase-row {
         grid-template-columns: 1fr;
@@ -398,8 +428,10 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
   </style>
 </head>
 <body>
+  <!-- Header section with navigation -->
   <div class="header">
     <div class="header-left" style="display: flex; align-items: center;">
+      <!-- Back navigation button -->
       <button class="back-btn" onclick="window.history.back()">
         <i class="fas fa-arrow-left"></i>
       </button>
@@ -407,19 +439,19 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
       <span style="margin-left: 10px;">| Order History</span>
     </div>
     <div class="header-right">
-      <!-- Navigation Icons -->
+      <!-- Navigation Icons positioned in top-right -->
       <div class="nav-icons">
-        <!-- Cart Icon -->
+        <!-- Cart navigation -->
         <div class="nav-icon" onclick="goToCart()" title="Shopping Cart">
           <img src="images/cart.png" alt="Cart">
         </div>
         
-        <!-- Order History Icon (current page - highlighted) -->
+        <!-- Current page indicator -->
         <div class="nav-icon current" title="Order History (Current Page)">
           <img src="images/deliv.png" alt="Orders">
         </div>
         
-        <!-- User Profile Icon -->
+        <!-- Profile navigation -->
         <div class="nav-icon" onclick="goToProfile()" title="Profile">
           <img src="images/users.png" alt="Profile">
         </div>
@@ -427,18 +459,23 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     </div>
   </div>
 
+  <!-- Main content layout -->
   <div class="main">
+    <!-- Sidebar with user information and statistics -->
     <div class="sidebar">
       <h2>👤 User Info</h2>
       <label><strong>Name:</strong><span class="info-value"><?php echo htmlspecialchars($user_info['name']); ?></span></label>
       <label><strong>Email:</strong><span class="info-value"><?php echo htmlspecialchars($user_info['email']); ?></span></label>
       
+      <!-- Order statistics section -->
       <div class="stats">
         <h3>📊 Order Statistics</h3>
         <p><strong>Total Orders:</strong> <?php echo count($orders); ?></p>
         <p><strong>Total Spent:</strong> ₱<?php echo number_format(array_sum(array_column($orders, 'total_amount')), 2); ?></p>
         <?php
-        $status_counts = array_count_values(array_column($orders, 'status'));
+        // Count orders by display status (pending/delivered)
+        $display_statuses = array_column($orders, 'display_status');
+        $status_counts = array_count_values($display_statuses);
         foreach ($status_counts as $status => $count):
         ?>
           <p><strong><?php echo ucfirst($status); ?>:</strong> <?php echo $count; ?></p>
@@ -446,7 +483,9 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
       </div>
     </div>
 
+    <!-- Main content area -->
     <div class="content">
+      <!-- Table header -->
       <div class="table-header">
         <div>📦 Order Details</div>
         <div>📋 Status</div>
@@ -454,8 +493,10 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         <div>💰 Amount</div>
       </div>
 
+      <!-- Orders list container -->
       <div class="order-list">
         <?php if (empty($orders)): ?>
+          <!-- Empty state when no orders exist -->
           <div class="empty-orders">
             <i class="fas fa-shopping-cart"></i>
             <h3>No Orders Yet</h3>
@@ -465,8 +506,10 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             </button>
           </div>
         <?php else: ?>
+          <!-- Loop through each order -->
           <?php foreach ($orders as $order): ?>
             <div class="purchase-row">
+              <!-- Order information column -->
               <div class="order-info">
                 <i class="fas fa-box"></i>
                 <div class="order-details">
@@ -479,17 +522,20 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 </div>
               </div>
               
+              <!-- Status column - shows mapped status (pending/delivered) -->
               <div>
-                <span class="status-badge status-<?php echo $order['status']; ?>">
-                  <?php echo ucfirst($order['status']); ?>
+                <span class="status-badge status-<?php echo $order['display_status']; ?>">
+                  <?php echo ucfirst($order['display_status']); ?>
                 </span>
               </div>
               
+              <!-- Payment information column -->
               <div class="payment-info">
                 <div class="payment-method"><?php echo htmlspecialchars($order['payment_method'] ?? 'N/A'); ?></div>
                 <div class="payment-status">Status: <?php echo ucfirst($order['payment_status'] ?? 'pending'); ?></div>
               </div>
               
+              <!-- Amount column -->
               <div class="amount">₱<?php echo number_format($order['total_amount'], 2); ?></div>
             </div>
           <?php endforeach; ?>
@@ -499,16 +545,16 @@ $orders = $orders_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
   </div>
 
   <script>
+    // Function to show order details (placeholder for future implementation)
     function viewOrderDetails(orderId) {
-      // For now, show an alert. You can implement a modal or redirect to details page
+      // For now, show an alert with planned features
       alert(`Viewing details for Order #${orderId}\n\nThis feature will show detailed order information including:\n- Items ordered\n- Quantities\n- Delivery address\n- Tracking information`);
       
-      // Future implementation could be:
+      // Future implementation could redirect to details page:
       // window.location.href = `order_details.php?id=${orderId}`;
-      // or open a modal with detailed information
     }
     
-    // Navigation functions
+    // Navigation functions for header icons
     function goToCart() {
       window.location.href = 'Cart.php';
     }
