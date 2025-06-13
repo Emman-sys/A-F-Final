@@ -135,14 +135,62 @@ html, body {
       .decorative-image {
         position: absolute;
         z-index: 1;
-        opacity: 0.7;
+        opacity: 0.4; /* Reduced opacity for better visibility of content */
+        pointer-events: none; /* Prevent images from interfering with clicks */
       }
-      .image-1 { left: 0; top: 75px; width: 540px; transform: rotate(-11deg);}
-      .image-2 { right: 0; top: 94px; width: 540px; transform: rotate(-8deg);}
-      .image-3 { left: 63px; bottom: 0; width: 520px;}
-      .image-4 { right: 100px; bottom: 0; width: 250px; transform: rotate(-18deg);}
-      .image-5 { right: 100px; top: 66px; width: 260px; transform: rotate(33deg);}
+      
+      /* Better distributed positioning for all screen sizes */
+      .image-1 { 
+        left: 5%; 
+        top: 10%; 
+        width: 280px; 
+        transform: rotate(-15deg);
+      }
+      
+      .image-2 { 
+        right: 5%; 
+        top: 15%; 
+        width: 320px; 
+        transform: rotate(12deg);
+      }
+      
+      .image-3 { 
+        left: 8%; 
+        bottom: 15%; 
+        width: 300px;
+        transform: rotate(8deg);
+      }
+      
+      .image-4 { 
+        right: 8%; 
+        bottom: 10%; 
+        width: 250px; 
+        transform: rotate(-20deg);
+      }
+      
+      .image-5 { 
+        left: 50%; 
+        top: 5%; 
+        width: 200px; 
+        transform: translateX(-50%) rotate(25deg);
+      }
 
+      /* Add new image positioning for better coverage */
+      .image-6 { 
+        left: 15%; 
+        top: 60%; 
+        width: 180px; 
+        transform: rotate(-45deg);
+        opacity: 0.3;
+      }
+      
+      .image-7 { 
+        right: 15%; 
+        top: 45%; 
+        width: 200px; 
+        transform: rotate(35deg);
+        opacity: 0.3;
+      }
 
       @media (max-width: 1000px) {
         .dashboard-container {
@@ -152,13 +200,29 @@ html, body {
         .dashboard-buttons {
           max-width: 100%;
         }
+        
+        /* Adjust image sizes for tablets */
+        .image-1, .image-2 { width: 200px; }
+        .image-3, .image-4 { width: 180px; }
+        .image-5 { width: 150px; }
+        .image-6, .image-7 { width: 120px; }
       }
+      
       @media (max-width: 600px) {
         .brand-logo { font-size: 32px; left: 16px; top: 12px;}
         .dashboard-container { min-width: unset; width: 98vw; }
         .dashboard-title { font-size: 22px; }
         .dashboard-btn { font-size: 15px; padding: 14px 0;}
-        .image-1, .image-2, .image-3, .image-4, .image-5 { display: none; }
+        
+        /* Keep smaller images on mobile for subtle background effect */
+        .image-1, .image-2, .image-3, .image-4, .image-5 { 
+          width: 100px;
+          opacity: 0.2;
+        }
+        .image-6, .image-7 { 
+          width: 80px;
+          opacity: 0.15;
+        }
       }    
       .nav-icon {
       width: 50px;
@@ -200,10 +264,17 @@ html, body {
         </div>
       </div>
 
+      <!-- Existing decorative images with better positioning -->
       <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/1192fe4c4e19ec325cebdf6ab93326d7b756d1b2" alt="" class="decorative-image image-1" />
       <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/a7a048e7493fbf1c6595beb3de45ac8c2fa42df3" alt="" class="decorative-image image-2" />
       <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/63fbad6ef4e9aeac26ad69824aef8f4a040fb95b" alt="" class="decorative-image image-3" />
       <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/63eccd7e09789e7777e24681264391d14aeea6f2" alt="" class="decorative-image image-4" />
-      <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/a5d04448581cd8ed933e22b0732f56e6c980a7b2" alt="" class="decorative-image image-5" />    </main>
+      <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/a5d04448581cd8ed933e22b0732f56e6c980a7b2" alt="" class="decorative-image image-5" />
+      
+      <!-- Additional decorative images for better coverage -->
+      <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/1192fe4c4e19ec325cebdf6ab93326d7b756d1b2" alt="" class="decorative-image image-6" />
+      <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/a7a048e7493fbf1c6595beb3de45ac8c2fa42df3" alt="" class="decorative-image image-7" />
+
+    </main>
   </body>
 </html>

@@ -366,7 +366,7 @@ $isLoggedIn = isset($_SESSION["user_id"]);
   <div class="page-wrapper">
     <nav class="navigation">
       <div class="nav-links-left">
-        <a href="#" class="nav-link">AdminDash</a>
+        <a href="AdminDashboard.php" class="nav-link">AdminDash</a>
         <a href="Contact.php" class="nav-link">Contact</a>
       </div>
        
@@ -375,7 +375,7 @@ $isLoggedIn = isset($_SESSION["user_id"]);
       <div class="nav-links-right">
         <a href="About.php" class="nav-link">About</a>
         <?php if ($isLoggedIn): ?>
-          <a href="Userdashboard.php" class="nav-link">Dashboard</a>
+          <a href="Userdashboard.php" class="nav-link">UsersDashboard</a>
         <?php else: ?>
           <a onclick="openPopup('loginPopup')" class="nav-link">Login/Sign up</a>
         <?php endif; ?>

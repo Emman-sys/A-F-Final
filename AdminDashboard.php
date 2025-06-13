@@ -45,6 +45,8 @@ if (isset($_SESSION['product_error'])) {
 
 // Handle product addition
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product']) && isset($_SESSION['admin_id'])) {
+    error_log("🔥 ADD PRODUCT ATTEMPT - Files: " . print_r($_FILES, true));
+    
     $name = trim($_POST['product_name']);
     $description = trim($_POST['product_description']);
     $price = floatval($_POST['product_price']);
@@ -54,42 +56,224 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product']) && iss
     // Validate inputs
     if (empty($name) || empty($description) || $price <= 0 || $stock < 0) {
         $_SESSION['product_error'] = "Please fill all fields with valid data.";
+        error_log("❌ Validation failed");
     } else {
         try {
-            // Handle image upload
+            // Handle image upload with compression
             $imageData = null;
-            $imageType = null;
             
             if (isset($_FILES['product_image']) && $_FILES['product_image']['error'] === UPLOAD_ERR_OK) {
+                error_log("📸 Image upload detected: " . $_FILES['product_image']['name']);
                 $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
                 $fileType = $_FILES['product_image']['type'];
                 
                 if (in_array($fileType, $allowedTypes) && $_FILES['product_image']['size'] <= 5000000) {
-                    $imageData = file_get_contents($_FILES['product_image']['tmp_name']);
-                    $imageType = $fileType;
+                    // Compress and resize image
+                    $imageData = compressImage($_FILES['product_image']['tmp_name'], $fileType);
+                    if ($imageData === false) {
+                        $_SESSION['product_error'] = "Failed to process image. Please try a different image.";
+                        header('Location: AdminDashboard.php?product_added=1&show_modal=1');
+                        exit();
+                    }
+                    error_log("✅ Image processed and compressed: " . strlen($imageData) . " bytes");
+                } else {
+                    $_SESSION['product_error'] = "Invalid image file. Please use JPG, PNG, or GIF format under 5MB.";
+                    header('Location: AdminDashboard.php?product_added=1&show_modal=1');
+                    exit();
                 }
+            } else {
+                error_log("📷 No image uploaded or upload error: " . ($_FILES['product_image']['error'] ?? 'no file'));
             }
             
-            // Insert product into database
-            $stmt = $conn->prepare("INSERT INTO products (name, description, price, stock_quantity, category_id, product_image, image_type) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("ssdiibs", $name, $description, $price, $stock, $category_id, $imageData, $imageType);
+            // Insert product into database - SIMPLE BLOB APPROACH
+            $stmt = $conn->prepare("INSERT INTO products (name, description, price, stock_quantity, category_id, product_image, image_type) VALUES (?, ?, ?, ?, ?, ?, NULL)");
+            $stmt->bind_param("ssdiis", $name, $description, $price, $stock, $category_id, $imageData);
+            error_log("🔄 Inserting product with image data: " . ($imageData ? strlen($imageData) . " bytes" : "NULL"));
             
             if ($stmt->execute()) {
-                $_SESSION['product_success'] = "Product added successfully!";
+                $_SESSION['product_success'] = "Product added successfully!" . ($imageData ? " With image." : " Without image.");
+                error_log("✅ Product added successfully");
             } else {
                 $_SESSION['product_error'] = "Failed to add product: " . $conn->error;
+                error_log("❌ Database error: " . $conn->error);
             }
         } catch (Exception $e) {
             $_SESSION['product_error'] = "Error adding product: " . $e->getMessage();
+            error_log("❌ Exception: " . $e->getMessage());
         }
     }
     
-    header('Location: AdminDashboard.php?product_added=1');
+    header('Location: AdminDashboard.php?product_added=1&show_modal=1');
     exit();
+}
+
+// Image compression function - handles large images and MySQL packet size limitations
+function compressImage($sourcePath, $mimeType) {
+    error_log("🔍 Starting image compression - File: " . $sourcePath . ", Type: " . $mimeType);
+    
+    // Check if GD extension is available for image processing
+    if (!extension_loaded('gd')) {
+        error_log("⚠️ GD extension not available, using original image");
+        
+        // Fallback: use original image data but check size to prevent MySQL errors
+        $imageData = file_get_contents($sourcePath);
+        
+        // 4MB fallback limit - prevents "Got a packet bigger than 'max_allowed_packet'" MySQL error
+        // Most default MySQL configurations have max_allowed_packet = 1MB-16MB
+        if (strlen($imageData) > 4000000) { // 4MB limit
+            error_log("❌ Image too large without compression: " . strlen($imageData) . " bytes");
+            return false; // Reject image if too large and can't compress
+        }
+        
+        error_log("✅ Using original image (no GD): " . strlen($imageData) . " bytes");
+        return $imageData;
+    }
+    
+    error_log("✅ GD extension available, proceeding with compression");
+    
+    try {
+        // Create image resource based on MIME type for processing
+        switch ($mimeType) {
+            case 'image/jpeg':
+                $image = imagecreatefromjpeg($sourcePath);
+                break;
+            case 'image/png':
+                $image = imagecreatefrompng($sourcePath);
+                break;
+            case 'image/gif':
+                $image = imagecreatefromgif($sourcePath);
+                break;
+            default:
+                error_log("❌ Unsupported image type: " . $mimeType);
+                return false;
+        }
+        
+        // If image creation failed, fallback to original with size check
+        if (!$image) {
+            error_log("❌ Failed to create image resource from: " . $sourcePath);
+            $imageData = file_get_contents($sourcePath);
+            
+            // Same 4MB limit for fallback scenario
+            if (strlen($imageData) > 4000000) {
+                error_log("❌ Fallback image too large: " . strlen($imageData) . " bytes");
+                return false;
+            }
+            error_log("⚠️ Using original image as fallback: " . strlen($imageData) . " bytes");
+            return $imageData;
+        }
+        
+        // Get original image dimensions for resizing calculations
+        $originalWidth = imagesx($image);
+        $originalHeight = imagesy($image);
+        error_log("📐 Original dimensions: " . $originalWidth . "x" . $originalHeight);
+        
+        // Set maximum dimensions - balances quality vs file size
+        // Larger dimensions = better quality but bigger file size
+        $maxWidth = 800;  // Good for product display
+        $maxHeight = 600; // Maintains reasonable aspect ratios
+        
+        // Calculate new dimensions while preserving aspect ratio
+        $ratio = min($maxWidth / $originalWidth, $maxHeight / $originalHeight);
+        $newWidth = (int)($originalWidth * $ratio);
+        $newHeight = (int)($originalHeight * $ratio);
+        error_log("📐 New dimensions: " . $newWidth . "x" . $newHeight . " (ratio: " . $ratio . ")");
+        
+        // Create new blank image canvas with calculated dimensions
+        $newImage = imagecreatetruecolor($newWidth, $newHeight);
+        
+        // Preserve transparency for PNG and GIF images
+        if ($mimeType === 'image/png') {
+            // PNG transparency handling
+            imagealphablending($newImage, false);
+            imagesavealpha($newImage, true);
+            $transparent = imagecolorallocatealpha($newImage, 255, 255, 255, 127);
+            imagefilledrectangle($newImage, 0, 0, $newWidth, $newHeight, $transparent);
+            error_log("🔍 PNG transparency preserved");
+        } elseif ($mimeType === 'image/gif') {
+            // GIF transparency handling
+            $transparentIndex = imagecolortransparent($image);
+            if ($transparentIndex >= 0) {
+                $transparentColor = imagecolorsforindex($image, $transparentIndex);
+                $transparentNew = imagecolorallocate($newImage, $transparentColor['red'], $transparentColor['green'], $transparentColor['blue']);
+                imagefill($newImage, 0, 0, $transparentNew);
+                imagecolortransparent($newImage, $transparentNew);
+            }
+            error_log("🔍 GIF transparency handled");
+        }
+        
+        // Resize original image to new dimensions using resampling for quality
+        imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $originalWidth, $originalHeight);
+        error_log("✅ Image resized successfully");
+        
+        // Convert processed image back to binary data with compression
+        ob_start(); // Start output buffering to capture image data
+        switch ($mimeType) {
+            case 'image/jpeg':
+                imagejpeg($newImage, null, 75); // 75% quality - balance of size vs quality
+                break;
+            case 'image/png':
+                imagepng($newImage, null, 6); // Compression level 6 (0-9, 9=max compression)
+                break;
+            case 'image/gif':
+                imagegif($newImage, null); // GIF doesn't have quality settings
+                break;
+        }
+        $imageData = ob_get_contents(); // Get the buffered image data
+        ob_end_clean(); // Clean the output buffer
+        
+        // Free up memory by destroying image resources
+        imagedestroy($image);
+        imagedestroy($newImage);
+        
+        // Final size check - 1.5MB limit prevents MySQL packet errors
+        // Even with compression, some images might still be large
+        if (strlen($imageData) > 1500000) { // 1.5MB limit
+            error_log("❌ Compressed image still too large: " . strlen($imageData) . " bytes");
+            return false; // Reject if still too large after compression
+        }
+        
+        error_log("✅ Image compressed successfully: " . strlen($imageData) . " bytes");
+        return $imageData;
+        
+    } catch (Exception $e) {
+        error_log("❌ Image compression error: " . $e->getMessage());
+        
+        // Final fallback: try original image with size check
+        try {
+            $imageData = file_get_contents($sourcePath);
+            
+            // 4MB limit for this fallback too
+            if (strlen($imageData) > 4000000) {
+                error_log("❌ Fallback image too large: " . strlen($imageData) . " bytes");
+                return false;
+            }
+            
+            error_log("⚠️ Using original image as fallback after error: " . strlen($imageData) . " bytes");
+            return $imageData;
+        } catch (Exception $fallbackError) {
+            error_log("❌ Fallback also failed: " . $fallbackError->getMessage());
+            return false;
+        }
+    }
+}
+
+// Function to ensure database connection is alive
+function ensureConnection($conn) {
+    if (!$conn->ping()) {
+        error_log("❌ Database connection lost, attempting to reconnect...");
+        $conn->close();
+        
+        // Reconnect using the same credentials
+        require 'db_connect.php';
+        return $conn;
+    }
+    return $conn;
 }
 
 // Handle product editing
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_product']) && isset($_SESSION['admin_id'])) {
+    error_log("🔥 EDIT PRODUCT ATTEMPT - ID: " . $_POST['product_id']);
+    
     $product_id = intval($_POST['product_id']);
     $name = trim($_POST['product_name']);
     $description = trim($_POST['product_description']);
@@ -98,46 +282,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_product']) && is
     $category_id = intval($_POST['category_id']);
     
     // Validate inputs
-    if (empty($name) || empty($description) || $price <= 0 || $stock < 0) {
+    if (empty($name) || empty($description) || $price <= 0 || $stock < 0 || $product_id <= 0) {
         $_SESSION['product_error'] = "Please fill all fields with valid data.";
     } else {
         try {
-            // Handle image upload if new image is provided
-            $imageUpdateQuery = "";
+            // Ensure database connection is alive
+            $conn = ensureConnection($conn);
+            
+            // Check if new image was uploaded
+            $updateImage = false;
             $imageData = null;
-            $imageType = null;
             
             if (isset($_FILES['product_image']) && $_FILES['product_image']['error'] === UPLOAD_ERR_OK) {
+                error_log("📸 New image upload for edit: " . $_FILES['product_image']['name']);
                 $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
                 $fileType = $_FILES['product_image']['type'];
                 
                 if (in_array($fileType, $allowedTypes) && $_FILES['product_image']['size'] <= 5000000) {
-                    $imageData = file_get_contents($_FILES['product_image']['tmp_name']);
-                    $imageType = $fileType;
-                    $imageUpdateQuery = ", product_image = ?, image_type = ?";
+                    // Compress and resize image
+                    $imageData = compressImage($_FILES['product_image']['tmp_name'], $fileType);
+                    if ($imageData === false) {
+                        $_SESSION['product_error'] = "Image too large after compression. Please use a smaller image.";
+                        header('Location: AdminDashboard.php?product_edit_error=1&show_modal=1');
+                        exit();
+                    }
+                    $updateImage = true;
+                    error_log("✅ New image processed and compressed: " . strlen($imageData) . " bytes");
+                } else {
+                    $_SESSION['product_error'] = "Invalid image file. Please use JPG, PNG, or GIF format under 5MB.";
+                    header('Location: AdminDashboard.php?product_edit_error=1&show_modal=1');
+                    exit();
                 }
             }
             
-            // Update product in database
-            if ($imageUpdateQuery) {
-                $stmt = $conn->prepare("UPDATE products SET name = ?, description = ?, price = ?, stock_quantity = ?, category_id = ?" . $imageUpdateQuery . " WHERE product_id = ?");
-                $stmt->bind_param("ssdiiisi", $name, $description, $price, $stock, $category_id, $imageData, $imageType, $product_id);
+            // Update product in database - with connection check
+            if ($updateImage) {
+                // Update with new image
+                $stmt = $conn->prepare("UPDATE products SET name = ?, description = ?, price = ?, stock_quantity = ?, category_id = ?, product_image = ?, image_type = NULL WHERE product_id = ?");
+                if (!$stmt) {
+                    error_log("❌ Prepare failed: " . $conn->error);
+                    $_SESSION['product_error'] = "Database prepare error: " . $conn->error;
+                    header('Location: AdminDashboard.php?product_edit_error=1&show_modal=1');
+                    exit();
+                }
+                
+                $stmt->bind_param("ssdiisi", $name, $description, $price, $stock, $category_id, $imageData, $product_id);
+                error_log("🔄 Updating product WITH new image: " . strlen($imageData) . " bytes");
             } else {
+                // Update without changing image
                 $stmt = $conn->prepare("UPDATE products SET name = ?, description = ?, price = ?, stock_quantity = ?, category_id = ? WHERE product_id = ?");
+                if (!$stmt) {
+                    error_log("❌ Prepare failed: " . $conn->error);
+                    $_SESSION['product_error'] = "Database prepare error: " . $conn->error;
+                    header('Location: AdminDashboard.php?product_edit_error=1&show_modal=1');
+                    exit();
+                }
+                
                 $stmt->bind_param("ssdiii", $name, $description, $price, $stock, $category_id, $product_id);
+                error_log("🔄 Updating product WITHOUT changing image");
             }
             
             if ($stmt->execute()) {
-                $_SESSION['product_success'] = "Product updated successfully!";
+                $_SESSION['product_success'] = "Product updated successfully!" . ($updateImage ? " Image updated." : " Image kept.");
+                error_log("✅ Product updated successfully");
             } else {
-                $_SESSION['product_error'] = "Failed to update product: " . $conn->error;
+                $_SESSION['product_error'] = "Failed to update product: " . $stmt->error;
+                error_log("❌ Update failed: " . $stmt->error);
             }
+            
+            $stmt->close();
+            
         } catch (Exception $e) {
             $_SESSION['product_error'] = "Error updating product: " . $e->getMessage();
+            error_log("❌ Update exception: " . $e->getMessage());
         }
     }
     
-    header('Location: AdminDashboard.php?product_updated=1');
+    header('Location: AdminDashboard.php?product_updated=1&show_modal=1');
     exit();
 }
 
@@ -199,7 +420,7 @@ function getCategories($conn) {
     return $categories;
 }
 
-// Function to get all products - FIXED to show proper category names
+// Function to get all products 
 function getAllProducts($conn) {
     $products = [];
     try {
@@ -782,67 +1003,6 @@ $monthlySalesData = getMonthlySalesData($conn);
         font-size: 12px;
     }
 
-    /* Chart Container - now relative to rectangle2 */
-    .chart-container {
-        position: relative;
-        width: 100%;
-        height: 320px;
-        z-index: 2;
-        margin-top: 60px;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    .chart-canvas {
-        width: 100% !important;
-        height: 100% !important;
-        background: transparent;
-    }
-
-    /* Update existing elements to work with chart */
-    .sumsales{
-        position: absolute;
-        left: 170px;
-        top: 520px;
-        font-size: 24px;
-        font-weight: bold;
-        color: black;
-        z-index: 3;
-    }
-
-    .scalendar{
-        position: absolute;
-        right: 235px;
-        top: 520px;
-        width: 96px;
-        height: 35px;
-        background-color: white;
-        border-radius: 14px;
-        border: 1px solid #8D7D7D;
-        z-index: 3;
-    }
-
-    .month{
-        position: absolute;
-        right: 250px;
-        top: 528px;
-        font-size: 16px;
-        font-weight: 700;
-        color: black;
-        z-index: 3;
-    }
-
-    .triangle{
-        position: absolute;
-        right: 192px;
-        top: 534px;
-        border-left: 10px solid transparent;
-        border-right: 10px solid transparent;
-        border-top: 17px solid black;
-        color: black;
-        z-index: 3;
-    }
-
     /* Product Management Modal Styles */
     .product-modal {
         display: none;
@@ -1414,7 +1574,25 @@ $monthlySalesData = getMonthlySalesData($conn);
                         <td data-sort="<?php echo $product['product_id']; ?>"><?php echo $product['product_id']; ?></td>
                         <td>
                             <?php if ($product['product_image']): ?>
-                                <img src="data:<?php echo $product['image_type']; ?>;base64,<?php echo base64_encode($product['product_image']); ?>" 
+                                <?php
+                                // Detect image type from binary data since image_type is always NULL
+                                $imageData = $product['product_image'];
+                                $detectedType = 'image/jpeg'; // default fallback
+                                
+                                // Check PNG signature
+                                if (substr($imageData, 0, 8) === "\x89PNG\r\n\x1a\n") {
+                                    $detectedType = 'image/png';
+                                }
+                                // Check GIF signature  
+                                elseif (substr($imageData, 0, 6) === "GIF87a" || substr($imageData, 0, 6) === "GIF89a") {
+                                    $detectedType = 'image/gif';
+                                }
+                                // Check JPEG signature
+                                elseif (substr($imageData, 0, 2) === "\xFF\xD8") {
+                                    $detectedType = 'image/jpeg';
+                                }
+                                ?>
+                                <img src="data:<?php echo $detectedType; ?>;base64,<?php echo base64_encode($product['product_image']); ?>" 
                                      alt="<?php echo htmlspecialchars($product['name']); ?>" 
                                      style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;">
                             <?php else: ?>
@@ -1501,7 +1679,7 @@ $monthlySalesData = getMonthlySalesData($conn);
     <script>
         console.log('🚀 Starting simple script approach...');
 
-        // Store product data globally - WITHOUT large BLOB data
+        // Store product data globally
         const productDataMap = new Map();
         <?php foreach ($allProducts as $product): ?>
         productDataMap.set(<?php echo $product['product_id']; ?>, {
@@ -1517,7 +1695,7 @@ $monthlySalesData = getMonthlySalesData($conn);
         <?php endforeach; ?>
 
         // Edit product function
-        function editProductById(productId) {
+         function editProductById(productId) {
             console.log('✏️ Editing product ID:', productId);
             
             const product = productDataMap.get(productId);
@@ -1544,28 +1722,35 @@ $monthlySalesData = getMonthlySalesData($conn);
             document.getElementById('product_stock').value = product.stock_quantity;
             document.getElementById('category_id').value = product.category_id;
             
-            // Handle current image - get from table instead of storing in JavaScript
+            // Handle current image display
             const currentImg = document.getElementById('currentImage');
             const imgPreview = document.getElementById('currentImagePreview');
             const imageLabel = document.getElementById('imageLabel');
             
-            if (product.has_image && product.image_type) {
-                // Get image source from the table row instead of storing in JavaScript
+            if (product.has_image) {
+                // Get the actual image from the table row
                 const tableRow = document.querySelector(`tr[data-product-id="${productId}"]`);
-                const existingImg = tableRow.querySelector('img');
+                const existingImg = tableRow ? tableRow.querySelector('img') : null;
                 
-                if (existingImg) {
+                if (existingImg && existingImg.src) {
+                    console.log('🖼️ Found existing image in table');
                     currentImg.style.display = 'block';
-                    imgPreview.src = existingImg.src; // Copy from table
+                    imgPreview.src = existingImg.src;
+                    imgPreview.alt = product.name;
                     imageLabel.textContent = '(Optional - leave empty to keep current image)';
                 } else {
+                    console.log('❌ No image found in table row');
                     currentImg.style.display = 'none';
                     imageLabel.textContent = '(Optional)';
                 }
             } else {
+                console.log('📷 Product has no image');
                 currentImg.style.display = 'none';
                 imageLabel.textContent = '(Optional)';
             }
+            
+            // Clear the file input
+            document.getElementById('product_image').value = '';
             
             console.log('✅ Edit modal opened successfully');
         }
@@ -1694,8 +1879,30 @@ $monthlySalesData = getMonthlySalesData($conn);
         document.addEventListener('DOMContentLoaded', function() {
             console.log('📋 DOM ready - initializing...');
             
+            // Check if we should show the modal (after form submission)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('show_modal') === '1') {
+                console.log('🔔 Showing modal due to URL parameter');
+                document.getElementById('productModal').style.display = 'block';
+                
+                // Remove the parameter from URL without refresh
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            
             // Create chart
             setTimeout(createChart, 300);
+            
+            // Add form submission logging
+            const productForm = document.getElementById('productForm');
+            if (productForm) {
+                productForm.addEventListener('submit', function(e) {
+                    console.log('📝 Form submission:', {
+                        action: document.getElementById('submitBtn').name,
+                        hasFile: document.getElementById('product_image').files.length > 0,
+                        fileName: document.getElementById('product_image').files[0]?.name || 'none'
+                    });
+                });
+            }
             
             // Add sorting functionality
             const sortableHeaders = document.querySelectorAll('th.sortable');
@@ -1703,6 +1910,7 @@ $monthlySalesData = getMonthlySalesData($conn);
                 header.addEventListener('click', function() {
                     const columnName = this.getAttribute('data-column');
                     const dataType = this.getAttribute('data-type');
+                   
                     const columnIndex = Array.from(this.parentNode.children).indexOf(this);
                     sortTable(columnIndex, dataType, columnName);
                 });
@@ -1717,8 +1925,7 @@ $monthlySalesData = getMonthlySalesData($conn);
                 }
             });
             
-            console.log('✅ Initialization complete with sorting!');
-            console.log('🔧 editProductById function available:', typeof editProductById);
+            console.log('✅ Initialization complete with debugging!');
         });
 
         console.log('🎯 Script loaded successfully!');

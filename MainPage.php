@@ -165,7 +165,7 @@ function generateProductCarousel($conn) {
         
         $html .= '<div class="carousel-product-info">';
         $html .= '<h4 class="product-name">' . htmlspecialchars($product['name']) . '</h4>';
-        $html .= '<div class="carousel-price">$' . number_format($product['price'], 2) . '</div>';
+        $html .= '<div class="carousel-price">₱' . number_format($product['price'], 2) . '</div>'; // Changed from $ to ₱
         
         if ($product['stock_quantity'] <= 0) {
             $html .= '<div class="stock-info">Out of Stock</div>';
@@ -272,7 +272,7 @@ if (isset($_SESSION['user_id'])) {
       background-position: center;
       background-attachment: fixed;
       background-size: cover;
-      font-family: 'Merriweather Sans', 'Roboto';
+      font-family:Merriweather;
       min-height: 100vh;
       overflow-x: hidden; 
       zoom: 0.8;
@@ -309,7 +309,7 @@ if (isset($_SESSION['user_id'])) {
       display: flex;
       gap: clamp(15px, 3vw, 30px);
       color: white;
-      font-size: clamp(0.8rem, 2vw, 1rem);
+      font-size: 20px;
     }
 
     .nav-icons {
@@ -449,10 +449,10 @@ if (isset($_SESSION['user_id'])) {
 
     /* PRODUCT CAROUSEL STYLES */
     .product-carousel {
-        width: 495px;
-        max-width: 400px;
-        height: 350px;
-        background: rgba(255, 255, 255, 0.95);
+        width: 550px;
+        max-width: 500px;
+        height: 300px;
+        background:linear-gradient(to bottom, #6A34D6, #FFFFFF);
         border-radius: 15px;
         padding: 15px;
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
@@ -469,7 +469,7 @@ if (isset($_SESSION['user_id'])) {
     }
 
     .carousel-header h3 {
-        color: #C647CC;
+        color: #FFFFFF;
         font-size: 16px;
         margin: 0;
         font-weight: bold;
@@ -496,7 +496,7 @@ if (isset($_SESSION['user_id'])) {
     }
 
     .carousel-btn:hover {
-        background: #a63d9f;
+        background: #D997D5;
         transform: scale(1.1);
     }
 
@@ -542,7 +542,7 @@ if (isset($_SESSION['user_id'])) {
     }
 
     .carousel-product-image {
-        width: 100px;
+        width: 150px;
         height: 100px;
         border-radius: 10px;
         overflow: hidden;
@@ -552,14 +552,14 @@ if (isset($_SESSION['user_id'])) {
     }
 
     .carousel-product-image img {
-        width: 100%;
+        width: 150%;
         height: 100%;
         object-fit: cover;
     }
 
     .carousel-placeholder-img {
-        width: 100%;
-        height: 100%;
+        width: 155%;
+        height: 150%;
         background: linear-gradient(135deg, #C647CC, #ECC7ED);
         display: flex;
         align-items: center;
@@ -596,7 +596,7 @@ if (isset($_SESSION['user_id'])) {
     .carousel-price {
         font-size: 16px;
         font-weight: bold;
-        color: #C647CC;
+        color: #FFFFFF;
         margin: 5px 0;
     }
 
@@ -652,7 +652,7 @@ if (isset($_SESSION['user_id'])) {
         width: 10px;
         height: 10px;
         border-radius: 50%;
-        background: rgba(198, 71, 204, 0.3);
+        background: linear-gradient(to bottom, #C59DD4, #FFFFFF);
         cursor: pointer;
         transition: all 0.3s ease;
     }
@@ -665,7 +665,7 @@ if (isset($_SESSION['user_id'])) {
     /* CATEGORIES SECTION STYLES */
     .categories-section {
         padding: 40px 20px;
-        background: rgba(0, 0, 0, 0.3);
+        background:linear-gradient(to bottom, #C59DD4, #FFFFFF);
         backdrop-filter: blur(10px);
         margin: 20px 0;
     }
@@ -1082,8 +1082,7 @@ if (isset($_SESSION['user_id'])) {
         transform: scale(1.05);
     }
 
-    /* Comments Section Styles */
-    .modal-comments-section {
+   .modal-comments-section {
         margin-top: 20px;
         border-top: 1px solid #eee;
         padding-top: 20px;
@@ -1322,9 +1321,10 @@ if (isset($_SESSION['user_id'])) {
     <div class="brand-name">A&F</div>
     <div class="nav-items">
       <span onclick="window.location.href='Welcome.php'" style="cursor: pointer;">Home</span>
-      <span>About</span>
       <span onclick="window.location.href='Contact.php'" style="cursor: pointer;">Contact</span>
+      <span onclick="window.location.href='About.php'" style="cursor: pointer;">About</span>
     </div>
+    
     
     <!-- NAVIGATION ICONS -->
     <div class="nav-icons">
@@ -1441,7 +1441,7 @@ if (isset($_SESSION['user_id'])) {
             <?php echo htmlspecialchars($product['name']); ?>
           </div>
           <div class="product-price">
-            $<?php echo number_format($product['price'], 2); ?>
+            ₱<?php echo number_format($product['price'], 2); ?> <!-- Changed from $ to ₱ -->
           </div>
           <div class="product-stock <?php echo $product['stock_quantity'] <= 0 ? 'out-of-stock' : ''; ?>">
             <?php 
@@ -1487,138 +1487,15 @@ if (isset($_SESSION['user_id'])) {
           <span>Add to Cart</span>
         </button>
       </div>
-      
-      <!-- Comments Section -->
-      <div class="modal-comments-section">
-        <h3>Customer Comments</h3>
-        
-        <!-- Add Comment Form -->
-        <!-- Replace the add comment form with this: -->
-<div class="add-comment-form">
-    <h4>Leave a comment</h4>
-    <div class="rating-input">
-        <label for="rating">Rating:</label>
-        <div class="star-rating">
-            <span class="star" data-value="1">&#9733;</span>
-            <span class="star" data-value="2">&#9733;</span>
-            <span class="star" data-value="3">&#9733;</span>
-            <span class="star" data-value="4">&#9733;</span>
-            <span class="star" data-value="5">&#9733;</span>
-        </div>
-    </div>
-    <textarea id="commentText" placeholder="Write your comment here..." rows="3"></textarea>
-    <div style="display: flex; gap: 10px;">
-        <button class="submit-comment-btn" onclick="submitComment()">Submit Comment</button>
-        <button class="cancel-comment-btn" onclick="cancelComment()" style="background: #6c757d;">Cancel</button>
-    </div>
-</div>
-        
-        <!-- Comments List -->
-        <div class="comments-list" id="commentsList">
-          <!-- Comments will be populated here by JavaScript -->
-        </div>
-        
-        <!-- No comments message -->
-        <div class="no-comments" id="noCommentsMessage" style="display: none;">
-          No comments yet. Be the first to comment!
-        </div>
-        
-        <!-- Loading message -->
-        <div class="loading" id="commentsLoading" style="display: none;">
-          Loading comments...
-        </div>
-      </div>
     </div>
   </div>
 </div>
 
 <script>
 
-
 // Product Modal Variables
 let currentProduct = null;
 let modalQuantity = 1;
-
-// Comments functionality variables
-let currentRating = 0;
-
-// Initialize star rating functionality
-function initStarRating() {
-    const stars = document.querySelectorAll('.star-rating .star');
-    
-    stars.forEach((star, index) => {
-        // Click event
-        star.addEventListener('click', function() {
-            currentRating = parseInt(this.dataset.value);
-            updateStarDisplay();
-        });
-        
-        // Hover events
-        star.addEventListener('mouseenter', function() {
-            const hoverRating = parseInt(this.dataset.value);
-            highlightStars(hoverRating, true);
-        });
-    });
-    
-    // Reset on mouse leave
-    const starRating = document.querySelector('.star-rating');
-    if (starRating) {
-        starRating.addEventListener('mouseleave', function() {
-            updateStarDisplay();
-        });
-    }
-}
-
-// Highlight stars up to given rating
-function highlightStars(rating, isHover = false) {
-    const stars = document.querySelectorAll('.star-rating .star');
-    stars.forEach((star, index) => {
-        const starValue = parseInt(star.dataset.value);
-        
-        star.classList.remove('active', 'hover');
-        
-        if (starValue <= rating) {
-            star.classList.add(isHover ? 'hover' : 'active');
-        }
-    });
-}
-
-// Update star display based on current rating
-function updateStarDisplay() {
-    highlightStars(currentRating);
-}
-
-// Helper function to render star rating
-function renderStarRating(rating) {
-    let stars = '';
-    for (let i = 1; i <= 5; i++) {
-        if (i <= rating) {
-            stars += '<span style="color: #ffc107;">★</span>';
-        } else {
-            stars += '<span style="color: #ddd;">★</span>';
-        }
-    }
-    return stars;
-}
-
-// Helper function to format date
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
-
-// Helper function to escape HTML
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
 
 // Notification system
 function showNotification(message, type) {
@@ -1677,7 +1554,6 @@ function showNotification(message, type) {
         }
     }, 5000);
 }
-// Add these missing functions to MainPage.php:
 
 // Carousel Variables
 let currentSlide = 0;
@@ -1865,11 +1741,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Initialize carousel
             initCarousel();
-            
-    
-
-            // Initialize star rating
-            initStarRating();
             
             // Modal click outside to close
             const modal = document.getElementById('productModal');
@@ -2176,8 +2047,8 @@ function openProductModal(productId) {
     
     // Extract data
     const productName = productNameElement ? productNameElement.textContent.trim() : 'Unknown Product';
-    const priceText = productPriceElement ? productPriceElement.textContent.trim() : '$0.00';
-    const productPrice = parseFloat(priceText.replace('$', '') || 0);
+    const priceText = productPriceElement ? productPriceElement.textContent.trim() : '₱0.00'; // Changed from $0.00 to ₱0.00
+    const productPrice = parseFloat(priceText.replace('₱', '') || 0); // Changed from $ to ₱
     
     let stockText = 'In Stock';
     if (productStockElement) {
@@ -2234,20 +2105,8 @@ function openProductModal(productId) {
     
     modalQuantity = 1;
     
-    // Reset comments form
-    const commentText = document.getElementById('commentText');
-    if (commentText) commentText.value = '';
-    currentRating = 0;
-    updateStarDisplay();
-    
-    // Fetch description and comments
+    // Fetch description only (no comments)
     fetchProductDescription(productId);
-    fetchProductComments(productId);
-    
-    // Initialize star rating for this modal
-    setTimeout(() => {
-        initStarRating();
-    }, 100);
     
     console.log('=== MODAL DEBUG END ===');
 }
@@ -2512,7 +2371,7 @@ function fetchProductDescription(productId) {
             }
             
             if (modalPrice && product.price) {
-                modalPrice.textContent = '$' + parseFloat(product.price).toFixed(2);
+                modalPrice.textContent = '₱' + parseFloat(product.price).toFixed(2);
             }
             
             if (modalStock && product.stock_quantity !== undefined) {
@@ -2546,184 +2405,9 @@ function fetchProductDescription(productId) {
     });
 }
 
-// Comments functionality
-function fetchProductComments(productId) {
-    console.log('Fetching comments for product ID:', productId);
-    
-    // Convert to integer and validate
-    const numericProductId = parseInt(productId);
-    if (!numericProductId || numericProductId <= 0) {
-        console.error('Invalid product ID for comments:', productId);
-        return;
-    }
-    
-    const commentsList = document.getElementById('commentsList');
-    const noCommentsMessage = document.getElementById('noCommentsMessage');
-    const commentsLoading = document.getElementById('commentsLoading');
-    
-    if (commentsLoading) commentsLoading.style.display = 'block';
-    if (commentsList) commentsList.innerHTML = '';
-    if (noCommentsMessage) noCommentsMessage.style.display = 'none';
-    // Temporary debug logging
-console.log('=== FETCH DEBUG ===');
-console.log('Original productId:', productId, typeof productId);
-console.log('Numeric productId:', numericProductId, typeof numericProductId);
-console.log('Request body:', JSON.stringify({product_id: numericProductId}));
-console.log('==================');
-
-    fetch('product-comments.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            action: 'get_comments',
-            product_id: numericProductId  // Send as integer
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success && Array.isArray(data.comments)) {
-            if (commentsList) commentsList.innerHTML = '';
-            
-            if (data.comments.length === 0) {
-                if (noCommentsMessage) noCommentsMessage.style.display = 'block';
-            } else {
-                if (noCommentsMessage) noCommentsMessage.style.display = 'none';
-                
-                data.comments.forEach(comment => {
-                    const commentItem = document.createElement('div');
-                    commentItem.className = 'comment-item';
-                    
-                    commentItem.innerHTML = `
-                        <div class="comment-header">
-                            <div class="comment-author">${escapeHtml(comment.user_name)}</div>
-                            <div class="comment-rating">${renderStarRating(comment.rating)}</div>
-                            <div class="comment-date">${formatDate(comment.date)}</div>
-                        </div>
-                        <div class="comment-text">${escapeHtml(comment.text)}</div>
-                    `;
-                    
-                    if (commentsList) commentsList.appendChild(commentItem);
-                });
-            }
-        } else {
-            if (commentsList) {
-                commentsList.innerHTML = '<div class="no-comments">Error loading comments.</div>';
-            }
-        }
-    })
-    .catch(error => {
-        console.error('Comments fetch error:', error);
-        if (commentsList) {
-            commentsList.innerHTML = '<div class="no-comments">Error loading comments.</div>';
-        }
-    })
-    .finally(() => {
-        if (commentsLoading) commentsLoading.style.display = 'none';
-    });
-}
-
-// Submit comment
-function submitComment() {
-    <?php if (!isset($_SESSION['user_id'])): ?>
-        showNotification('Please login to add comments', 'error');
-        setTimeout(() => {
-            window.location.href = 'Welcome.php';
-        }, 1500);
-        return;
-    <?php endif; ?>
-    
-    if (!currentProduct) {
-        showNotification('No product selected', 'error');
-        return;
-    }
-    
-    const commentText = document.getElementById('commentText');
-    if (!commentText) {
-        showNotification('Comment form not found', 'error');
-        return;
-    }
-    
-    const text = commentText.value.trim();
-    
-    // Validation
-    if (currentRating === 0) {
-        showNotification('Please select a rating', 'error');
-        return;
-    }
-    
-    if (text.length < 5) {
-        showNotification('Comment must be at least 5 characters long', 'error');
-        return;
-    }
-    
-    // Get the product ID - fix the access method
-    const productId = parseInt(currentProduct.id || currentProduct.product_id);
-
-    if (!productId) {
-        showNotification('Product ID not found', 'error');
-        console.error('currentProduct object:', currentProduct);
-        return;
-    }
-    
-    // Disable submit button
-    const submitBtn = document.querySelector('.submit-comment-btn');
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Posting...';
-    }
-    
-    console.log('Submitting comment:', {
-        product_id: productId,
-        text: text,
-        rating: currentRating,
-        currentProduct: currentProduct
-    });
-    
-    fetch('product-comments.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            action: 'add_comment',
-            product_id: productId,
-            comment_text: text,
-            rating: currentRating
-        })
-    })
-    .then(response => {
-        console.log('Response status:', response.status);
-        return response.json();
-    })
-    .then(data => {
-        console.log('Comment response:', data);
-        if (data.success) {
-            showNotification('Review posted successfully!', 'success');
-            
-            // Clear form
-            commentText.value = '';
-            currentRating = 0;
-            updateStarDisplay();
-            
-            // Reload comments
-            fetchProductComments(productId);
-        } else {
-            showNotification(data.message || 'Error posting review', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error posting comment:', error);
-        showNotification('Network error while posting review', 'error');
-    })
-    .finally(() => {
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit Comment';
-        }
-    });
-}
+// Comments functionality - REMOVED
+// Submit comment - REMOVED
+// Cancel comment - REMOVED
 
 // Sort products
 function sortProducts(sortType, button) {
@@ -2757,16 +2441,6 @@ function sortProducts(sortType, button) {
     productsGrid.innerHTML = '';
     productCards.forEach(card => productsGrid.appendChild(card));
 }
-function cancelComment() {
-    const commentText = document.getElementById('commentText');
-    if (commentText) commentText.value = '';
-    
-    currentRating = 0;
-    updateStarDisplay();
-    
-    showNotification('Comment cancelled', 'info');
-}
-
 </script>
 </body>
 </html>

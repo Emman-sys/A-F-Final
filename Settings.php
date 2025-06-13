@@ -172,23 +172,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $stmt->close();
             break;
             
-        case 'save_privacy_settings':
-            $data_sharing = isset($_POST['dataSharing']) ? 1 : 0;
-            $marketing_emails = isset($_POST['marketingEmails']) ? 1 : 0;
-            $profile_visibility = $_POST['profileVisibility'] ?? 'private';
-            
-            // Update privacy settings in users table
-            $stmt = $conn->prepare("UPDATE users SET data_sharing = ?, marketing_emails = ?, profile_visibility = ? WHERE user_id = ?");
-            $stmt->bind_param("iisi", $data_sharing, $marketing_emails, $profile_visibility, $user_id);
-            
-            if ($stmt->execute()) {
-                echo json_encode(['success' => true, 'message' => 'Privacy settings saved successfully!']);
-            } else {
-                echo json_encode(['success' => false, 'message' => 'Error saving privacy settings']);
-            }
-            $stmt->close();
-            break;
-            
         case 'get_user_settings':
             // Get all user settings from users table
             $stmt = $conn->prepare("SELECT * FROM users WHERE user_id = ?");
@@ -202,51 +185,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     'orderNotifications' => $user['order_notifications'] ?? 1,
                     'promoNotifications' => $user['promo_notifications'] ?? 0,
                     'emailNotifications' => $user['email_notifications'] ?? 1,
-                    'language' => $user['language'] ?? 'en',
-                    'dataSharing' => $user['data_sharing'] ?? 0,
-                    'marketingEmails' => $user['marketing_emails'] ?? 0,
-                    'profileVisibility' => $user['profile_visibility'] ?? 'private'
+                    'language' => $user['language'] ?? 'en'
                 ];
                 echo json_encode(['success' => true, 'settings' => $settings]);
             } else {
                 echo json_encode(['success' => false, 'message' => 'User not found']);
-            }
-            $stmt->close();
-            break;
-            
-        case 'save_payment_method':
-            $payment_type = $_POST['paymentType'];
-            $card_number = $_POST['cardNumber'] ?? '';
-            $expiry_date = $_POST['expiryDate'] ?? '';
-            $card_holder = $_POST['cardHolder'] ?? '';
-            
-            // Create payment_methods table if it doesn't exist
-            $conn->query("CREATE TABLE IF NOT EXISTS payment_methods (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                user_id INT,
-                payment_type VARCHAR(50),
-                card_number_last4 VARCHAR(4),
-                card_holder VARCHAR(100),
-                expiry_date VARCHAR(7),
-                is_default TINYINT(1) DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(user_id)
-            )");
-            
-            // For security, only store last 4 digits of card
-            $last4 = '';
-            if (!empty($card_number)) {
-                $last4 = substr(str_replace(' ', '', $card_number), -4);
-            }
-            
-            // Insert payment method
-            $stmt = $conn->prepare("INSERT INTO payment_methods (user_id, payment_type, card_number_last4, card_holder, expiry_date, is_default) VALUES (?, ?, ?, ?, ?, 1)");
-            $stmt->bind_param("issss", $user_id, $payment_type, $last4, $card_holder, $expiry_date);
-            
-            if ($stmt->execute()) {
-                echo json_encode(['success' => true, 'message' => 'Payment method saved successfully!']);
-            } else {
-                echo json_encode(['success' => false, 'message' => 'Error saving payment method']);
             }
             $stmt->close();
             break;
@@ -614,12 +557,6 @@ $conn->close();
         <div class="setting-box" onclick="openModal('passwordModal')">
           <i class="fas fa-lock"></i> Change Password
         </div>
-        <div class="setting-box" onclick="openModal('paymentModal')">
-          <i class="fas fa-credit-card"></i> Payment Method
-        </div>
-        <div class="setting-box" onclick="openModal('privacyModal')">
-          <i class="fas fa-user"></i> Privacy
-        </div>
       </div>
 
       <div class="column">
@@ -778,78 +715,6 @@ $conn->close();
         </div>
         <button type="submit" class="btn">Save Language</button>
         <button type="button" class="btn btn-secondary" onclick="closeModal('languageModal')">Cancel</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Enhanced Privacy Modal -->
-  <div id="privacyModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal('privacyModal')">&times;</span>
-      <h2><i class="fas fa-user"></i> Privacy Settings</h2>
-      <div id="privacyAlert" class="alert"></div>
-      <form id="privacyForm">
-        <div class="setting-item">
-          <label>Data Sharing:</label>
-          <label class="toggle-switch">
-            <input type="checkbox" id="dataSharing">
-            <span class="slider"></span>
-          </label>
-        </div>
-        <small>Allow sharing of anonymized data for service improvement</small>
-        
-        <div class="setting-item">
-          <label>Marketing Emails:</label>
-          <label class="toggle-switch">
-            <input type="checkbox" id="marketingEmails">
-            <span class="slider"></span>
-          </label>
-        </div>
-        <small>Receive promotional emails and offers</small>
-        
-        <div class="form-group">
-          <label for="profileVisibility">Profile Visibility:</label>
-          <select id="profileVisibility">
-            <option value="private">Private</option>
-            <option value="friends">Friends Only</option>
-            <option value="public">Public</option>
-          </select>
-        </div>
-        
-        <button type="submit" class="btn">Save Settings</button>
-        <button type="button" class="btn btn-secondary" onclick="closeModal('privacyModal')">Cancel</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Enhanced Payment Modal -->
-  <div id="paymentModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal('paymentModal')">&times;</span>
-      <h2><i class="fas fa-credit-card"></i> Payment Methods</h2>
-      <div id="paymentAlert" class="alert"></div>
-      <form id="paymentForm">
-        <div class="form-group">
-          <label for="paymentType">Payment Type:</label>
-          <select id="paymentType" required>
-            <option value="cash">Cash on Delivery</option>
-            <option value="gcash">GCash</option>
-            <option value="paymaya">PayMaya</option>
-            <option value="card">Credit/Debit Card</option>
-          </select>
-        </div>
-        <div class="form-group" id="cardFields" style="display: none;">
-          <label for="cardHolder">Card Holder Name:</label>
-          <input type="text" id="cardHolder" placeholder="Enter cardholder name">
-          
-          <label for="cardNumber">Card Number:</label>
-          <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
-          
-          <label for="expiryDate">Expiry Date:</label>
-          <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5">
-        </div>
-        <button type="submit" class="btn">Save Payment Method</button>
-        <button type="button" class="btn btn-secondary" onclick="closeModal('paymentModal')">Cancel</button>
       </form>
     </div>
   </div>
@@ -1061,77 +926,6 @@ $conn->close();
       });
     });
 
-    // Privacy Form Submission
-    document.getElementById('privacyForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      const formData = new FormData();
-      formData.append('action', 'save_privacy_settings');
-      formData.append('dataSharing', document.getElementById('dataSharing').checked ? '1' : '0');
-      formData.append('marketingEmails', document.getElementById('marketingEmails').checked ? '1' : '0');
-      formData.append('profileVisibility', document.getElementById('profileVisibility').value);
-
-      this.classList.add('loading');
-
-      fetch('Settings.php', {
-        method: 'POST',
-        body: formData
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          showAlert('privacyAlert', data.message, 'success');
-          setTimeout(() => {
-            closeModal('privacyModal');
-          }, 1500);
-        } else {
-          showAlert('privacyAlert', data.message, 'error');
-        }
-        this.classList.remove('loading');
-      })
-      .catch(error => {
-        showAlert('privacyAlert', 'Network error occurred', 'error');
-        this.classList.remove('loading');
-      });
-    });
-
-    // Payment Form Submission
-    document.getElementById('paymentForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      const formData = new FormData();
-      formData.append('action', 'save_payment_method');
-      formData.append('paymentType', document.getElementById('paymentType').value);
-      formData.append('cardHolder', document.getElementById('cardHolder').value);
-      formData.append('cardNumber', document.getElementById('cardNumber').value);
-      formData.append('expiryDate', document.getElementById('expiryDate').value);
-
-      this.classList.add('loading');
-
-      fetch('Settings.php', {
-        method: 'POST',
-        body: formData
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          showAlert('paymentAlert', data.message, 'success');
-          document.getElementById('paymentForm').reset();
-          document.getElementById('cardFields').style.display = 'none';
-          setTimeout(() => {
-            closeModal('paymentModal');
-          }, 1500);
-        } else {
-          showAlert('paymentAlert', data.message, 'error');
-        }
-        this.classList.remove('loading');
-      })
-      .catch(error => {
-        showAlert('paymentAlert', 'Network error occurred', 'error');
-        this.classList.remove('loading');
-      });
-    });
-
     // Load user settings on page load
     document.addEventListener('DOMContentLoaded', function() {
       loadUserSettings();
@@ -1149,43 +943,12 @@ $conn->close();
       .then(data => {
         if (data.success) {
           const settings = data.settings;
-          
-          // Update privacy settings
-          document.getElementById('dataSharing').checked = settings.dataSharing;
-          document.getElementById('marketingEmails').checked = settings.marketingEmails;
-          document.getElementById('profileVisibility').value = settings.profileVisibility;
         }
       })
       .catch(error => {
         console.error('Error loading settings:', error);
       });
     }
-
-    // Show/hide card fields based on payment type
-    document.getElementById('paymentType').addEventListener('change', function() {
-      const cardFields = document.getElementById('cardFields');
-      if (this.value === 'card') {
-        cardFields.style.display = 'block';
-      } else {
-        cardFields.style.display = 'none';
-      }
-    });
-
-    // Format card number input
-    document.getElementById('cardNumber').addEventListener('input', function() {
-      let value = this.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
-      let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
-      this.value = formattedValue;
-    });
-
-    // Format expiry date input
-    document.getElementById('expiryDate').addEventListener('input', function() {
-      let value = this.value.replace(/\D/g, '');
-      if (value.length >= 2) {
-        value = value.substring(0, 2) + '/' + value.substring(2, 4);
-      }
-      this.value = value;
-    });
   </script>
 </body>
 </html>

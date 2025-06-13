@@ -1,8 +1,9 @@
 <?php
+// Start session and connect to database for cart functionality
 session_start();
 require 'db_connect.php';
 
-// Check if user is logged in
+// Security check - redirect to login if user not authenticated
 if (!isset($_SESSION['user_id'])) {
     header('Location: Welcome.php');
     exit;
@@ -10,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// Get user info for the payment form
+// Get user information for pre-filling checkout form
 $user_stmt = $conn->prepare("SELECT name, email FROM users WHERE user_id = ?");
 if (!$user_stmt) {
     die("Error preparing user query: " . $conn->error);
@@ -19,18 +20,19 @@ $user_stmt->bind_param("i", $user_id);
 $user_stmt->execute();
 $user_info = $user_stmt->get_result()->fetch_assoc();
 
-// Get user's order count for display
+// Get user's total order count for navigation badge display
 $order_count_stmt = $conn->prepare("SELECT COUNT(*) as order_count FROM orders WHERE user_id = ?");
 $order_count_stmt->bind_param("i", $user_id);
 $order_count_stmt->execute();
 $order_count = $order_count_stmt->get_result()->fetch_assoc()['order_count'];
 
-// Check if cartitems table exists
+// Check if cartitems table exists (graceful handling for new database installations)
 $table_check = $conn->query("SHOW TABLES LIKE 'cartitems'");
 if ($table_check->num_rows == 0) {
     $cart_items = [];
 } else {
-    // Get cart items with enhanced stock checking
+    // Get cart items with comprehensive stock checking and product details
+    // JOIN multiple tables to get all necessary product information
     $stmt = $conn->prepare("
         SELECT ci.cart_item_id, ci.quantity, p.product_id, p.name, p.description, p.price, p.stock_quantity,
                (ci.quantity * p.price) as subtotal,
@@ -59,6 +61,7 @@ if ($table_check->num_rows == 0) {
     $cart_items = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 }
 
+// Calculate cart totals and delivery fee
 $total = 0;
 $total_items = 0;
 foreach ($cart_items as $item) {
@@ -66,8 +69,8 @@ foreach ($cart_items as $item) {
     $total_items += $item['quantity'];
 }
 
-// Calculate estimated delivery fee (simple logic)
-$delivery_fee = $total >= 500 ? 0 : 50; // Free delivery for orders over ₱500
+// Simple delivery fee logic - free delivery for orders over ₱500
+$delivery_fee = $total >= 500 ? 0 : 50;
 $grand_total = $total + $delivery_fee;
 ?>
 
@@ -80,15 +83,17 @@ $grand_total = $total + $delivery_fee;
    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family+Merriweather+Sans:wght@700&display=swap" rel="stylesheet" />
    <link rel="stylesheet" href="styles.css">
    
-   <!-- Free Map Alternatives - No API Key Required -->
+   <!-- Free Map Libraries - No API Key Required -->
+   <!-- Leaflet: Open-source interactive map library -->
    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
    
-   <!-- Optional: Geocoding service -->
+   <!-- Optional: Free geocoding service for address search -->
    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
 
     <style>
+      /* Cart page styling with responsive design and modern UI */
       body {
         background: linear-gradient(135deg, #5127A3, #986C93, #E0B083);
         background-image: url('bg.png');
@@ -754,46 +759,48 @@ $grand_total = $total + $delivery_fee;
       <div class="header-gradient"></div>
       <a href="MainPage.php" class="brand">A&F</a>
       
-      <!-- ADD: Navigation Icons -->
+      <!-- Navigation Icons with cart badge and order count -->
     <div class="nav-icons">
-      <!-- Cart Icon (current page - highlighted) -->
+      <!-- Cart Icon (current page - highlighted with special styling) -->
       <div class="nav-icon current" title="Cart (Current Page)">
         <img src="images/cart.png" alt="Cart">
         <span class="cart-badge"><?php echo $total_items; ?></span>
       </div>
       
-      <!-- Order History Icon -->
+      <!-- Order History Icon with dynamic badge showing order count -->
       <div class="nav-icon" onclick="goToOrderHistory()" title="Order History (<?php echo $order_count; ?> orders)">
-        <img src="images/history.png" alt="Orders">
+        <img src="images/deliv.png" alt="Orders">
         <?php if ($order_count > 0): ?>
           <span class="cart-badge" style="background: #28a745;"><?php echo $order_count; ?></span>
         <?php endif; ?>
       </div>
       
-      <!-- User Profile Icon -->
+      <!-- User Profile Icon for account management -->
       <div class="nav-icon" onclick="goToProfile()" title="Profile">
         <img src="images/users.png" alt="Profile">
       </div>
     </div>
     
+    <!-- Empty cart state - shows when no items in cart -->
     <?php if (empty($cart_items)): ?>
         <div class="empty-cart">
           <h2>🛒 Your cart is empty</h2>
           <p><a href="MainPage.php">Continue Shopping</a></p>
+          <!-- Show order history link if user has previous orders -->
           <?php if ($order_count > 0): ?>
             <p><a href="#" onclick="goToOrderHistory()" style="color: #8ADEF1;">View Order History (<?php echo $order_count; ?> orders)</a></p>
           <?php endif; ?>
         </div>
       <?php else: ?>
         
-        <!-- Main Cart Content -->
+        <!-- Main Cart Content - displays when items exist -->
         <div class="main-content">
-          <!-- Cart Summary Header -->
+          <!-- Cart Summary Header with item count -->
           <div style="background: linear-gradient(135deg, #C647CC, #ECC7ED); color: white; padding: 15px; text-align: center; font-weight: bold; border-radius: 10px 10px 0 0;">
             🛒 Shopping Cart - <?php echo $total_items; ?> item(s)
           </div>
           
-          <!-- Table Header -->
+          <!-- Table Header - defines column structure for cart items -->
           <div class="table-header">
             <div>Image</div>
             <div>Product</div>
@@ -803,31 +810,35 @@ $grand_total = $total + $delivery_fee;
             <div>Action</div>
           </div>
           
-          <!-- Products Container -->
+          <!-- Products Container - scrollable area for cart items -->
           <div class="products-container" id="products-container">
             <?php foreach ($cart_items as $index => $item): ?>
+              <!-- Product Row - each cart item with stock status styling -->
               <div class="product-row <?php echo $item['stock_status']; ?>" id="product-row-<?php echo $index; ?>">
                 
-                <!-- Product Image -->
+                <!-- Product Image Column -->
                 <div>
                   <?php if ($item['has_image']): ?>
+                    <!-- Display actual product image from database -->
                     <img src="display_image.php?id=<?php echo $item['product_id']; ?>" 
                          alt="<?php echo htmlspecialchars($item['name']); ?>"
                          class="product-image"
                          id="product-image-<?php echo $index; ?>">
                   <?php else: ?>
+                    <!-- Fallback placeholder for products without images -->
                     <div class="product-placeholder" style="width: 60px; height: 60px; background: linear-gradient(135deg, #C647CC, #ECC7ED); color: white; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: bold;">
                       <?php echo strtoupper(substr($item['name'], 0, 1)); ?>
                     </div>
                   <?php endif; ?>
                 </div>
                 
-                <!-- Product Name with Category -->
+                <!-- Product Name with Category and Stock Status Indicators -->
                 <div class="product-name" id="product-name-<?php echo $index; ?>">
                   <div style="font-weight: bold;"><?php echo htmlspecialchars($item['name']); ?></div>
                   <div style="font-size: 11px; color: #666; margin-top: 2px;">
                     📂 <?php echo htmlspecialchars($item['category_name']); ?>
                   </div>
+                  <!-- Dynamic stock status warnings -->
                   <?php if ($item['stock_status'] == 'out_of_stock'): ?>
                     <div style="color: #dc3545; font-size: 10px; font-weight: bold;">⚠️ OUT OF STOCK</div>
                   <?php elseif ($item['stock_status'] == 'insufficient_stock'): ?>
@@ -837,34 +848,37 @@ $grand_total = $total + $delivery_fee;
                   <?php endif; ?>
                 </div>
                 
-                <!-- Unit Price -->
+                <!-- Unit Price Display -->
                 <div class="price-display" id="unit-price-<?php echo $index; ?>">
                   ₱<?php echo number_format($item['price'], 2); ?>
                 </div>
                 
-                <!-- Quantity Controls -->
+                <!-- Quantity Controls with Stock-aware Disable Logic -->
                 <div class="quantity-controls">
+                  <!-- Decrease quantity button -->
                   <button class="qty-btn" 
                           onclick="updateQuantity(<?php echo $item['cart_item_id']; ?>, -1, <?php echo $index; ?>)"
                           id="minus-btn-<?php echo $index; ?>"
                           <?php echo ($item['stock_status'] == 'out_of_stock') ? 'disabled' : ''; ?>>-</button>
                   
+                  <!-- Current quantity display -->
                   <span class="qty-display" id="quantity-display-<?php echo $index; ?>">
                     <?php echo $item['quantity']; ?>
                   </span>
                   
+                  <!-- Increase quantity button - disabled when at stock limit -->
                   <button class="qty-btn" 
                           onclick="updateQuantity(<?php echo $item['cart_item_id']; ?>, 1, <?php echo $index; ?>)"
                           id="add-btn-<?php echo $index; ?>"
                           <?php echo ($item['stock_status'] == 'out_of_stock' || $item['quantity'] >= $item['stock_quantity']) ? 'disabled' : ''; ?>>+</button>
                 </div>
                 
-                <!-- Total Price -->
+                <!-- Total Price for This Item (quantity × unit price) -->
                 <div class="total-price" id="total-price-<?php echo $index; ?>">
                   ₱<?php echo number_format($item['subtotal'], 2); ?>
                 </div>
                 
-                <!-- Delete Button -->
+                <!-- Delete/Remove Button -->
                 <div>
                   <button class="delete-btn" 
                           onclick="removeFromCart(<?php echo $item['cart_item_id']; ?>, <?php echo $index; ?>)"
@@ -873,7 +887,8 @@ $grand_total = $total + $delivery_fee;
                   </button>
                 </div>
                 
-                <!-- Hidden data for AJAX -->
+                <!-- Hidden Data Container for AJAX Operations -->
+                <!-- Stores item information for JavaScript access without exposing sensitive data -->
                 <div id="item-data-<?php echo $index; ?>" 
                      data-cart-item-id="<?php echo $item['cart_item_id']; ?>"
                      data-product-id="<?php echo $item['product_id']; ?>"
@@ -887,24 +902,26 @@ $grand_total = $total + $delivery_fee;
             <?php endforeach; ?>
           </div>
           
-          <!-- Cart Summary Footer -->
+          <!-- Cart Summary Footer with Totals and Free Delivery Notice -->
           <div style="background: #f8f9fa; padding: 15px; border-top: 2px solid #dee2e6;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
               <span>Subtotal (<span id="total-items-count"><?php echo $total_items; ?></span> items):</span>
               <span style="font-weight: bold;" id="subtotal-display">₱<?php echo number_format($total, 2); ?></span>
             </div>
+            <!-- Dynamic free delivery notice - shows remaining amount needed -->
             <div id="free-delivery-notice" style="font-size: 12px; color: #28a745; margin-bottom: 10px; <?php echo ($total >= 500 || $delivery_fee == 0) ? 'display: none;' : ''; ?>">
               💡 Add ₱<span id="free-delivery-amount"><?php echo number_format(500 - $total, 2); ?></span> more for FREE delivery!
             </div>
           </div>
         </div>
         
-        <!-- Payment Sidebar Modal -->
+        <!-- Checkout Modal - Full checkout form with map integration -->
         <div id="checkout-modal" class="checkout-modal">
           <div class="checkout-modal-content">
             <span class="checkout-modal-close" onclick="closeCheckoutModal()">&times;</span>
             <div class="payment-title">💳 Checkout Details</div>
             
+            <!-- Pre-filled Customer Information -->
             <div class="payment-section">
               <div class="payment-label">👤 Customer Name:</div>
               <input type="text" class="payment-input" id="customer-name"
@@ -917,6 +934,7 @@ $grand_total = $total + $delivery_fee;
                      value="<?php echo htmlspecialchars($user_info['email']); ?>" readonly>
             </div>
             
+            <!-- Delivery Address with Map Integration -->
             <div class="payment-section">
               <div class="payment-label">🏠 Delivery Address:</div>
               <textarea class="payment-input" id="delivery-address"
@@ -925,46 +943,51 @@ $grand_total = $total + $delivery_fee;
                         style="resize: vertical; min-height: 60px; line-height: 1.4;"
                         required></textarea>
               
-              <!-- Map Integration -->
+              <!-- Free Map Integration using Leaflet + OpenStreetMap -->
               <div class="map-container">
                 <button type="button" class="map-toggle" onclick="toggleMap()">
                   📍 Pick Location on Map
                 </button>
+                <!-- Interactive map for location selection -->
                 <div id="map"></div>
                 <div class="map-instructions" id="map-instructions" style="display: none;">
                   🎯 Click anywhere on the map to set your delivery location
                 </div>
               </div>
               
-              <!-- Address Suggestions -->
+              <!-- Address Suggestions from free geocoding service -->
               <div class="address-suggestions" id="address-suggestions"></div>
             </div>
             
+            <!-- Contact Information -->
             <div class="payment-section">
               <div class="payment-label">📱 Contact Number:</div>
               <input type="tel" class="payment-input" id="customer-phone"
                      placeholder="09XXXXXXXXX" pattern="[0-9]{11}" required>
             </div>
             
+            <!-- Payment Method Selection -->
             <div class="payment-section">
               <div class="payment-label">💰 Payment Method:</div>
               <div class="payment-methods">
                 <div class="payment-method" data-method="credit_card" title="Credit Card">
-                  <img src="images/credit-card.png" alt="Card">
+                  <img src="images/4341764.png" alt="Card">
                 </div>
                 <div class="payment-method" data-method="gcash" title="GCash">
-                  <img src="images/gcash.png" alt="GCash">
+                  <img src="images/gcash-logo_brandlogos.net_kiaqh.png" alt="GCash">
                 </div>
                 <div class="payment-method" data-method="cash_on_delivery" title="Cash on Delivery">
-                  <img src="images/peso.png" alt="COD">
+                  <img src="images/32724.png" alt="COD">
                 </div>
               </div>
             </div>
             
+            <!-- Final Checkout Button -->
             <button class="checkout-btn" onclick="checkout()" id="checkout-btn">
               🛒 Confirm Checkout - ₱<span id="total-amount"><?php echo number_format($grand_total, 2); ?></span>
             </button>
             
+            <!-- Clear Cart Option -->
             <div style="text-align: center; margin-top: 10px;">
               <button onclick="clearCart()" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; cursor: pointer;">
                 🗑️ Clear All Items
@@ -973,7 +996,7 @@ $grand_total = $total + $delivery_fee;
           </div>
         </div>
         
-        <!-- Checkout trigger button (replace sidebar button) -->
+        <!-- Floating Checkout Trigger Button -->
         <button class="checkout-btn" style="position: absolute; right: 60px; top: 600px; width: 300px; z-index: 10;" onclick="openCheckoutModal()" id="open-checkout-btn">
           🛒 Proceed to Checkout - ₱<span id="total-amount"><?php echo number_format($grand_total, 2); ?></span>
         </button>
@@ -982,26 +1005,26 @@ $grand_total = $total + $delivery_fee;
     </div>
     
     <script>
-      // Global variables
-      let isUpdating = false;
-      let cartTotal = <?php echo $total; ?>;
-      let deliveryFee = <?php echo $delivery_fee; ?>;
-      let grandTotal = <?php echo $grand_total; ?>;
-      let totalItems = <?php echo $total_items; ?>;
+      // Global Variables for Cart State Management
+      let isUpdating = false; // Prevents concurrent AJAX requests
+      let cartTotal = <?php echo $total; ?>; // Current subtotal
+      let deliveryFee = <?php echo $delivery_fee; ?>; // Delivery fee (₱50 or free)
+      let grandTotal = <?php echo $grand_total; ?>; // Total including delivery
+      let totalItems = <?php echo $total_items; ?>; // Total item count
       
-      // Map variables
-      let map;
-      let marker;
-      let isMapVisible = false;
-      let isMapLoaded = false;
+      // Map Integration Variables
+      let map; // Leaflet map instance
+      let marker; // Delivery location marker
+      let isMapVisible = false; // Map visibility state
+      let isMapLoaded = false; // Map initialization state
       
-      // Initialize Free Map (using Leaflet + OpenStreetMap)
+      // Initialize Free Map using Leaflet + OpenStreetMap (No API Key Required)
       function initMap() {
         try {
-          // Default location (Manila, Philippines)
+          // Default location (Manila, Philippines) - you can change this
           const defaultLocation = [14.5995, 120.9842];
           
-          // Create map with OpenStreetMap tiles (completely free)
+          // Create map instance with OpenStreetMap tiles (completely free)
           map = L.map('map', {
             center: defaultLocation,
             zoom: 13,
@@ -1009,32 +1032,32 @@ $grand_total = $total + $delivery_fee;
             scrollWheelZoom: true
           });
           
-          // Add free OpenStreetMap tiles
+          // Add free OpenStreetMap tiles - no API key needed
           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
             maxZoom: 19
           }).addTo(map);
           
-          // Alternative free tile providers (you can switch):
+          // Alternative free tile providers you can use:
           // Satellite view: https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}
           // Dark theme: https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png
           
           isMapLoaded = true;
           
-          // Add click listener to map
+          // Add click listener for delivery location selection
           map.on('click', function(e) {
             setMarker(e.latlng);
-            reverseGeocode(e.latlng);
+            reverseGeocode(e.latlng); // Convert coordinates to address
           });
           
-          // Try to get user's current location
+          // Try to get user's current location using browser geolocation
           if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
               function(position) {
                 const userLocation = [position.coords.latitude, position.coords.longitude];
                 map.setView(userLocation, 15);
                 
-                // Add a "You are here" marker
+                // Add "You are here" marker
                 L.marker(userLocation)
                   .addTo(map)
                   .bindPopup('📍 Your current location')
@@ -1046,23 +1069,23 @@ $grand_total = $total + $delivery_fee;
             );
           }
           
-          // Setup address autocomplete
+          // Setup address autocomplete functionality
           setupAddressAutocomplete();
           
         } catch (error) {
           console.error('Error initializing map:', error);
-          hideMapFeatures();
+          hideMapFeatures(); // Graceful fallback
         }
       }
       
-      // Hide map features if map fails to load
+      // Hide map features if map fails to load - graceful degradation
       function hideMapFeatures() {
         const mapContainer = document.querySelector('.map-container');
         if (mapContainer) {
           mapContainer.style.display = 'none';
         }
         
-        // Add fallback message
+        // Add fallback message for users
         const addressSection = document.querySelector('.payment-section:has(#delivery-address)');
         if (addressSection && !document.getElementById('map-fallback-notice')) {
           const fallbackNotice = document.createElement('div');
@@ -1073,7 +1096,7 @@ $grand_total = $total + $delivery_fee;
         }
       }
       
-      // Toggle map visibility
+      // Toggle map visibility with proper loading checks
       function toggleMap() {
         if (!isMapLoaded) {
           showNotification('Map not available - please enter address manually', 'error');
@@ -1085,17 +1108,19 @@ $grand_total = $total + $delivery_fee;
         const toggleButton = document.querySelector('.map-toggle');
         
         if (isMapVisible) {
+          // Hide map
           mapElement.style.display = 'none';
           mapInstructions.style.display = 'none';
           toggleButton.textContent = '📍 Pick Location on Map';
           isMapVisible = false;
         } else {
+          // Show map
           mapElement.style.display = 'block';
           mapInstructions.style.display = 'block';
           toggleButton.textContent = '🔼 Hide Map';
           isMapVisible = true;
           
-          // Trigger map resize to ensure proper rendering
+          // Trigger map resize to ensure proper rendering after CSS display change
           setTimeout(() => {
             if (map) {
               map.invalidateSize();
@@ -1104,13 +1129,14 @@ $grand_total = $total + $delivery_fee;
         }
       }
       
-      // Set marker on map
+      // Set delivery location marker on map
       function setMarker(location) {
+        // Remove existing marker if present
         if (marker) {
           map.removeLayer(marker);
         }
         
-        // Create custom delivery marker
+        // Create custom delivery marker icon
         const deliveryIcon = L.divIcon({
           html: '📦',
           className: 'delivery-marker',
@@ -1118,18 +1144,20 @@ $grand_total = $total + $delivery_fee;
           iconAnchor: [15, 15]
         });
         
+        // Add new marker at clicked location
         marker = L.marker([location.lat, location.lng], {
           icon: deliveryIcon,
           title: 'Delivery Location'
         }).addTo(map);
         
-        // Add popup with delivery info
+        // Add popup with delivery information
         marker.bindPopup('🚚 Delivery Location<br><small>Click elsewhere to change</small>').openPopup();
       }
       
-      // Reverse geocode using free Nominatim service
+      // Reverse geocode coordinates to address using free Nominatim service
       async function reverseGeocode(location) {
         try {
+          // Use OpenStreetMap's free Nominatim geocoding service
           const response = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${location.lat}&lon=${location.lng}&zoom=18&addressdetails=1`
           );
@@ -1138,13 +1166,15 @@ $grand_total = $total + $delivery_fee;
           
           if (data && data.display_name) {
             const address = data.display_name;
+            // Auto-fill the address field
             document.getElementById('delivery-address').value = address;
             
-            // Visual feedback
+            // Visual feedback for successful address selection
             const addressField = document.getElementById('delivery-address');
             addressField.style.background = 'rgba(40, 167, 69, 0.2)';
             addressField.style.borderColor = '#28a745';
             
+            // Reset visual feedback after 2 seconds
             setTimeout(() => {
               addressField.style.background = 'rgba(255,255,255,0.1)';
               addressField.style.borderColor = '#8ADEF1';
@@ -1160,7 +1190,7 @@ $grand_total = $total + $delivery_fee;
         }
       }
       
-      // Address autocomplete using free Nominatim service
+      // Address autocomplete using free Nominatim search service
       function setupAddressAutocomplete() {
         if (!isMapLoaded) return;
         
@@ -1169,19 +1199,22 @@ $grand_total = $total + $delivery_fee;
         
         let timeout;
         
+        // Listen for address input changes
         addressInput.addEventListener('input', function() {
           const query = this.value.trim();
           
           clearTimeout(timeout);
           
+          // Only search for addresses with 3+ characters
           if (query.length < 3) {
             suggestionsContainer.style.display = 'none';
             return;
           }
           
+          // Debounce requests to be respectful to free service
           timeout = setTimeout(() => {
             getAddressSuggestions(query);
-          }, 500); // Longer delay to be respectful to free service
+          }, 500);
         });
         
         // Hide suggestions when clicking outside
@@ -1192,12 +1225,12 @@ $grand_total = $total + $delivery_fee;
         });
       }
       
-      // Get address suggestions using free Nominatim service
+      // Get address suggestions using free Nominatim search service
       async function getAddressSuggestions(query) {
         const suggestionsContainer = document.getElementById('address-suggestions');
         
         try {
-          // Use Nominatim search (free OpenStreetMap geocoding)
+          // Use Nominatim search API (free OpenStreetMap geocoding)
           const response = await fetch(
             `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=ph&limit=5&addressdetails=1`
           );
@@ -1211,7 +1244,7 @@ $grand_total = $total + $delivery_fee;
         }
       }
       
-      // Display address suggestions
+      // Display address suggestions in dropdown
       function displayAddressSuggestions(suggestions) {
         const suggestionsContainer = document.getElementById('address-suggestions');
         suggestionsContainer.innerHTML = '';
@@ -1221,6 +1254,7 @@ $grand_total = $total + $delivery_fee;
           return;
         }
         
+        // Create suggestion elements
         suggestions.forEach(function(suggestion) {
           const suggestionElement = document.createElement('div');
           suggestionElement.className = 'address-suggestion';
@@ -1230,6 +1264,7 @@ $grand_total = $total + $delivery_fee;
             ${suggestion.display_name}
           `;
           
+          // Handle suggestion selection
           suggestionElement.addEventListener('click', function() {
             document.getElementById('delivery-address').value = suggestion.display_name;
             suggestionsContainer.style.display = 'none';
@@ -1257,9 +1292,9 @@ $grand_total = $total + $delivery_fee;
         suggestionsContainer.style.display = 'block';
       }
       
-      // Function to update all totals dynamically
+      // Function to dynamically update all cart totals and displays
       function updateCartTotals() {
-        // Recalculate subtotal from all visible items
+        // Recalculate subtotal from all visible cart items
         cartTotal = 0;
         totalItems = 0;
         
@@ -1276,16 +1311,16 @@ $grand_total = $total + $delivery_fee;
           }
         });
         
-        // Calculate delivery fee dynamically
+        // Calculate delivery fee dynamically based on subtotal
         deliveryFee = cartTotal >= 500 ? 0 : 50;
         grandTotal = cartTotal + deliveryFee;
         
-        // Update all displays
+        // Update all total displays throughout the page
         document.getElementById('subtotal-display').textContent = `₱${cartTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
         document.getElementById('total-amount').textContent = cartTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         document.getElementById('total-items-count').textContent = totalItems;
         
-        // Update cart badge
+        // Update navigation cart badge
         const cartBadge = document.querySelector('.cart-badge');
         if (cartBadge) {
           cartBadge.textContent = totalItems;
@@ -1302,7 +1337,7 @@ $grand_total = $total + $delivery_fee;
           freeDeliveryNotice.style.display = 'none';
         }
         
-        // Add visual feedback for total updates
+        // Add visual feedback animation for total updates
         const subtotalDisplay = document.getElementById('subtotal-display');
         const totalAmountDisplay = document.getElementById('total-amount');
         
@@ -1316,22 +1351,24 @@ $grand_total = $total + $delivery_fee;
         });
       }
       
-      // AJAX function to update quantity
+      // AJAX function to update item quantity with optimistic UI updates
       async function updateQuantity(cartItemId, change, itemIndex) {
+        // Prevent concurrent quantity updates
         if (isUpdating) return;
         
         isUpdating = true;
         
-        // Visual feedback
+        // Get UI elements for this item
         const quantityDisplay = document.getElementById(`quantity-display-${itemIndex}`);
         const addBtn = document.getElementById(`add-btn-${itemIndex}`);
         const minusBtn = document.getElementById(`minus-btn-${itemIndex}`);
         const totalPriceElement = document.getElementById(`total-price-${itemIndex}`);
         
-        // Add loading state
+        // Add loading state visual feedback
         [addBtn, minusBtn].forEach(btn => btn?.classList.add('loading'));
         
         try {
+          // Send AJAX request to update quantity in database
           const response = await fetch('update_cart.php', {
             method: 'POST',
             headers: { 
@@ -1352,28 +1389,32 @@ $grand_total = $total + $delivery_fee;
             const itemData = document.getElementById(`item-data-${itemIndex}`);
             const price = parseFloat(itemData.dataset.price);
             
+            // Handle item removal (quantity <= 0)
             if (newQuantity <= 0) {
               removeItemFromDisplay(itemIndex);
               showNotification('Item removed from cart', 'success');
             } else {
+              // Update quantity display
               quantityDisplay.textContent = newQuantity;
               
+              // Update item total price
               const newSubtotal = newQuantity * price;
               totalPriceElement.textContent = `₱${newSubtotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
               
-              // Update stock status buttons
+              // Update stock-aware button states
               const stock = parseInt(itemData.dataset.stock);
               const addButton = document.getElementById(`add-btn-${itemIndex}`);
               
               if (newQuantity >= stock) {
-                addButton.disabled = true;
+                addButton.disabled = true; // Disable add button when at stock limit
               } else {
                 addButton.disabled = false;
               }
               
-              // Update totals dynamically
+              // Update all cart totals dynamically
               updateCartTotals();
               
+              // Visual success feedback
               quantityDisplay.classList.add('success-flash');
               setTimeout(() => {
                 quantityDisplay.classList.remove('success-flash');
@@ -1389,13 +1430,15 @@ $grand_total = $total + $delivery_fee;
           console.error('Error:', error);
           showNotification('Network error. Please try again.', 'error');
         } finally {
+          // Remove loading state
           [addBtn, minusBtn].forEach(btn => btn?.classList.remove('loading'));
           isUpdating = false;
         }
       }
       
-      // AJAX function to remove item
+      // AJAX function to remove item from cart with optimistic UI updates
       async function removeFromCart(cartItemId, itemIndex) {
+        // Prevent concurrent operations
         if (isUpdating) return;
         
         isUpdating = true;
@@ -1403,12 +1446,13 @@ $grand_total = $total + $delivery_fee;
         const deleteBtn = document.getElementById(`delete-btn-${itemIndex}`);
         deleteBtn?.classList.add('loading');
         
-        // Add immediate visual feedback
+        // Add immediate visual feedback (optimistic update)
         const productRow = document.getElementById(`product-row-${itemIndex}`);
         productRow.style.opacity = '0.5';
         productRow.style.transform = 'scale(0.98)';
         
         try {
+          // Send AJAX request to remove item from database
           const response = await fetch('remove_from_cart.php', {
             method: 'POST',
             headers: { 
@@ -1430,7 +1474,7 @@ $grand_total = $total + $delivery_fee;
             }, 100);
             
           } else {
-            // Restore visual state if error
+            // Restore visual state if removal failed
             productRow.style.opacity = '1';
             productRow.style.transform = 'scale(1)';
             showNotification(data.message || 'Error removing item', 'error');
@@ -1438,7 +1482,7 @@ $grand_total = $total + $delivery_fee;
           
         } catch (error) {
           console.error('Error:', error);
-          // Restore visual state if error
+          // Restore visual state on network error
           productRow.style.opacity = '1';
           productRow.style.transform = 'scale(1)';
           showNotification('Network error. Please try again.', 'error');
@@ -1448,10 +1492,11 @@ $grand_total = $total + $delivery_fee;
         }
       }
       
-      // Function to remove item from display
+      // Function to animate item removal from display
       function removeItemFromDisplay(itemIndex) {
         const productRow = document.getElementById(`product-row-${itemIndex}`);
         if (productRow) {
+          // Smooth removal animation
           productRow.style.opacity = '0';
           productRow.style.transform = 'translateX(-100%)';
           productRow.style.transition = 'all 0.3s ease';
@@ -1459,33 +1504,37 @@ $grand_total = $total + $delivery_fee;
           setTimeout(() => {
             productRow.remove();
             
-            // Update totals after removal animation
+            // Update totals after removal animation completes
             updateCartTotals();
             
-            // Check if cart is now empty
+            // Check if cart is now empty and reload page
             const container = document.getElementById('products-container');
             if (container.children.length === 0) {
               setTimeout(() => {
-                location.reload();
+                location.reload(); // Reload to show empty cart state
               }, 500);
             }
           }, 300);
         }
       }
       
-      // Notification system
+      // Universal notification system for user feedback
       function showNotification(message, type) {
+        // Remove any existing notifications
         const existingNotifications = document.querySelectorAll('.notification');
         existingNotifications.forEach(notification => notification.remove());
         
+        // Create new notification element
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
         notification.innerHTML = `${type === 'success' ? '✅' : '❌'} ${message}`;
         
         document.body.appendChild(notification);
         
+        // Trigger slide-in animation
         setTimeout(() => notification.classList.add('show'), 100);
         
+        // Auto-remove notification after 3 seconds
         setTimeout(() => {
           notification.classList.remove('show');
           setTimeout(() => {
@@ -1496,24 +1545,25 @@ $grand_total = $total + $delivery_fee;
         }, 3000);
       }
       
-      // Enhanced checkout function - save directly to database
+      // Enhanced checkout function - processes order and saves to database
       async function checkout() {
-        // Recalculate totals before checkout
+        // Ensure totals are current before processing
         updateCartTotals();
         
+        // Validate cart is not empty
         if (cartTotal <= 0) {
           showNotification('Your cart is empty', 'error');
           return;
         }
         
-        // Check for out of stock items
+        // Check for out of stock items before checkout
         const outOfStockItems = document.querySelectorAll('.product-row.out_of_stock');
         if (outOfStockItems.length > 0) {
           showNotification('Please remove out of stock items before checkout', 'error');
           return;
         }
         
-        // Validate required fields
+        // Validate required form fields
         const deliveryAddress = document.getElementById('delivery-address').value.trim();
         const customerPhone = document.getElementById('customer-phone').value.trim();
         
@@ -1529,7 +1579,7 @@ $grand_total = $total + $delivery_fee;
           return;
         }
         
-        // Validate phone number format
+        // Validate phone number format (11 digits for Philippine numbers)
         const phoneRegex = /^[0-9]{11}$/;
         if (!phoneRegex.test(customerPhone)) {
           showNotification('Please enter a valid 11-digit phone number', 'error');
@@ -1537,19 +1587,20 @@ $grand_total = $total + $delivery_fee;
           return;
         }
         
-        // Get selected payment method
+        // Validate payment method selection
         const selectedPaymentMethod = document.querySelector('.payment-method.selected');
         if (!selectedPaymentMethod) {
           showNotification('Please select a payment method', 'error');
           return;
         }
         
+        // Disable checkout button during processing
         const checkoutBtn = document.getElementById('checkout-btn');
         checkoutBtn.style.opacity = '0.7';
         checkoutBtn.style.pointerEvents = 'none';
         checkoutBtn.textContent = '🔄 Processing Order...';
         
-        // Collect cart items data
+        // Collect all cart items data for order processing
         const cartItems = [];
         const productRows = document.querySelectorAll('.product-row');
         productRows.forEach((row, index) => {
@@ -1566,7 +1617,7 @@ $grand_total = $total + $delivery_fee;
           }
         });
         
-        // Create checkout data
+        // Create comprehensive checkout data object
         const checkoutData = {
           delivery_address: deliveryAddress,
           phone: customerPhone,
@@ -1579,7 +1630,7 @@ $grand_total = $total + $delivery_fee;
         };
         
         try {
-          // Send order to database
+          // Send order data to backend for processing
           const response = await fetch('process_checkout.php', {
             method: 'POST',
             headers: {
@@ -1592,13 +1643,13 @@ $grand_total = $total + $delivery_fee;
           const result = await response.json();
           
           if (result.success) {
-            // Show success message
+            // Show success notification
             showNotification('🎉 Order placed successfully!', 'success');
             
-            // Close modal and show success screen
+            // Close checkout modal
             closeCheckoutModal();
             
-            // Show order confirmation
+            // Show order confirmation modal
             showOrderConfirmation(result.order_id, result.total_amount);
             
             // Clear cart after successful order
@@ -1614,14 +1665,14 @@ $grand_total = $total + $delivery_fee;
           console.error('Checkout error:', error);
           showNotification('❌ Order failed: ' + error.message, 'error');
           
-          // Restore checkout button
+          // Restore checkout button functionality
           checkoutBtn.style.opacity = '1';
           checkoutBtn.style.pointerEvents = 'auto';
           checkoutBtn.textContent = '🛒 Confirm Checkout - ₱' + grandTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
       }
       
-      // Show order confirmation modal
+      // Show order confirmation modal after successful checkout
       function showOrderConfirmation(orderId, totalAmount) {
         const confirmationModal = document.createElement('div');
         confirmationModal.className = 'checkout-modal show';
@@ -1643,7 +1694,7 @@ $grand_total = $total + $delivery_fee;
         document.body.appendChild(confirmationModal);
       }
       
-      // Clear cart after successful order
+      // Clear cart from database after successful order
       async function clearCartAfterOrder() {
         try {
           await fetch('clear_cart.php', {
@@ -1658,32 +1709,34 @@ $grand_total = $total + $delivery_fee;
         }
       }
 
-      // Navigate to order history
+      // Navigation Functions
+      
+      // Navigate to order history page
       function goToOrderHistory() {
         window.location.href = 'order_history.php';
       }
       
-      // Navigation function for profile
+      // Navigate to user profile page
       function goToProfile() {
-        window.location.href = 'profile.php';
+        window.location.href = 'UserDashboard.php';
       }
       
-      // Add enhanced payment method selection with styling
+      // Enhanced DOM Ready Event Handler
       document.addEventListener('DOMContentLoaded', function() {
         console.log('Enhanced cart system with free map initialized');
         showNotification('Cart loaded successfully', 'success');
         
-        // Initialize totals
+        // Initialize all cart totals
         updateCartTotals();
         
-        // Initialize map immediately (no API key needed)
+        // Initialize free map (no API key required)
         initMap();
         
-        // Payment method selection with enhanced styling
+        // Enhanced payment method selection with visual feedback
         const paymentMethods = document.querySelectorAll('.payment-method');
         paymentMethods.forEach(method => {
           method.addEventListener('click', function() {
-            // Remove selected class from all methods
+            // Remove selected class from all payment methods
             paymentMethods.forEach(m => m.classList.remove('selected'));
             // Add selected class to clicked method
             this.classList.add('selected');
@@ -1693,7 +1746,8 @@ $grand_total = $total + $delivery_fee;
           });
         });
         
-        // Add periodic total refresh (every 30 seconds) to catch any discrepancies
+        // Add periodic total refresh to catch any discrepancies
+        // Runs every 30 seconds when not actively updating
         setInterval(() => {
           if (!isUpdating) {
             updateCartTotals();
@@ -1701,28 +1755,32 @@ $grand_total = $total + $delivery_fee;
         }, 30000);
       });
       
-      // Modal open/close logic
+      // Modal Management Functions
+      
+      // Open checkout modal with accessibility focus
       function openCheckoutModal() {
         document.getElementById('checkout-modal').classList.add('show');
-        document.body.style.overflow = 'hidden';
-        // Focus on delivery address for accessibility
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        
+        // Focus on delivery address field for accessibility
         setTimeout(() => {
           const addr = document.getElementById('delivery-address');
           if (addr) addr.focus();
         }, 200);
       }
       
+      // Close checkout modal and restore scrolling
       function closeCheckoutModal() {
         document.getElementById('checkout-modal').classList.remove('show');
-        document.body.style.overflow = '';
+        document.body.style.overflow = ''; // Restore scrolling
       }
       
-      // Optional: close modal on ESC key
+      // Close modal on ESC key press for accessibility
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') closeCheckoutModal();
       });
       
-      // Remove the old payment-sidebar div if present
+      // Clean up any old payment sidebar elements (compatibility)
       const oldSidebar = document.querySelector('.payment-sidebar');
       if (oldSidebar) {
         oldSidebar.remove();
@@ -1730,7 +1788,9 @@ $grand_total = $total + $delivery_fee;
     </script>
     
     <style>
-      /* Custom marker styling */
+      /* Custom styling for map markers and popups */
+      
+      /* Delivery marker styling */
       .delivery-marker {
         background: #C647CC;
         border: 2px solid white;
@@ -1742,7 +1802,7 @@ $grand_total = $total + $delivery_fee;
         box-shadow: 0 2px 8px rgba(0,0,0,0.3);
       }
       
-      /* Leaflet popup customization */
+      /* Leaflet popup customization to match app theme */
       .leaflet-popup-content-wrapper {
         background: linear-gradient(135deg, #C647CC, #ECC7ED);
         color: white;
@@ -1759,13 +1819,13 @@ $grand_total = $total + $delivery_fee;
         background: #C647CC;
       }
       
-      /* Map container enhancements */
+      /* Map container visual enhancements */
       #map {
         border: 2px solid rgba(198, 71, 204, 0.3);
         border-radius: 6px;
       }
       
-      /* Address suggestions styling */
+      /* Address suggestions dropdown styling */
       .address-suggestion {
         background: rgba(0,0,0,0.8);
         color: white;

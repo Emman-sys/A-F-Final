@@ -109,7 +109,6 @@
     .social-item img {
       width: 24px;
       height: 24px;
-      filter: brightness(0) invert(1);
     }
 
     .map-container {
@@ -256,7 +255,7 @@
         <span>+639123456789</span>
       </div>
       <div class="social-item">
-        <img src="icons/location.png" alt="Location Icon" />
+        <img src="images/Google_Maps_icon_(2020).svg.png" alt="Location Icon" />
         <span>W5R7+H8 Lipa, Batangas</span>
       </div>
     </div>
