@@ -2,24 +2,45 @@
 session_start();
 require 'db_connect.php';
 
+// Ensure a CSRF token exists for forms
+if (empty($_SESSION['csrf_token'])) {
+    try {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    } catch (Exception $e) {
+        // Fallback if random_bytes is not available
+        $_SESSION['csrf_token'] = bin2hex(openssl_random_pseudo_bytes(32));
+    }
+}
+
+// Simple CSRF validation helper
+function validate_csrf_token($token) {
+    if (!isset($_SESSION['csrf_token']) || !isset($token)) return false;
+    return hash_equals($_SESSION['csrf_token'], $token);
+}
+
 // Check if user is trying to login
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_login'])) {
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-    
-    // DEBUG: BYPASS LOGIN FOR TESTING - FORCE ADMIN SESSION
-    if ($email === 'admin@af.com' || $email === 'admin@test.com') {
-        $_SESSION['admin_id'] = 1;
-        $_SESSION['admin_name'] = 'Admin User';
-        $_SESSION['admin_email'] = $email;
-        $_SESSION['role'] = 'admin';
+    // Validate CSRF token
+    if (!validate_csrf_token($_POST['csrf_token'] ?? null)) {
+        $loginError = "Invalid CSRF token.";
+    } else {
+        $email = $_POST['email'];
+        $password = $_POST['password'];
         
-        error_log("🔥 FORCED ADMIN LOGIN FOR TESTING");
-        header('Location: AdminDashboard.php');
-        exit();
+        // DEBUG: BYPASS LOGIN FOR TESTING - FORCE ADMIN SESSION
+        if ($email === 'admin@af.com' || $email === 'admin@test.com') {
+            $_SESSION['admin_id'] = 1;
+            $_SESSION['admin_name'] = 'Admin User';
+            $_SESSION['admin_email'] = $email;
+            $_SESSION['role'] = 'admin';
+            
+            error_log("🔥 FORCED ADMIN LOGIN FOR TESTING");
+            header('Location: AdminDashboard.php');
+            exit();
+        }
+        
+        $loginError = "Login temporarily bypassed for testing";
     }
-    
-    $loginError = "Login temporarily bypassed for testing";
 }
 
 // Handle logout
@@ -45,6 +66,12 @@ if (isset($_SESSION['product_error'])) {
 
 // Handle product addition
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product']) && isset($_SESSION['admin_id'])) {
+    // CSRF validation for admin action
+    if (!validate_csrf_token($_POST['csrf_token'] ?? null)) {
+        $_SESSION['product_error'] = 'Invalid CSRF token.';
+        header('Location: AdminDashboard.php?product_added=1&show_modal=1');
+        exit();
+    }
     error_log("🔥 ADD PRODUCT ATTEMPT - Files: " . print_r($_FILES, true));
     
     $name = trim($_POST['product_name']);
@@ -272,6 +299,12 @@ function ensureConnection($conn) {
 
 // Handle product editing
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_product']) && isset($_SESSION['admin_id'])) {
+    // CSRF validation for admin action
+    if (!validate_csrf_token($_POST['csrf_token'] ?? null)) {
+        $_SESSION['product_error'] = 'Invalid CSRF token.';
+        header('Location: AdminDashboard.php?product_edit_error=1&show_modal=1');
+        exit();
+    }
     error_log("🔥 EDIT PRODUCT ATTEMPT - ID: " . $_POST['product_id']);
     
     $product_id = intval($_POST['product_id']);
@@ -364,6 +397,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_product']) && is
 
 // Handle product deletion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_product']) && isset($_SESSION['admin_id'])) {
+    // CSRF validation for admin action
+    if (!validate_csrf_token($_POST['csrf_token'] ?? null)) {
+        $_SESSION['product_error'] = 'Invalid CSRF token.';
+        header('Location: AdminDashboard.php');
+        exit();
+    }
+
     $product_id = intval($_POST['product_id']);
     
     try {
@@ -385,6 +425,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_product']) && 
 
 // Handle order status update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_order']) && isset($_SESSION['admin_id'])) {
+    // CSRF validation for admin action
+    if (!validate_csrf_token($_POST['csrf_token'] ?? null)) {
+        $_SESSION['product_error'] = 'Invalid CSRF token.';
+        header('Location: AdminDashboard.php');
+        exit();
+    }
+
     $payment_id = intval($_POST['payment_id']);
     
     try {
@@ -1367,6 +1414,7 @@ $monthlySalesData = getMonthlySalesData($conn);
             <?php endif; ?>
             
             <form class="login-form" method="POST">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>" />
                 <div class="form-group">
                     <label class="input-label">Admin Email</label>
                     <input type="email" class="form-input" name="email" value="admin@af.com" required />
@@ -1416,6 +1464,7 @@ $monthlySalesData = getMonthlySalesData($conn);
             <?php endif; ?>
             
             <form class="product-form" method="POST" enctype="multipart/form-data" id="productForm">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>" />
                 <!-- Hidden field for edit mode -->
                 <input type="hidden" id="product_id" name="product_id" value="">
                 
@@ -1608,6 +1657,7 @@ $monthlySalesData = getMonthlySalesData($conn);
                             <div class="table-actions">
                                 <button class="btn-edit" onclick="editProductById(<?php echo $product['product_id']; ?>)">Edit</button>
                                 <form method="POST" style="display: inline;">
+                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>" />
                                     <input type="hidden" name="product_id" value="<?php echo $product['product_id']; ?>">
                                     <button type="submit" name="delete_product" class="btn-delete" 
                                             onclick="return confirm('Are you sure you want to delete this product?')">Delete</button>
@@ -1655,6 +1705,7 @@ $monthlySalesData = getMonthlySalesData($conn);
                         </td>
                         <td>
                             <form method="POST" style="display: inline;">
+                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>" />
                                 <input type="hidden" name="payment_id" value="<?php echo $order['payment_id']; ?>">
                                 <button type="submit" name="complete_order" class="btn-complete" 
                                         onclick="return confirm('Mark this order as completed?')">Complete Order</button>
